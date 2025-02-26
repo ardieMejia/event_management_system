@@ -1,3 +1,4 @@
+import unittest
 import pandas as pd
 from tabulate import tabulate
 import random
@@ -9,7 +10,7 @@ temporary_members_value = {         # These 2 variables is used for storing our 
     'NAME': [],
     'CONTACT NUMBER': [],
     'EMAIL ADDRESS': [],
-    'EVENT NAME': []
+    'EVENT ID': []
 }
 
 
@@ -23,15 +24,14 @@ temporary_events_value= {
 
 
 
-def Call_menu(*args, menu_title):
+def Call_menu(menus, menu_title):
     print('----------------------------')
     print("{:^29}".format(menu_title))
     print('----------------------------')
-    for i, option in enumerate(args, start=1):
+    for i, option in enumerate(menus, start=1):
         print(f"{i}. {option}")
         print('----------------------------')
-        input_menu = input('Select Menu: ').strip()
-        print()
+    input_menu = input('Select Menu: ').strip()
     return input_menu
 
 def Menu_error_message(*args):
@@ -67,8 +67,11 @@ def Input_member_checker(input, column, evt):
             print("Please enter a valid email address")
             return False
         
-    elif column == 'EVENT NAME':
-        if input in evt.values:
+    elif column == 'EVENT ID':
+        for i in evt['EVENT ID'].values:
+            print(i)
+            print(type(i))
+        if input in evt['EVENT ID'].values:
             return True
         else:
             print('Please enter a valid department name')
@@ -76,7 +79,7 @@ def Input_member_checker(input, column, evt):
         
 
     
-def ID_generator(data, used_id, name, contact_number, email_address, event_name):
+def ID_generator(data, used_id, name, contact_number, email_address, event_id):
     global temporary_members_value
     # DEPARTMENT_initial = ''.join([word[0].upper() for word in department.split()])      
                                                                                         
@@ -115,13 +118,13 @@ def Show_specific_data(data):
             Input_error_message('Invalid Input. Input "Y" to search other ID or "N" to exit')
 
 # Menu Create
-def Input_data_member(data, used_id, event_data, value):
+def Input_data_member(data, used_id, evt, value):
     global members_path, used_membersID_path
     while True:
         column_input_NAME = 'NAME'      
         input_NAME = input('NAME: ').title().strip()
         
-        if Input_member_checker(input_NAME, column_input_NAME, evt= event_data) == True:
+        if Input_member_checker(input_NAME, column_input_NAME, evt= evt) == True:
             value.update({'NAME': input_NAME})
             break
         else:
@@ -131,7 +134,7 @@ def Input_data_member(data, used_id, event_data, value):
         column_input_CONTACT_NUMBER = 'CONTACT NUMBER'
         input_CONTACT_NUMBER = input('CONTACT NUMBER: ').title()   
         
-        if Input_member_checker(input_CONTACT_NUMBER, column_input_CONTACT_NUMBER, evt= event_data) == True:
+        if Input_member_checker(input_CONTACT_NUMBER, column_input_CONTACT_NUMBER, evt= evt) == True:
             value.update({'CONTACT NUMBER': input_CONTACT_NUMBER})
             break
         else:
@@ -141,23 +144,23 @@ def Input_data_member(data, used_id, event_data, value):
         column_input_EMAIL_ADDRESS = 'EMAIL ADDRESS'
         input_EMAIL_ADDRESS = input('EMAIL ADDRESS: ').upper().strip()
 
-        if Input_member_checker(input_EMAIL_ADDRESS, column_input_EMAIL_ADDRESS, evt= event_data) == True:
+        if Input_member_checker(input_EMAIL_ADDRESS, column_input_EMAIL_ADDRESS, evt= evt) == True:
             value.update({'EMAIL ADDRESS': input_EMAIL_ADDRESS})
             break
         else:
             continue
 
     while True:
-        column_input_EVENT = 'EVENT'
-        print(tabulate(dept, headers='keys', tablefmt='fancy_grid'))
+        column_input_EVENT = 'EVENT ID'
+        print(tabulate(evt, headers='keys', tablefmt='fancy_grid'))
 
-        input_EVENT = input('EVENT: ').title().strip()
-        if Input_member_checker(input_EVENT, column_input_EVENT, evt= event_data) == True:
-            value.update({'EVENT': input_EVENT})
+        input_EVENT_ID = input('EVENT ID: ').title().strip()
+        if Input_member_checker(input_EVENT_ID, column_input_EVENT, evt= evt) == True:
+            value.update({'EVENT ID': input_EVENT_ID})
             break
         else:
             continue  
-        generated_id = ID_generator(data= data, used_id= used_id, name= input_NAME, contact_number= input_CONTACT_NUMBER, email_address= input_EMAIL_ADDRESS, event= input_EVENT)
+    generated_id = ID_generator(data= data, used_id= used_id, name= input_NAME, contact_number= input_CONTACT_NUMBER, email_address= input_EMAIL_ADDRESS, event_id= input_EVENT_ID)
         
     while True:
         input_confirmation_add_data = input(f"Are you sure you want to add data with Member ID {value['MEMBER ID']}? [Y/N]: ").upper().strip()
@@ -319,15 +322,15 @@ def Main_flow():
         used_eventsID_path = r'./Used_EventsID.xlsx'
         
 
-        members_data = pd.read_excel(members_path, dtype= 'object')
-        event_data = pd.read_excel(events_path, dtype= 'object')
+        members_data = pd.read_excel(members_path, dtype= 'str')
+        event_data = pd.read_excel(events_path, dtype= 'str')
         used_members_ID = pd.read_excel(used_membersID_path, dtype= 'object')
         used_events_ID = pd.read_excel(used_membersID_path, dtype= 'object')
 
-        main_menu_input = Call_menu('Members Data', 'Add Data', 'Change Data', 'Delete Data', 'Exit', menu_title= 'Main Menu')
+        main_menu_input = Call_menu(['Members Data', 'Add Data', 'Change Data', 'Delete Data', 'Exit'], menu_title= 'Main Menu')
         if main_menu_input == '1':      # Menu Read
             while True:
-                sub_menu_1_input = Call_menu('Show All Data', 'Search ID', 'Main Menu', menu_title= 'Employee Data')
+                sub_menu_1_input = Call_menu(['Show All Data', 'Search ID', 'Main Menu'], menu_title= 'Employee Data')
                 if sub_menu_1_input == '1':     # Show all members data
                     print(tabulate(members_data, headers='keys', tablefmt='fancy_grid'))
                 elif sub_menu_1_input == '2':   # Show specific data based on ID
@@ -339,9 +342,9 @@ def Main_flow():
 
         elif main_menu_input == '2':    # Menu Create
             while True:
-                sub_menu_2_input = Call_menu('Add Member Data', 'Main Menu', menu_title= 'Add Data')
+                sub_menu_2_input = Call_menu(['Add Member Data', 'Main Menu'], menu_title= 'Add Data')
                 if sub_menu_2_input == '1':     # Add new member
-                    Input_data_member(data= members_data, used_id= used_members_ID, evt= event_data , value= temporary_value)
+                    Input_data_member(data= members_data, used_id= used_members_ID, evt= event_data , value= temporary_members_value)
                 elif sub_menu_2_input == '2':   # Return to main menu
                     break
                 else:
@@ -349,7 +352,7 @@ def Main_flow():
 
         elif main_menu_input == '3':    # Menu Update
             while True:
-                sub_menu_3_input = Call_menu('Change Member Data', 'Main Menu', menu_title= 'Change Data')
+                sub_menu_3_input = Call_menu(['Change Member Data', 'Main Menu'], menu_title= 'Change Data')
                 if sub_menu_3_input == '1':     # Change member data based on ID
                     Input_data_to_change(data= members_data, evt= event_data)
                 elif sub_menu_3_input == '2':   # Return to main menu
@@ -359,7 +362,7 @@ def Main_flow():
 
         elif main_menu_input == '4':    # Menu Delete
             while True:
-                sub_menu_4_input = Call_menu('Delete Member Data', 'Main Menu', menu_title= 'Delete Data')
+                sub_menu_4_input = Call_menu(['Delete Member Data', 'Main Menu'], menu_title= 'Delete Data')
                 if sub_menu_4_input == '1':     # Delete employee data based on ID
                     Delete_data(data= members_data, evt=event_data)
                 elif sub_menu_4_input == '2':   # Return to main menu
@@ -372,4 +375,25 @@ def Main_flow():
         else:
             Menu_error_message(main_menu_input)
 
-Main_flow()
+
+
+def null_test():
+    
+    global members_path, events_path, used_membersID_path, used_eventsID_path
+    # Define DF
+    members_path = r"./Members_Data.xlsx"
+    events_path = r"./Events_Data.xlsx"
+    used_membersID_path = r'./Used_MembersID.xlsx'
+    used_eventsID_path = r'./Used_EventsID.xlsx'
+    
+    
+    members_data = pd.read_excel(members_path, dtype= 'str')
+    event_data = pd.read_excel(events_path, dtype= 'str')
+    used_members_ID = pd.read_excel(used_membersID_path, dtype= 'object')
+    used_events_ID = pd.read_excel(used_membersID_path, dtype= 'object')
+
+    missing_data = members_data.isnull()
+    print(missing_data)
+
+        
+# Main_flow()
