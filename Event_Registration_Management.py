@@ -179,38 +179,39 @@ def Input_data_member(data, used_id, event_data, value):
 
 # Menu Update
 def Update_data(data, index_change, column_change, value): 
-    global employee_path  
+    global member_path  
     while True:
-        input_konfirmasi_update_data = input(f"Are you sure you want to update data for ID {data.loc[index_change]['EMPLOYEE ID'].values}? [Y/N]: ").upper().strip()
-        if input_konfirmasi_update_data == 'Y':
+        input_update_data_confirmation = input(f"Are you sure you want to update this value for ID {data.loc[index_change]['MEMBER ID'].values}? [Y/N]: ").upper().strip()
+        if input_update_data_confirmation == 'Y':
             data.loc[index_change, column_change] = value      
-            data.to_excel(employee_path, index=False)
+            data.to_excel(member_path, index=False)
             print(tabulate(data.loc[index_change, :], headers='keys', tablefmt='fancy_grid'))
             break
        
-        elif input_konfirmasi_update_data == 'N':
+        elif input_update_data_confirmation == 'N':
             print('\nThe update process has been canceled.\n')
             break
 
         else:
             Input_error_message('Invalid Input. Input [Y] to proceed or [N] to cancel')
 
-def Input_data_to_change(data, dept):
-    while True:     
-        input_id_update = input('EMPLOYEE ID: ').upper().strip()   
+def Input_data_to_change(data, event_data):
+    while True:
+        input_id_update = input('MEMBER ID: ').upper().strip()   
 
-        if input_id_update in data['EMPLOYEE ID'].values:
-            print(tabulate(data.loc[data['EMPLOYEE ID'] == input_id_update].values, headers= data.columns, tablefmt='fancy_grid'))
-            index_to_update = data.loc[data['EMPLOYEE ID'] == input_id_update].index
+        if input_id_update in data['MEMBER ID'].values:
+            print(tabulate(data.loc[data['MEMBER ID'] == input_id_update].values, headers= data.columns, tablefmt='fancy_grid'))
+            index_to_update = data.loc[data['MEMBER ID'] == input_id_update].index
         
         else:
-            Input_error_message(f'There is no Employee with ID: {input_id_update}')
+            Input_error_message(f'There is no Member with ID: {input_id_update}')
             break
   
         column_to_update = None                   
         while True:                
             input_confirmation_change_data = input('Input [Y] to proceed or [N] to cancel: ').upper().strip()
-    
+
+
             if input_confirmation_change_data == 'Y':
                 while True:
                     input_column_change = input('Please enter the column name: ').upper().strip()
@@ -223,50 +224,50 @@ def Input_data_to_change(data, dept):
                         Input_error_message(f'Column {input_column_change} does not exist')
                         continue
                           
-                if column_to_update == 'RESIDENCE':
+                if column_to_update == 'NAME':
                     while True:
-                        input_new_RESIDENCE = input(f'Input new {input_column_change}: ').title().strip()
+                        input_new_NAME = input(f'Input new {input_column_change}: ').title().strip()
 
-                        if Input_member_checker(input_new_RESIDENCE, column_to_update, dept= dept) == True:
-                            Update_data(data= data, index_change= index_to_update, column_change= column_to_update, value= input_new_RESIDENCE)
+                        if Input_member_checker(input_new_NAME, column_to_update, evt= event_data) == True:
+                            Update_data(data= data, index_change= index_to_update, column_change= column_to_update, value= input_new_NAME)
                             return
                         else:
                             continue
 
-                elif column_to_update == 'NAME':
+                elif column_to_update == 'CONTACT NUMBER':
                     while True:
-                        input_new_NAME = input(f'Input new {input_column_change}: ').title()
+                        input_new_CONTACT_NUMBER = input(f'Input new {input_column_change}: ').title()
 
-                        if Input_member_checker(input_new_NAME, column_to_update, dept= dept) == True:
+                        if Input_member_checker(input_new_CONTACT_NUMBER, column_to_update, evt= event_data) == True:
                             Update_data(data= data, index_change= index_to_update, column_change= column_to_update, value= input_new_NAME.strip())
                             return
                         else:
                             continue
 
-                elif column_to_update == 'GENDER':
+                elif column_to_update == 'EMAIL ADDRESS':
                     while True:
-                        input_new_GENDER = input(f'Input new {input_column_change}: ').upper().strip()
+                        input_new_EMAIL_ADDRESS = input(f'Input new {input_column_change}: ').upper().strip()
 
-                        if Input_member_checker(input_new_GENDER, column_to_update, dept= dept) == True:
-                            Update_data(data= data, index_change= index_to_update, column_change= column_to_update, value= input_new_GENDER)
+                        if Input_member_checker(input_new_EMAIL_ADDRESS, column_to_update, evt= event_data) == True:
+                            Update_data(data= data, index_change= index_to_update, column_change= column_to_update, value= input_new_EMAIL_ADDRESS)
                             return
                         else:
                             continue
 
-                elif column_to_update == 'DEPARTMENT':
+                elif column_to_update == 'EVENT ID':
                     while True:
-                        print(tabulate(dept, headers='keys', tablefmt='fancy_grid'))
+                        print(tabulate(event_data, headers='keys', tablefmt='fancy_grid'))
 
-                        input_new_DEPARTMENT = input(f'Input new {input_column_change}: ').title().strip()
+                        input_new_EVENT_ID = input(f'Input new {input_column_change}: ').title().strip()
 
-                        if Input_member_checker(input_new_DEPARTMENT, column_to_update, dept= dept) == True:
-                            Update_data(data= data, index_change= index_to_update, column_change= column_to_update, value= input_new_DEPARTMENT)
+                        if Input_member_checker(input_new_EVENT_ID, column_to_update, evt= event_data) == True:
+                            Update_data(data= data, index_change= index_to_update, column_change= column_to_update, value= input_new_EVENT_ID)
                             return
                         else:
                             continue
 
-                elif input_column_change == 'EMPLOYEE ID':
-                    Input_error_message('Can not change EMPLOYEE ID')
+                elif input_column_change == 'MEMBER ID':
+                    Input_error_message('Can not change MEMBER ID')
                     return
             
             elif input_confirmation_change_data == 'N':
@@ -275,19 +276,19 @@ def Input_data_to_change(data, dept):
                 Input_error_message('Invalid input. Input [Y] to proceed or [N] to cancel')
 
 # Menu Delete
-def Delete_data(data, dept):
+def Delete_data(data, evt):
     global members_path
-    input_id_delete = input('EMPLOYEE ID: ').upper().strip()       
+    input_id_delete = input('MEMBER ID: ').upper().strip()       
     
-    if input_id_delete not in data['EMPLOYEE ID'].values:
+    if input_id_delete not in data['MEMBER ID'].values:
         Input_error_message(f'{input_id_delete} does not exist')
         return
     
-    index_to_delete = data.loc[data['EMPLOYEE ID'] == input_id_delete].index         
-    print(tabulate(data.loc[data['EMPLOYEE ID'] == input_id_delete], headers= data.columns, tablefmt='fancy_grid'))
+    index_to_delete = data.loc[data['MEMBER ID'] == input_id_delete].index         
+    print(tabulate(data.loc[data['MEMBER ID'] == input_id_delete], headers= data.columns, tablefmt='fancy_grid'))
 
     while True:
-        input_confirmation_delete_data = input(f"Are you sure you want to delete data with ID {data.loc[index_to_delete, 'EMPLOYEE ID'].values}? [Y/N]: ").upper().strip()
+        input_confirmation_delete_data = input(f"Are you sure you want to delete data with ID {data.loc[index_to_delete, 'MEMBER ID'].values}? [Y/N]: ").upper().strip()
         if input_confirmation_delete_data == 'Y':
             data = data.drop(index_to_delete)
             data.to_excel(members_path, index=False)
@@ -358,7 +359,7 @@ def Main_flow():
 
         elif main_menu_input == '4':    # Menu Delete
             while True:
-                sub_menu_4_input = Call_menu('Delete Employee Data', 'Main Menu', menu_title= 'Delete Data')
+                sub_menu_4_input = Call_menu('Delete Member Data', 'Main Menu', menu_title= 'Delete Data')
                 if sub_menu_4_input == '1':     # Delete employee data based on ID
                     Delete_data(data= members_data, evt=event_data)
                 elif sub_menu_4_input == '2':   # Return to main menu
