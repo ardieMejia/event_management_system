@@ -13,12 +13,12 @@ temporary_members_value = {         # These 2 variables is used for storing our 
 }
 
 
- temporary_events_value= {         
-     'EVENT ID': [], 
-     'EVENT DATE': [],
-     'EVENT FORMAT': [],
-     'NUMBER OF ROUNDS': [],
-     'COST': []
+temporary_events_value= {
+    'EVENT ID': [], 
+    'EVENT DATE': [],
+    'EVENT FORMAT': [],
+    'NUMBER OF ROUNDS': [],
+    'COST': []
 }
 
 
@@ -29,9 +29,9 @@ def Call_menu(*args, menu_title):
     print('----------------------------')
     for i, option in enumerate(args, start=1):
         print(f"{i}. {option}")
-    print('----------------------------')
-    input_menu = input('Select Menu: ').strip()
-    print()
+        print('----------------------------')
+        input_menu = input('Select Menu: ').strip()
+        print()
     return input_menu
 
 def Menu_error_message(*args):
@@ -103,7 +103,7 @@ def Show_specific_data(data):
         print(tabulate(data.loc[data['MEMBER ID'] == ask_input_ID].values, headers= data.columns, tablefmt='fancy_grid'))
     else:
         print('MEMBER ID not found')
-    
+        
     while True:
         find_other_ID = input('Search other ID [Y/N]:').upper().strip()
         print()
@@ -120,7 +120,7 @@ def Input_data_member(data, used_id, event_data, value):
     while True:
         column_input_NAME = 'NAME'      
         input_NAME = input('NAME: ').title().strip()
-       
+        
         if Input_member_checker(input_NAME, column_input_NAME, evt= event_data) == True:
             value.update({'NAME': input_NAME})
             break
@@ -130,7 +130,7 @@ def Input_data_member(data, used_id, event_data, value):
     while True:
         column_input_CONTACT_NUMBER = 'CONTACT NUMBER'
         input_CONTACT_NUMBER = input('CONTACT NUMBER: ').title()   
-                                                        
+        
         if Input_member_checker(input_CONTACT_NUMBER, column_input_CONTACT_NUMBER, evt= event_data) == True:
             value.update({'CONTACT NUMBER': input_CONTACT_NUMBER})
             break
@@ -157,8 +157,8 @@ def Input_data_member(data, used_id, event_data, value):
             break
         else:
             continue  
-    generated_id = ID_generator(data= data, used_id= used_id, name= input_NAME, contact_number= input_CONTACT_NUMBER, email_address= input_EMAIL_ADDRESS, event= input_EVENT)
-    
+        generated_id = ID_generator(data= data, used_id= used_id, name= input_NAME, contact_number= input_CONTACT_NUMBER, email_address= input_EMAIL_ADDRESS, event= input_EVENT)
+        
     while True:
         input_confirmation_add_data = input(f"Are you sure you want to add data with Member ID {value['MEMBER ID']}? [Y/N]: ").upper().strip()
         print()
@@ -187,7 +187,7 @@ def Update_data(data, index_change, column_change, value):
             data.to_excel(member_path, index=False)
             print(tabulate(data.loc[index_change, :], headers='keys', tablefmt='fancy_grid'))
             break
-       
+        
         elif input_update_data_confirmation == 'N':
             print('\nThe update process has been canceled.\n')
             break
@@ -202,11 +202,11 @@ def Input_data_to_change(data, event_data):
         if input_id_update in data['MEMBER ID'].values:
             print(tabulate(data.loc[data['MEMBER ID'] == input_id_update].values, headers= data.columns, tablefmt='fancy_grid'))
             index_to_update = data.loc[data['MEMBER ID'] == input_id_update].index
-        
+            
         else:
             Input_error_message(f'There is no Member with ID: {input_id_update}')
             break
-  
+        
         column_to_update = None                   
         while True:                
             input_confirmation_change_data = input('Input [Y] to proceed or [N] to cancel: ').upper().strip()
@@ -223,7 +223,7 @@ def Input_data_to_change(data, event_data):
                     else:
                         Input_error_message(f'Column {input_column_change} does not exist')
                         continue
-                          
+                    
                 if column_to_update == 'NAME':
                     while True:
                         input_new_NAME = input(f'Input new {input_column_change}: ').title().strip()
@@ -269,7 +269,7 @@ def Input_data_to_change(data, event_data):
                 elif input_column_change == 'MEMBER ID':
                     Input_error_message('Can not change MEMBER ID')
                     return
-            
+                
             elif input_confirmation_change_data == 'N':
                 return
             else:
@@ -317,7 +317,7 @@ def Main_flow():
         events_path = r"./Events_Data.xlsx"
         used_membersID_path = r'./Used_MembersID.xlsx'
         used_eventsID_path = r'./Used_EventsID.xlsx'
-                
+        
 
         members_data = pd.read_excel(members_path, dtype= 'object')
         event_data = pd.read_excel(events_path, dtype= 'object')
