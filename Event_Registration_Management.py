@@ -1,15 +1,27 @@
 import pandas as pd
 from tabulate import tabulate
+import random
 
 
 # Global Variable and Function
-temporary_value = {         # This variable is used for storing our input when using menu create and update
-    'EMPLOYEE ID': [], 
-    'RESIDENCE': [],
+temporary_members_value = {         # These 2 variables is used for storing our input when using menu create and update
+    'MEMBER ID': [], 
     'NAME': [],
-    'GENDER': [],
-    'DEPARTMENT': []
+    'CONTACT NUMBER': [],
+    'EMAIL ADDRESS': [],
+    'EVENT NAME': []
 }
+
+
+ temporary_events_value= {         
+     'EVENT ID': [], 
+     'EVENT DATE': [],
+     'EVENT FORMAT': [],
+     'NUMBER OF ROUNDS': [],
+     'COST': []
+}
+
+
 
 def Call_menu(*args, menu_title):
     print('----------------------------')
@@ -31,61 +43,66 @@ def Input_error_message(*args):
     print(*args)
     print('+' * len_char + '\n')
 
-def Input_checker(input, column, dept):
-    if column == 'RESIDENCE':  
-        check_character_RESIDENCE = ''.join(input.split())   
-        if check_character_RESIDENCE.isalpha():  
-            return True
-        else:
-            print('RESIDENCE can only be filled with letters')
-            return False
-        
-    elif column == 'NAME':
-        if input.isspace():     
-            print('Name cannot be left blank. Please enter a valid name.')
+def Input_member_checker(input, column, evt):
 
+    if column == 'NAME':  
+        check_character_NAME = ''.join(input.split())   
+        if check_character_NAME.isalpha():  
+            return True
+        else:
+            print('NAME can only be filled with letters')
+            return False
+        
+    elif column == 'CONTACT NUMBER':
+        if not input.isnumeric():     
+            print('Contact number must be numeric')
             return False
         else:
             return True
         
-    elif column == 'GENDER':
-        if input not in ['M', 'F']:
-            print("Invalid input. Please enter 'M' for male or 'F' for female")
-            return False
-        else:
+    elif column == 'EMAIL ADDRESS':
+        if "@" in input:
             return True
+        else:
+            print("Please enter a valid email address")
+            return False
         
-    elif column == 'DEPARTMENT':
-        if input in dept.values:
+    elif column == 'EVENT NAME':
+        if input in evt.values:
             return True
         else:
             print('Please enter a valid department name')
             return False
         
-def ID_generator(data, used_id, department, gender, residence, name):
-    global temporary_value
-    DEPARTMENT_initial = ''.join([word[0].upper() for word in department.split()])      
-                                                                                        
-    residence_initial = ''.join([word[0].upper() for word in residence.split()])   
-    name_length = len(name.strip())
-    id_generator = f'{DEPARTMENT_initial}{gender}{residence_initial}{name_length}'
 
-    all_ids = data['EMPLOYEE ID'].tolist() + used_id['EMPLOYEE ID'].tolist()           
-    while id_generator in all_ids:
-        name_length += 1
-        id_generator = f'{DEPARTMENT_initial}{gender}{residence_initial}{name_length}'
     
-    temporary_value.update({'EMPLOYEE ID': id_generator})
+def ID_generator(data, used_id, name, contact_number, email_address, event_name):
+    global temporary_members_value
+    # DEPARTMENT_initial = ''.join([word[0].upper() for word in department.split()])      
+                                                                                        
+    # residence_initial = ''.join([word[0].upper() for word in residence.split()])   
+    # name_length = len(name.strip())
+    # id_generator = f'{DEPARTMENT_initial}{gender}{residence_initial}{name_length}'
+
+    id_generator = random.randint(10000,99999)
+
+
+    # all_ids = data['EMPLOYEE ID'].tolist() + used_id['EMPLOYEE ID'].tolist()           
+    # while id_generator in all_ids:
+    #     name_length += 1
+    #     id_generator = f'{DEPARTMENT_initial}{gender}{residence_initial}{name_length}'
+    
+    temporary_members_value.update({'MEMBER ID': id_generator})
     return id_generator
 
 # Menu Read
 def Show_specific_data(data): 
-    ask_input_ID = input('Input EMPLOYEE ID: ').upper().strip()
+    ask_input_ID = input('Input MEMBER ID: ').upper().strip()
 
-    if ask_input_ID in data["EMPLOYEE ID"].values:
-        print(tabulate(data.loc[data['EMPLOYEE ID'] == ask_input_ID].values, headers= data.columns, tablefmt='fancy_grid'))
+    if ask_input_ID in data["MEMBER ID"].values:
+        print(tabulate(data.loc[data['MEMBER ID'] == ask_input_ID].values, headers= data.columns, tablefmt='fancy_grid'))
     else:
-        print('Employee ID not found')
+        print('MEMBER ID not found')
     
     while True:
         find_other_ID = input('Search other ID [Y/N]:').upper().strip()
@@ -98,61 +115,61 @@ def Show_specific_data(data):
             Input_error_message('Invalid Input. Input "Y" to search other ID or "N" to exit')
 
 # Menu Create
-def Input_data_employee(data, used_id, dept, value):
-    global employee_path, usedID_path
+def Input_data_member(data, used_id, event_data, value):
+    global members_path, used_membersID_path
     while True:
-        column_input_RESIDENCE = 'RESIDENCE'      
-        input_RESIDENCE = input('RESIDENCE: ').title().strip()
+        column_input_NAME = 'NAME'      
+        input_NAME = input('NAME: ').title().strip()
        
-        if Input_checker(input_RESIDENCE, column_input_RESIDENCE, dept= dept) == True:
-            value.update({'RESIDENCE': input_RESIDENCE})
-            break
-        else:
-            continue
-
-    while True:
-        column_input_NAME = 'NAME'
-        input_NAME = input('NAME: ').title()   
-                                                        
-        if Input_checker(input_NAME, column_input_NAME, dept= dept) == True:
+        if Input_member_checker(input_NAME, column_input_NAME, evt= event_data) == True:
             value.update({'NAME': input_NAME})
             break
         else:
             continue
 
     while True:
-        column_input_GENDER = 'GENDER'
-        input_GENDER = input('GENDER [M/F]: ').upper().strip()
-
-        if Input_checker(input_GENDER, column_input_GENDER, dept= dept) == True:
-            value.update({'GENDER': input_GENDER})
+        column_input_CONTACT_NUMBER = 'CONTACT NUMBER'
+        input_CONTACT_NUMBER = input('CONTACT NUMBER: ').title()   
+                                                        
+        if Input_member_checker(input_CONTACT_NUMBER, column_input_CONTACT_NUMBER, evt= event_data) == True:
+            value.update({'CONTACT NUMBER': input_CONTACT_NUMBER})
             break
         else:
             continue
 
     while True:
-        column_input_DEPARTMENT = 'DEPARTMENT'
+        column_input_EMAIL_ADDRESS = 'EMAIL ADDRESS'
+        input_EMAIL_ADDRESS = input('EMAIL ADDRESS: ').upper().strip()
+
+        if Input_member_checker(input_EMAIL_ADDRESS, column_input_EMAIL_ADDRESS, evt= event_data) == True:
+            value.update({'EMAIL ADDRESS': input_EMAIL_ADDRESS})
+            break
+        else:
+            continue
+
+    while True:
+        column_input_EVENT = 'EVENT'
         print(tabulate(dept, headers='keys', tablefmt='fancy_grid'))
 
-        input_DEPARTMENT = input('DEPARTMENT: ').title().strip()
-        if Input_checker(input_DEPARTMENT, column_input_DEPARTMENT, dept= dept) == True:
-            value.update({'DEPARTMENT': input_DEPARTMENT})
+        input_EVENT = input('EVENT: ').title().strip()
+        if Input_member_checker(input_EVENT, column_input_EVENT, evt= event_data) == True:
+            value.update({'EVENT': input_EVENT})
             break
         else:
             continue  
-    generated_id = ID_generator(data= data, used_id= used_id, department= input_DEPARTMENT, gender= input_GENDER, residence= input_RESIDENCE, name= input_NAME)
+    generated_id = ID_generator(data= data, used_id= used_id, name= input_NAME, contact_number= input_CONTACT_NUMBER, email_address= input_EMAIL_ADDRESS, event= input_EVENT)
     
     while True:
-        input_confirmation_add_data = input(f"Are you sure you want to add data with Employee ID {value['EMPLOYEE ID']}? [Y/N]: ").upper().strip()
+        input_confirmation_add_data = input(f"Are you sure you want to add data with Member ID {value['MEMBER ID']}? [Y/N]: ").upper().strip()
         print()
         if input_confirmation_add_data == 'Y':
             data = pd.concat([data, pd.DataFrame.from_dict(value, orient= 'index').T], ignore_index= True)
             
             print('\nData Saved')
-            data.to_excel(employee_path, index=False)
+            data.to_excel(members_path, index=False)
 
             used_id.loc[len(used_id)] = generated_id
-            used_id.to_excel(usedID_path, index= False)
+            used_id.to_excel(used_membersID_path, index= False)
             print(tabulate(data, headers='keys', tablefmt='fancy_grid'))
             break
         elif input_confirmation_add_data == 'N':
@@ -210,7 +227,7 @@ def Input_data_to_change(data, dept):
                     while True:
                         input_new_RESIDENCE = input(f'Input new {input_column_change}: ').title().strip()
 
-                        if Input_checker(input_new_RESIDENCE, column_to_update, dept= dept) == True:
+                        if Input_member_checker(input_new_RESIDENCE, column_to_update, dept= dept) == True:
                             Update_data(data= data, index_change= index_to_update, column_change= column_to_update, value= input_new_RESIDENCE)
                             return
                         else:
@@ -220,7 +237,7 @@ def Input_data_to_change(data, dept):
                     while True:
                         input_new_NAME = input(f'Input new {input_column_change}: ').title()
 
-                        if Input_checker(input_new_NAME, column_to_update, dept= dept) == True:
+                        if Input_member_checker(input_new_NAME, column_to_update, dept= dept) == True:
                             Update_data(data= data, index_change= index_to_update, column_change= column_to_update, value= input_new_NAME.strip())
                             return
                         else:
@@ -230,7 +247,7 @@ def Input_data_to_change(data, dept):
                     while True:
                         input_new_GENDER = input(f'Input new {input_column_change}: ').upper().strip()
 
-                        if Input_checker(input_new_GENDER, column_to_update, dept= dept) == True:
+                        if Input_member_checker(input_new_GENDER, column_to_update, dept= dept) == True:
                             Update_data(data= data, index_change= index_to_update, column_change= column_to_update, value= input_new_GENDER)
                             return
                         else:
@@ -242,7 +259,7 @@ def Input_data_to_change(data, dept):
 
                         input_new_DEPARTMENT = input(f'Input new {input_column_change}: ').title().strip()
 
-                        if Input_checker(input_new_DEPARTMENT, column_to_update, dept= dept) == True:
+                        if Input_member_checker(input_new_DEPARTMENT, column_to_update, dept= dept) == True:
                             Update_data(data= data, index_change= index_to_update, column_change= column_to_update, value= input_new_DEPARTMENT)
                             return
                         else:
@@ -259,7 +276,7 @@ def Input_data_to_change(data, dept):
 
 # Menu Delete
 def Delete_data(data, dept):
-    global employee_path
+    global members_path
     input_id_delete = input('EMPLOYEE ID: ').upper().strip()       
     
     if input_id_delete not in data['EMPLOYEE ID'].values:
@@ -273,7 +290,7 @@ def Delete_data(data, dept):
         input_confirmation_delete_data = input(f"Are you sure you want to delete data with ID {data.loc[index_to_delete, 'EMPLOYEE ID'].values}? [Y/N]: ").upper().strip()
         if input_confirmation_delete_data == 'Y':
             data = data.drop(index_to_delete)
-            data.to_excel(employee_path, index=False)
+            data.to_excel(members_path, index=False)
             print('\nData has been successfully deleted\n')
             break
 
@@ -293,26 +310,27 @@ def Save_file(path, sheet_name):
 
 def Main_flow():
     while True:
-        global members_path, events_path, usedID_path
+        global members_path, events_path, used_membersID_path, used_eventsID_path
         # Define DF
         members_path = r"./Members_Data.xlsx"
         events_path = r"./Events_Data.xlsx"
         used_membersID_path = r'./Used_MembersID.xlsx'
-         = r'./Used_MembersID.xlsx'
+        used_eventsID_path = r'./Used_EventsID.xlsx'
                 
 
-        employee_data = pd.read_excel(members_path, dtype= 'object')
-        available_department = pd.read_excel(events_path, dtype= 'object')
-        used_ID = pd.read_excel(used_membersID_path, dtype= 'object')
+        members_data = pd.read_excel(members_path, dtype= 'object')
+        event_data = pd.read_excel(events_path, dtype= 'object')
+        used_members_ID = pd.read_excel(used_membersID_path, dtype= 'object')
+        used_events_ID = pd.read_excel(used_membersID_path, dtype= 'object')
 
-        main_menu_input = Call_menu('Employee Data', 'Add Data', 'Change Data', 'Delete Data', 'Exit', menu_title= 'Main Menu')
+        main_menu_input = Call_menu('Members Data', 'Add Data', 'Change Data', 'Delete Data', 'Exit', menu_title= 'Main Menu')
         if main_menu_input == '1':      # Menu Read
             while True:
                 sub_menu_1_input = Call_menu('Show All Data', 'Search ID', 'Main Menu', menu_title= 'Employee Data')
-                if sub_menu_1_input == '1':     # Show all employee data
-                    print(tabulate(employee_data, headers='keys', tablefmt='fancy_grid'))
+                if sub_menu_1_input == '1':     # Show all members data
+                    print(tabulate(members_data, headers='keys', tablefmt='fancy_grid'))
                 elif sub_menu_1_input == '2':   # Show specific data based on ID
-                    Show_specific_data(employee_data)
+                    Show_specific_data(members_data)
                 elif sub_menu_1_input == '3':   # Return to main menu
                     break
                 else:
@@ -320,9 +338,9 @@ def Main_flow():
 
         elif main_menu_input == '2':    # Menu Create
             while True:
-                sub_menu_2_input = Call_menu('Add Employee Data', 'Main Menu', menu_title= 'Add Data')
-                if sub_menu_2_input == '1':     # Add new employee
-                    Input_data_employee(data= employee_data, used_id= used_ID, dept= available_department, value= temporary_value)
+                sub_menu_2_input = Call_menu('Add Member Data', 'Main Menu', menu_title= 'Add Data')
+                if sub_menu_2_input == '1':     # Add new member
+                    Input_data_member(data= members_data, used_id= used_members_ID, evt= event_data , value= temporary_value)
                 elif sub_menu_2_input == '2':   # Return to main menu
                     break
                 else:
@@ -330,9 +348,9 @@ def Main_flow():
 
         elif main_menu_input == '3':    # Menu Update
             while True:
-                sub_menu_3_input = Call_menu('Change Employee Data', 'Main Menu', menu_title= 'Change Data')
-                if sub_menu_3_input == '1':     # Change employee data based on ID
-                    Input_data_to_change(data= employee_data, dept= available_department)
+                sub_menu_3_input = Call_menu('Change Member Data', 'Main Menu', menu_title= 'Change Data')
+                if sub_menu_3_input == '1':     # Change member data based on ID
+                    Input_data_to_change(data= members_data, evt= event_data)
                 elif sub_menu_3_input == '2':   # Return to main menu
                     break
                 else:
@@ -342,7 +360,7 @@ def Main_flow():
             while True:
                 sub_menu_4_input = Call_menu('Delete Employee Data', 'Main Menu', menu_title= 'Delete Data')
                 if sub_menu_4_input == '1':     # Delete employee data based on ID
-                    Delete_data(data= employee_data, dept= available_department)
+                    Delete_data(data= members_data, evt=event_data)
                 elif sub_menu_4_input == '2':   # Return to main menu
                     break
                 else:
