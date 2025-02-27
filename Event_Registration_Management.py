@@ -169,6 +169,7 @@ def Input_data_member(data, used_id, evt, value):
             data = pd.concat([data, pd.DataFrame.from_dict(value, orient= 'index').T], ignore_index= True)
             
             print('\nData Saved')
+            data = data.astype(str)
             data.to_excel(members_path, index=False)
 
             used_id.loc[len(used_id)] = generated_id
@@ -332,7 +333,8 @@ def Main_flow():
             while True:
                 sub_menu_1_input = Call_menu(['Show All Data', 'Search ID', 'Main Menu'], menu_title= 'Employee Data')
                 if sub_menu_1_input == '1':     # Show all members data
-                    print(tabulate(members_data, headers='keys', tablefmt='fancy_grid'))
+                    members_data = members_data.astype(str)
+                    print(tabulate(members_data, headers='keys', tablefmt='fancy_grid', floatfmt='14.0f'))
                 elif sub_menu_1_input == '2':   # Show specific data based on ID
                     Show_specific_data(members_data)
                 elif sub_menu_1_input == '3':   # Return to main menu
@@ -392,6 +394,27 @@ def null_test():
     used_members_ID = pd.read_excel(used_membersID_path, dtype= 'object')
     used_events_ID = pd.read_excel(used_membersID_path, dtype= 'object')
 
+    missing_data = members_data.isnull()
+    print(missing_data)
+
+
+    
+def value_check():
+    
+    global members_path, events_path, used_membersID_path, used_eventsID_path
+    # Define DF
+    members_path = r"./Members_Data.xlsx"
+    events_path = r"./Events_Data.xlsx"
+    used_membersID_path = r'./Used_MembersID.xlsx'
+    used_eventsID_path = r'./Used_EventsID.xlsx'
+    
+    
+    members_data = pd.read_excel(members_path, dtype= 'str')
+    event_data = pd.read_excel(events_path, dtype= 'str')
+    used_members_ID = pd.read_excel(used_membersID_path, dtype= 'object')
+    used_events_ID = pd.read_excel(used_membersID_path, dtype= 'object')
+
+    print(members_data.loc[0]["MEMBER ID"])
     missing_data = members_data.isnull()
     print(missing_data)
 

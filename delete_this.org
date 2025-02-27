@@ -1,0 +1,21 @@
+* Temp:
+1) Member's ID Number (need to be able to do look up and auto populate 2/3/4/5)
+2) Name (If no ID, maybe able to still fill up manually)
+3) Contact Number
+4) Email Address
+5) Event Name (need to have a drop down list which I need to update from time to time)
+6) etc.
+
+
+
+1) Event Name
+2) Event Date
+3) Event Format
+4) Number of Rounds
+5) Gender
+6) Category
+7) Sub Category
+8) Cost
+
+* Just for myself:
+** Remember to make the client feel like they are part of the process. It makes all the difference
