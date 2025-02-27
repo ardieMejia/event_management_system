@@ -19,3 +19,4 @@
 
 * Just for myself:
 ** Remember to make the client feel like they are part of the process. It makes all the difference
+** we can also make IDmeaningful, by combining name with event with numbers
