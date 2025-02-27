@@ -90,10 +90,11 @@ def ID_generator(data, used_id, name, contact_number, email_address, event_id):
     id_generator = random.randint(10000,99999)
 
 
-    # all_ids = data['EMPLOYEE ID'].tolist() + used_id['EMPLOYEE ID'].tolist()           
-    # while id_generator in all_ids:
-    #     name_length += 1
-    #     id_generator = f'{DEPARTMENT_initial}{gender}{residence_initial}{name_length}'
+    all_ids = data['MEMBER ID'].tolist() + used_id['MEMBER ID'].tolist()           
+    while id_generator in all_ids:
+        # name_length += 1
+        # id_generator = f'{DEPARTMENT_initial}{gender}{residence_initial}{name_length}'
+        id_generator = random.randint(10000,99999)
     
     temporary_members_value.update({'MEMBER ID': id_generator})
     return id_generator
@@ -183,12 +184,12 @@ def Input_data_member(data, used_id, evt, value):
 
 # Menu Update
 def Update_data(data, index_change, column_change, value): 
-    global member_path  
+    global members_path  
     while True:
         input_update_data_confirmation = input(f"Are you sure you want to update this value for ID {data.loc[index_change]['MEMBER ID'].values}? [Y/N]: ").upper().strip()
         if input_update_data_confirmation == 'Y':
             data.loc[index_change, column_change] = value      
-            data.to_excel(member_path, index=False)
+            data.to_excel(members_path, index=False)
             print(tabulate(data.loc[index_change, :], headers='keys', tablefmt='fancy_grid'))
             break
         
@@ -243,7 +244,7 @@ def Input_data_to_change(data, event_data):
                         input_new_CONTACT_NUMBER = input(f'Input new {input_column_change}: ').title()
 
                         if Input_member_checker(input_new_CONTACT_NUMBER, column_to_update, evt= event_data) == True:
-                            Update_data(data= data, index_change= index_to_update, column_change= column_to_update, value= input_new_NAME.strip())
+                            Update_data(data= data, index_change= index_to_update, column_change= column_to_update, value= input_new_CONTACT_NUMBER.strip())
                             return
                         else:
                             continue
@@ -325,8 +326,8 @@ def Main_flow():
 
         members_data = pd.read_excel(members_path, dtype= 'str')
         event_data = pd.read_excel(events_path, dtype= 'str')
-        used_members_ID = pd.read_excel(used_membersID_path, dtype= 'object')
-        used_events_ID = pd.read_excel(used_membersID_path, dtype= 'object')
+        used_members_ID = pd.read_excel(used_membersID_path, dtype= 'str')
+        used_events_ID = pd.read_excel(used_membersID_path, dtype= 'str')
 
         main_menu_input = Call_menu(['Members Data', 'Add Data', 'Change Data', 'Delete Data', 'Exit'], menu_title= 'Main Menu')
         if main_menu_input == '1':      # Menu Read
@@ -356,7 +357,7 @@ def Main_flow():
             while True:
                 sub_menu_3_input = Call_menu(['Change Member Data', 'Main Menu'], menu_title= 'Change Data')
                 if sub_menu_3_input == '1':     # Change member data based on ID
-                    Input_data_to_change(data= members_data, evt= event_data)
+                    Input_data_to_change(data= members_data, event_data= event_data)
                 elif sub_menu_3_input == '2':   # Return to main menu
                     break
                 else:
@@ -366,7 +367,7 @@ def Main_flow():
             while True:
                 sub_menu_4_input = Call_menu(['Delete Member Data', 'Main Menu'], menu_title= 'Delete Data')
                 if sub_menu_4_input == '1':     # Delete employee data based on ID
-                    Delete_data(data= members_data, evt=event_data)
+                    Delete_data(data= members_data, event_data=event_data)
                 elif sub_menu_4_input == '2':   # Return to main menu
                     break
                 else:
