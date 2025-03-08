@@ -1,0 +1,22 @@
+* Random notes:
+** ev name
+** ev date
+** ev format
+** no of records
+** gender
+** category
+** sub category
+** cost
+* Things i installed
+#+begin_quote
+
+pip install Jinja2
+pip install simple-http-server-jinja
+pip instlal python-lsp-server
+pip install pandas
+pip install tabulate
+pip install openpyxl
+pip install Flask
+
+
+#+end_quote

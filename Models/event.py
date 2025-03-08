@@ -3,6 +3,7 @@ import os
 import sys
 
 
+
 class Event:
     def __init__(self,path, usedID_path, id_field):
         self.path = path
@@ -16,11 +17,17 @@ class Event:
         
         self.temporary_value = {         # This variable is used for storing our input when using menu create and update
             'EVENT ID': [], 
+            'EVENT NAME': [], 
             'EVENT DATE': [],
             'EVENT FORMAT': [],
             'NUMBER OF ROUNDS': [],
+            'GENDER': [],
+            'CATEGORY': [],
+            'SUB CATEGORY': [],            
             'COST': []
         }
+
+
         
         # print(os.path.realpath(__file__))
 

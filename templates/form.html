@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>The method Attribute</h2>
+
+
+
+<form action="{{ url_for('process_form') }}" method="post">
+  <!-- <label for="MEMBER ID">MEMBER ID</label><br> -->
+  <!-- <input type="text" id="MEMBER ID" name="MEMBER ID" value=""><br> -->
+  <label for="NAME">NAME</label><br>
+  <input type="text" id="NAME" name="NAME" value=""><br>
+  
+  <label for="CONTACT NUMBER">CONTACT NUMBER</label><br>
+  <input type="text" id="CONTACT NUMBER" name="CONTACT NUMBER" value=""><br>
+  
+  <label for="EMAIL ADDRESS">EMAIL ADDRESS</label><br>
+  <input type="text" id="EMAIL ADDRESS" name="EMAIL ADDRESS" value=""><br>
+  
+  <label for="EVENT ID">EVENT ID</label><br>
+  <input type="text" id="EVENT ID" name="EVENT ID" value=""><br>
+
+  <label for="mylist">EVENT ID</label><br>
+  <select name="dept" id="mylist">
+    <!-- <option value="haha">test</option> -->
+    
+    <!--list_dept is a python list-->
+    <!--in below piece of code we are iterating over list using
+	flask jinja template syntax to populate the dropdown-->
+    
+    {% for e in event %}
+
+
+
+
+
+    <option value={{ e['EVENT ID'] }}>{{ e['EVENT NAME'] }}</option>
+    <!-- <option value="next3">what now2</option> -->
+    {% endfor %}
+    
+  </select>
+  {% if testvar %}
+  <h2>The method Attribute</h2>  
+  {% endif %}
+  <select name="cars" id="cars">
+  <option value="volvo">Volvo</option>
+  <option value="saab">Saab</option>
+  <option value="mercedes">Mercedes</option>
+  <option value="audi">Audi</option>
+</select>
+  
+
+  
+  <input type="submit" value="Submit">
+</form>
+
+</body>
+</html>
+

@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 import sys
+from Models.event import Event
 
 
 # Global Variable and Function
@@ -28,6 +29,9 @@ class Member:
             'EMAIL ADDRESS': [],
             'EVENT ID': []
         }
+
+        event = Event(r"./Events_Data.xlsx", r'./Used_EventsID.xlsx', "EVENT ID") 
+        self.parent = event
 
         
         # print(os.path.realpath(__file__))

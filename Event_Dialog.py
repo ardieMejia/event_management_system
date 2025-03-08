@@ -10,7 +10,7 @@ from crud import Crud
 
 
 
-member = Member(r"./Members_Data.xlsx", r'./Used_MembersID.xlsx', "MEMBER ID")
+# member = Member(r"./Members_Data.xlsx", r'./Used_MembersID.xlsx', "MEMBER ID")
 event = Event(r"./Events_Data.xlsx", r'./Used_EventsID.xlsx', "EVENT ID") 
 crud = Crud() 
 
@@ -52,16 +52,16 @@ def Main_flow():
 
 
     while True:
-        main_menu_input = Call_menu(['Members Data', 'Add Data', 'Change Data', 'Delete Data', 'Exit'], menu_title= 'Main Menu')
+        main_menu_input = Call_menu(['Events Data', 'Add Data', 'Change Data', 'Delete Data', 'Exit'], menu_title= 'Main Menu')
         if main_menu_input == '1':      # Menu Read
             while True:
                 sub_menu_1_input = Call_menu(['Show All Data', 'Search ID', 'Main Menu'], menu_title= 'Employee Data')
                 if sub_menu_1_input == '1':     # Show all members data
                     print("show")
-                    member.data = member.data.astype(str)
-                    print(tabulate(member.data, headers='keys', tablefmt='fancy_grid', floatfmt='14.0f'))
+                    event.data = event.data.astype(str)
+                    print(tabulate(event.data, headers='keys', tablefmt='fancy_grid', floatfmt='14.0f'))
                 elif sub_menu_1_input == '2':   # Show specific data based on ID
-                    crud.Show_specific_data(member)
+                    crud.Show_specific_data(event)
                 elif sub_menu_1_input == '3':   # Return to main menu
                     break
                 else:
