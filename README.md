@@ -4,6 +4,11 @@ This project is a CRUD (Create, Read, Update, Delete) application for a client. 
 ---
 Most importantly:
   1. In the code, modify the values of 'employee_path', 'dept_path', and 'usedID_path' to the appropriate file paths on your local machine where you want to store the data
+For main branch:
+  1. run python Member.py
+For add_flask_and_jinja branch:
+  1. run flask --app main.py run --debug --extra-files "templates/form.html:crud.py:main.py"
+  
 
 
 
