@@ -17,6 +17,8 @@ class Event:
         print("created event")
         self.path = path
         self.usedID_path = usedID_path
+        self.id_field = 'EVENT ID'
+
                 
 
 
@@ -46,7 +48,7 @@ class Member:
         print("created member")
         self.path = path
         self.usedID_path = usedID_path
-                
+        self.id_field = 'MEMBER ID'                
 
 
 
@@ -79,6 +81,18 @@ class Crud:
         pass
 
 
+    # Menu Read
+    def Show_specific_data(self, model, input_ID):
+        
+        if input_ID in model.data[model.id_field].values:
+            # return model.data.loc[model.data[model.id_field] == input_ID].values
+            # pandas dataframe: i think its beautiful, and anyone who disagrees, is hugely mistaken
+            return model.data[model.data['EVENT ID'] == input_ID]
+        else:
+            return None
+            
+
+        
     def ID_generator(self,model):        
         id_generator = random.randint(10000,99999)
         
@@ -132,11 +146,5 @@ class Crud:
         member.data = member.data.astype(str)
         member.data.to_excel(member.path, index=False)
         
-
-
-
-
-            
-                        
 
 

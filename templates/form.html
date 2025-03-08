@@ -1,60 +1,142 @@
 <!DOCTYPE html>
-<html>
-<body>
+<html lang="en">
+    <head>
+	<meta charset="utf-8">
+	<link rel="shortcut icon" href="%PUBLIC_URL%/favicon.png">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="theme-color" content="#000000">
+	<link rel="manifest" href="%PUBLIC_URL%/manifest.json">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css" type="text/css" rel="stylesheet">
+	
+	<title>Urban Hero</title>
+    </head>
+      <body>
 
-<h2>The method Attribute</h2>
+	  <h2>Why arent you registering?</h2>
+
+	  
+	  <div class="container">
+	      <!-- ==================== -->
+
+	      		       
+	      <form id="my-form" action="{{ url_for('process_form') }}" method="post">
+		  <!-- <label for="MEMBER ID">MEMBER ID</label><br> -->
+		  <!-- <input type="text" id="MEMBER ID" name="MEMBER ID" value=""><br> -->
+		  <div class="row">
+		      <div class="four columns">
+			  <label for="NAME">NAME</label>
+			  <input type="text" id="NAME" name="NAME" value=""><br>
+		      </div>
+	    	      <div class="four columns">
+			  <label for="CONTACT NUMBER">CONTACT NUMBER</label>
+			  <input type="text" id="CONTACT NUMBER" name="CONTACT NUMBER" value=""><br>
+		      </div>
+	    	      <div class="four columns">
+			  <label for="EMAIL ADDRESS">EMAIL ADDRESS</label>
+			  <input type="text" id="EMAIL ADDRESS" name="EMAIL ADDRESS" value=""><br>
+		      </div>		      
+		  </div>
+	  
+	  
+
+		  <label for="mylist">EVENTS</label>
+		  <select name="dept" id="mylist">
+		      <!-- <option value="haha">test</option> -->
+		      
+		      <!--list_dept is a python list-->
+		      <!--in below piece of code we are iterating over list using
+			   flask jinja template syntax to populate the dropdown-->
+		      
+		      {% for e in event %}
+		      
+		      
+		      
+		      
+		      
+		      <option value={{ e['EVENT ID'] }}>{{ e['EVENT NAME'] }}</option>
+		      <!-- <option value="next3">what now2</option> -->
+		      {% endfor %}
+		      
+		  </select>
+		  <h2>The method Attribute</h2>  
+		  
+		  
+		  
+		  <input type="submit" value="Submit">
+		  
+		  
+	      </form>
+	      <table id="event_details" class="u-full-width" hidden>
+		  <thead>
+		      <tr>
+			  <th>Event Date</th>
+			  <th>Event Format</th>
+			  <th>Number of Rounds</th>
+			  <th>Gender</th>
+			  <th>Category</th>
+			  <th>Sub Category</th>
+			  <th>Cost</th>
+		      </tr>
+		  </thead>
+		  <tbody>
+		      <tr>
+			  <td id = "event_date"></td>
+			  <td id = "event_format"></td>
+			  <td id = "no_of_rounds"></td>
+			  <td id = "gender"></td>			  
+			  <td id ="cat"></td>
+			  <td id ="subcat"></td>
+			  <td id ="cost"></td>
+		      </tr>
+		  </tbody>
+	      </table>
+	      <div id="event_date" ></div>
+	      <div id="event_format" ></div>
+	      <div id="no_of_rounds" ></div>
+	      <div id="gender" ></div>
+	      <div id="cat" ></div>
+	      <div id="subcat" ></div>
+	      <div id="cost" ></div>
+
+	  </div>
+	  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+	  <script>
 
 
-
-<form action="{{ url_for('process_form') }}" method="post">
-  <!-- <label for="MEMBER ID">MEMBER ID</label><br> -->
-  <!-- <input type="text" id="MEMBER ID" name="MEMBER ID" value=""><br> -->
-  <label for="NAME">NAME</label><br>
-  <input type="text" id="NAME" name="NAME" value=""><br>
-  
-  <label for="CONTACT NUMBER">CONTACT NUMBER</label><br>
-  <input type="text" id="CONTACT NUMBER" name="CONTACT NUMBER" value=""><br>
-  
-  <label for="EMAIL ADDRESS">EMAIL ADDRESS</label><br>
-  <input type="text" id="EMAIL ADDRESS" name="EMAIL ADDRESS" value=""><br>
-  
-  <label for="EVENT ID">EVENT ID</label><br>
-  <input type="text" id="EVENT ID" name="EVENT ID" value=""><br>
-
-  <label for="mylist">EVENT ID</label><br>
-  <select name="dept" id="mylist">
-    <!-- <option value="haha">test</option> -->
-    
-    <!--list_dept is a python list-->
-    <!--in below piece of code we are iterating over list using
-	flask jinja template syntax to populate the dropdown-->
-    
-    {% for e in event %}
-
-
-
-
-
-    <option value={{ e['EVENT ID'] }}>{{ e['EVENT NAME'] }}</option>
-    <!-- <option value="next3">what now2</option> -->
-    {% endfor %}
-    
-  </select>
-  {% if testvar %}
-  <h2>The method Attribute</h2>  
-  {% endif %}
-  <select name="cars" id="cars">
-  <option value="volvo">Volvo</option>
-  <option value="saab">Saab</option>
-  <option value="mercedes">Mercedes</option>
-  <option value="audi">Audi</option>
-</select>
-  
-
-  
-  <input type="submit" value="Submit">
-</form>
-
-</body>
+	   $( "#mylist" ).on( "change", function() {
+	       var val = this.value;
+	       $.ajax({
+		   type:"GET",
+		   url:"/ajax",
+		   data:{ 'event_id': val },
+		   success: function(resp){
+		       $( '#event_details' ).show();		       		       
+		       document.getElementById("event_date").innerHTML = resp['event_date'];
+		       document.getElementById("event_format").innerHTML = resp['event_format'];
+		       document.getElementById("no_of_rounds").innerHTML = resp['no_of_rounds'];
+		       document.getElementById("gender").innerHTML = resp['gender'];
+		       document.getElementById("cat").innerHTML = resp['cat'];
+		       document.getElementById("subcat").innerHTML = resp['subcat'];
+		       document.getElementById("cost").innerHTML = resp['cost'];
+		   }
+	       });
+	   });
+	   
+	   
+	  </script>
+	  <!-- <script>
+	       $.ajax({
+	       url: '/process_form',
+	       type: "GET",
+	       success: function (data) {
+	       console.log(data);
+	       },
+	       error: function (error) {
+	       console.log(`Error ${error}`);
+	       }
+	       });	 
+	       </script>
+	  -->
+      </body>
 </html>
 
