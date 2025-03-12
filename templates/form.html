@@ -34,27 +34,16 @@
 	    	      <div class="four columns">
 			  <label for="EMAIL ADDRESS">EMAIL ADDRESS</label>
 			  <input type="text" id="EMAIL ADDRESS" name="EMAIL ADDRESS" value=""><br>
+			  <input type="hidden" id="EVENT ID" name="EVENT ID" value=""><br>
 		      </div>		      
 		  </div>
 	  
 	  
 
 		  <label for="mylist">EVENTS</label>
-		  <select name="dept" id="mylist">
-		      <!-- <option value="haha">test</option> -->
-		      
-		      <!--list_dept is a python list-->
-		      <!--in below piece of code we are iterating over list using
-			   flask jinja template syntax to populate the dropdown-->
-		      
+		  <select name="not_used" id="mylist">		      
 		      {% for e in event %}
-		      
-		      
-		      
-		      
-		      
 		      <option value={{ e['EVENT ID'] }}>{{ e['EVENT NAME'] }}</option>
-		      <!-- <option value="next3">what now2</option> -->
 		      {% endfor %}
 		      
 		  </select>
@@ -65,6 +54,45 @@
 		  
 		  
 	      </form>
+
+	      <h2>
+		  User test form
+	      </h2>
+	      <form id="user-test-form" action="{{ url_for('process_user') }}" method="post">
+		  <div class="row">
+		      <div class="four columns">
+			  <label for="username">username</label>
+			  <input type="text" id="username" name="username" value=""><br>
+		      </div>
+	    	      <div class="four columns">
+			  <label for="email">email</label>
+			  <input type="text" id="email" name="email" value=""><br>
+		      </div>
+		  </div>
+		  <input type="submit" value="Submit">
+	      </form>
+
+
+	      
+	      <h2>
+		  Select a user
+	      </h2>
+	      <form id="user-test-form" action="{{ url_for('write_post') }}" method="post">
+
+		  <label for="myusers">Select a user</label>
+		  <select name="user_id" id="user_id">		      
+		    {% for u in users %}
+		    <option value={{ u.id }}>{{ u.username }}</option>
+		    {% endfor %}
+		    
+		  </select>
+		  <input type="submit" value="Submit">
+	      </form>
+
+
+	      
+
+	      
 	      <table id="event_details" class="u-full-width" hidden>
 		  <thead>
 		      <tr>
@@ -117,6 +145,8 @@
 		       document.getElementById("cat").innerHTML = resp['cat'];
 		       document.getElementById("subcat").innerHTML = resp['subcat'];
 		       document.getElementById("cost").innerHTML = resp['cost'];
+
+		       document.getElementById("EVENT ID").innerHTML = resp['event_id'];
 		   }
 	       });
 	   });

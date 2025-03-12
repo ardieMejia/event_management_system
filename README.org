@@ -17,6 +17,18 @@ pip install pandas
 pip install tabulate
 pip install openpyxl
 pip install Flask
+pip install flask-sqlalchemy
+pip install flask-migrate
 
 
 #+end_quote
+* TODO
+
+create and run an app from code
+
+add a database config, for URI for the sqlalchemy
+
+as part of the processing of the POST request, we assign it to a variable each, then create an object instance of our favourite object
+
+using alchemy, we then commit this new object
+

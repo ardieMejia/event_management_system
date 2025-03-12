@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+	<meta charset="utf-8">
+	<link rel="shortcut icon" href="%PUBLIC_URL%/favicon.png">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="theme-color" content="#000000">
+	<link rel="manifest" href="%PUBLIC_URL%/manifest.json">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css" type="text/css" rel="stylesheet">
+	
+	<title>Post page</title>
+    </head>
+      <body>
+
+	  <h2>Create a post for this particular user</h2>
+
+	  
+	  <div class="container">
+	      <!-- ==================== -->
+
+
+	      <h2>
+		  Post test form
+	      </h2>
+	      <form id="post-test-form" action="{{ url_for('great_post_done') }}" method="post">
+		  <div class="row">
+		    <div class="four columns">
+		      <label for="body">Post Content</label>
+		      <textarea class="u-full-width" placeholder="Write something..." id="body" name=body></textarea>
+		      <input type="hidden" id="u_id" name="u_id" value={{ u_id }}><br>
+		    </div>
+		  </div>
+		  
+		  <input type="submit" value="Save">
+	      </form>
+
+	      
+
+	  </div>
+      </body>
+</html>
+
