@@ -1,47 +1,90 @@
-{% extends "base.html" %}
+{% extends "base_form.html" %}
 
-{% block content %}
+{% block heading_underline %}
+Members
+{% endblock %}
 
-	
-	<h2>Members</h2>	
+{% block form %}
 
-	<form id="update_member_form" action="{{ url_for('update_member') }}" method="post">
-	    
-	    <table id="event_details" class="u-full-width">
-		<thead>
-		    <tr>
-			<th>MCF ID</th>
-			<th>MCF Name</th>
-			<th>Gender</th>
-			<th>Year of Birth</th>
-			<th>State</th>
-			<th>National Rating</th>
-			<th>Events</th>		    
-		    </tr>
-		</thead>
-		<tbody>
-		    <tr>
-			<td>
-			    <input type="text" id="mcfId" name="mcfId" value="{{ m.mcfId }}" readonly="readonly"><br>			    
-			</td>
-			<td name = "mdfName">{{ m.mcfName }}</td>
-			<td name = "gender">{{ m.gender }}</td>
-			<td name = "yearOfBirth">{{ m.yearOfBirth }}</td>
-			<td name = "state">{{ m.state }}</td>
-			<td name = "nationalRating">{{ m.nationalRating }}</td>
-			<td name = "eventsSelect">
-			    <select name="events" id="e_id">
-				{% for e in es %}
-				<option value={{ e.id }}>{{ e.tournamentName }}</option>
-				{% endfor %}
-			    </select>
-			</td>
-		    </tr>
-		</tbody>
-	    </table>
 
-	    <input type="submit" value="Submit">
-	</form>			
-	
+
+
+<br>
+
+
+<form id="update_member_form" action="{{ url_for('update_member') }}" method="post">
+
+    <table>
+	<thead>
+	    <tr>
+		<th>
+		    MCF ID
+		</th>
+		<th>
+		    MCF Name
+		</th>
+		<th>
+		    Gender
+		</th>
+		<th>
+		    Year of Birth
+		</th>
+		<th>
+		    State
+		</th>
+		<th>
+		    National Rating
+		</th>
+		<th>
+		    Events
+		</th>
+	    </tr>
+	</thead>
+	<tbody>
+	    <tr>
+		
+		
+		<td>
+		    <input type="text" id="mcfId" name="mcfId" value="{{ m.mcfId }}" readonly="readonly"><br>
+		</td>
+		<td>
+		    {{ m.mcfName }}
+		</td>
+		<td>
+		    {{ m.gender }}
+		</td>
+		<td>
+		    {{ m.yearOfBirth }}
+		</td>
+		<td>
+		    {{ m.state }}
+		</td>
+		<td>
+		    {{ m.nationalRating }}
+		</td>
+		<td>
+		    <select name="events" id="e_id">
+			{% for e in es %}
+			<option value={{ e.id }}>{{ e.tournamentName }}</option>
+			{% endfor %}
+		    </select>
+		</td>
+	    </tr>
+	    <tr>
+		<td colspan="6"></td>
+		<td>
+		    <div class="p-8">
+			
+			<button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Submit</button>
+		    </div>
+		</td>
+	    </tr>
+	</tbody>
+    </table>
+    
+</form>	
+
+
+
 
 {% endblock %}
