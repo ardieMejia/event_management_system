@@ -1,0 +1,35 @@
+{% extends "base.html" %} 
+
+
+
+
+{% block content %}
+<h2>Welcome to MCF Event Registration System</h2>
+	
+	<table id="event_details" class="u-full-width">
+	    <tbody>
+		<tr>
+		    <th>Upload Events CSV</th>
+		    <td>
+			<a href="{{ url_for('bulk_upload_events_csv') }}">We should be selecting file here</a>      
+		    </td>
+		</tr>
+		<tr>
+		    <th>Upload Members CSV</th>
+		    <td>
+			<a href="{{ url_for('bulk_upload_members_csv') }}">We should be selecting file here</a>      
+		    </td>
+		</tr>
+		<tr>
+		    <th>Duplicate Checker</th>
+		    <td>			
+			<a>url_for('read_upload_csv')</a>      
+		    </td>
+		</tr>
+	    </tbody>
+	</table>
+	{% endblock %}
+
+	
+	
+

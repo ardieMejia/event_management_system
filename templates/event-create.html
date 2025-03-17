@@ -1,0 +1,41 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Create an event</h2>
+
+<form id="my-form" action="{{ url_for('create_event') }}" method="post">
+    <!-- <label for="MEMBER ID">MEMBER ID</label><br> -->
+    <!-- <input type="text" id="MEMBER ID" name="MEMBER ID" value=""><br> -->
+    <label for="tournamentName">Tournament Name</label>
+    <input type="text" id="tournamentName" name="tournamentName" value=""><br>
+    
+    <label for="startDate">Start Date</label>
+    <input type="text" id="startDate" name="startDate" value=""><br>
+    
+    <label for="endDate">End Date</label>
+    <input type="text" id="endDate" name="endDate" value=""><br>
+    
+    <label for="discipline">Discipline</label>
+    <input type="text" id="discipline" name="discipline" value=""><br>
+    
+    
+    
+    
+    <!-- <input type="hidden" id="EVENT ID" name="EVENT ID" value=""><br> -->
+    
+    
+    
+    <!-- <label for="mylist">EVENTS</label> -->
+    <!-- <select name="not_used" id="mylist">		       -->
+    <!--     {% for e in event %} -->
+    <!--     <option value={{ e['EVENT ID'] }}>{{ e['EVENT NAME'] }}</option> -->
+    <!--     {% endfor %} -->
+    
+    <!-- </select> -->
+    
+    
+    <input type="submit" value="Save to Database">
+</form>
+{% endblock %}
+

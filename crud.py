@@ -6,13 +6,94 @@ import os
 import sys
 import pandas as pd
 
+import sqlalchemy as sa
+import sqlalchemy.orm as so
+from app import db
+# from sqlalchemy import Column, Table, ForeignKey, Integer, String
+# from flask_sqlalchemy import SQLAlchemy
 
+# db = SQLAlchemy()
+# from sqlalchemy.orm import DeclarativeBase
 
 # Global Variable and Function
+# We put our models here, coz the project is kinda small anyway
+
+from sqlalchemy.orm import Mapped, mapped_column, relationship# , declarative_base
+
+# Base = declarative_base()
+# engine = create_engine('sqlite:///data.db')
+
+# class Base(DeclarativeBase):
+#     pass
 
 
+# note for a Core table, we use the sqlalchemy.Column construct,
+# not sqlalchemy.orm.mapped_column
+event_member = db.Table(
+    "event_members",
+    db.Column("event_id", db.ForeignKey("event.id")),
+    db.Column("member_id", db.ForeignKey("member.mcfId"))
+)
 
-class Event:
+class Event(db.Model):
+    __tablename__ = "event"
+
+    id = db.Column(db.Integer, primary_key=True)
+    tournamentName = db.Column(db.String(128), index=True, unique=True)
+    startDate = db.Column(db.String(64), index=True)
+    endDate = db.Column(db.String(64), index=True)
+    discipline = db.Column(db.String(64), index=True)
+    members = db.relationship('Member', secondary=event_member, back_populates='events')
+    def __repr__(self):
+        return '<tournament name {tn}> <members {m}>'.format(tn=self.tournamentName, m=self.members)
+
+class Member(db.Model):
+    __tablename__ = "member"
+
+    mcfId = db.Column(db.Integer, primary_key=True)
+    mcfName = db.Column(db.String(128), index=True)
+    gender = db.Column(db.String(64), index=True)
+    yearOfBirth = db.Column(db.String(64), index=True)
+    state = db.Column(db.String(64), index=True)
+    nationalRating = db.Column(db.String(64), index=True)
+    events = db.relationship('Event', secondary=event_member, back_populates='members')    
+    def __repr__(self):
+        return '<mcfName {tn}> <events {m}>'.format(tn=self.mcfName, m=self.events)
+
+    
+# class Event(db.Model):
+#     id: so.Mapped[int] = so.mapped_column(primary_key=True)
+#     tournamentName: so.Mapped[str] = so.mapped_column(sa.String(128), index=True, unique=True)
+#     startDate: so.Mapped[str] = so.mapped_column(sa.String(64), index=True,
+#                                                  unique=False)
+#     endDate: so.Mapped[str] = so.mapped_column(sa.String(64), index=True,
+#                                              unique=False)
+#     discipline: so.Mapped[str] = so.mapped_column(sa.String(64), index=True,
+#                                              unique=False)
+#     # eligibility: so.Mapped[str] = so.mapped_column(sa.String(64), index=True,
+#     #                                          unique=True)
+#     # limitation: so.Mapped[str] = so.mapped_column(sa.String(64), index=True,
+#     #                                          unique=True)
+#     # rounds: so.Mapped[str] = so.mapped_column(sa.String(64), index=True,
+#     #                                          unique=True)
+#     # timeControl: so.Mapped[str] = so.mapped_column(sa.String(64), index=True,
+#     #                                          unique=True)
+#     # eventType: so.Mapped[str] = so.mapped_column(sa.String(64), index=True,
+#     #                                          unique=True)
+#     # ageGroup: so.Mapped[str] = so.mapped_column(sa.String(64), index=True,
+#     #                                          unique=True)
+#     # participants: so.Mapped[str] = so.relationship(back_populates='events')
+
+#     def __repr__(self):
+#         return '<tournament name {tn}> <start date {sd}>'.format(tn=self.tournamentName, sd=self.startDate)
+
+
+    
+
+
+    
+
+class old_Event:
     def __init__(self, path, usedID_path):
         print("created event")
         self.path = path
@@ -43,7 +124,7 @@ class Event:
 
 
 
-class Member:
+class old_Member:
     def __init__(self, path, usedID_path):
         print("created member")
         self.path = path

@@ -1,0 +1,51 @@
+
+
+
+
+{% extends "base.html" %} 
+{% block content %} 
+{% endblock %}
+
+
+
+
+<h2>Create an event</h2>
+
+
+<form id="my-form" action="{{ url_for('create_member') }}" method="post">
+    <!-- <label for="MEMBER ID">MEMBER ID</label><br> -->
+    <!-- <input type="text" id="MEMBER ID" name="MEMBER ID" value=""><br> -->
+    <label for="mcfId">MCF Id</label>
+    <input type="text" id="mcfId" name="mcfId" value=""><br>
+    
+    <label for="mcfName">MCF Name</label>
+    <input type="text" id="mcfName" name="mcfName" value=""><br>
+    
+    <label for="gender">Gender</label>
+    <input type="text" id="gender" name="gender" value=""><br>
+    
+    <label for="yearOfBirth">Year of Birth</label>
+    <input type="text" id="yearOfBirth" name="yearOfBirth" value=""><br>
+    
+    <label for="state">State</label>
+    <input type="text" id="state" name="state" value=""><br>
+    
+    <label for="nationalRating">National Rating</label>
+    <input type="text" id="National Rating" name="National Rating" value=""><br>
+    
+    <!-- <input type="hidden" id="EVENT ID" name="EVENT ID" value=""><br> -->
+    
+    <!-- <label for="mylist">EVENTS</label> -->
+    <!-- <select name="not_used" id="mylist">		       -->
+    <!--     {% for e in event %} -->
+    <!--     <option value={{ e['EVENT ID'] }}>{{ e['EVENT NAME'] }}</option> -->
+    <!--     {% endfor %} -->
+    
+    <!-- </select> -->
+    
+    
+    <input type="submit" value="Save to Database">
+</form>
+
+
+

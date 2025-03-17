@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+	<meta charset="utf-8">
+	<link rel="shortcut icon" href="%PUBLIC_URL%/favicon.png">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="theme-color" content="#000000">
+	<link rel="manifest" href="%PUBLIC_URL%/manifest.json">
+	
+	<title>MCF -- Event Registration System</title>
+    </head>
+    <body>
+	
+	<h2>Members</h2>
+	
+			
+	<table id="event_details" class="u-full-width">
+	    <thead>
+		<tr>
+		    <th>MCF ID</th>
+		    <th>MCF Name</th>
+		    <th>Gender</th>
+		    <th>Year of Birth</th>
+		    <th>State</th>
+		    <th>National Rating</th>
+		    <th>Events</th>		    
+		    <th></th>		    
+		    <th></th>		    
+		</tr>
+	    </thead>
+	    <tbody>
+		{% for m in ms %}
+		<tr>
+		    <td id = "mcfId">{{ m.mcfId }}</td>
+		    <td id = "mdfName">{{ m.mcfName }}</td>
+		    <td id = "gender">{{ m.gender }}</td>
+		    <td id = "yearOfBirth">{{ m.yearOfBirth }}</td>
+		    <td id = "state">{{ m.state }}</td>
+		    <td id = "nationalRating">{{ m.nationalRating }}</td>
+		    <td id = "events">
+		      {% for e in m.events %}
+		      {{ e.tournamentName }}
+		      {% endfor %}
+		    </td>
+		    <td>
+			<a href={{ url_for('member_update_page', mcfId=m.mcfId )}}>Update Event</a>			
+		    </td>			  
+		    <td>
+			<a href={{ url_for('kill_member', mcfId=m.mcfId )}}>Remove Event</a>			
+		    </td>			  
+		</tr>
+		{% endfor %}
+		<tr>
+		    <td></td>
+		    <td></td>
+		    <td></td>
+		    <td></td>
+		    <td></td>
+		    <td colspan=4>
+			<a href={{ url_for('create_member')}}>Add Members</a>      
+		    </td>
+		</tr>
+	    </tbody>
+	</table>
+
+	
+	
+	
+	
+    </body>
+</html>
+

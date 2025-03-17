@@ -1,0 +1,50 @@
+	{% extends "base.html" %}
+	<ul>
+	    <li>
+		<a href={{ url_for('main_page')}}>Main Page</a>      
+	    </li>
+	    <li>     
+		<a href={{ url_for('find_events')}}>Show all events</a>      
+	    </li>
+	</ul>
+
+	{%  block content %}
+
+		<h2>Events</h2>
+	
+	<table id="event_details" class="u-full-width">
+	    <thead>
+		<tr>
+		    <th>Tourname Name</th>
+		    <th>Start Date</th>
+		    <th>End Date</th>
+		    <th>Discipline</th>
+		</tr>
+	    </thead>
+	    <tbody>
+		{% for e in es %}
+		<tr>
+		    <td id = "id">{{ e.id }}</td>
+		    <td id = "startDate">{{ e.startDate }}</td>
+		    <td id = "endDate">{{ e.endDate }}</td>
+		    <td id = "discipline">{{ e.discipline }}</td>			  
+		    <td>
+			<a href={{ url_for('kill_event', id=e.id )}}>Remove Event</a>      
+			
+		    </td>			  
+		</tr>
+		{% endfor %}
+		<tr>
+		    <td></td>
+		    <td></td>
+		    <td></td>
+		    <td>
+		    <a href={{ url_for('event_create')}}>Add Event</a>      
+		    </td>
+		    <td></td>
+		</tr>
+	    </tbody>
+	</table>
+
+	{% endblock %}
+

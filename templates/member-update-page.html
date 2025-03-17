@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+	<meta charset="utf-8">
+	<link rel="shortcut icon" href="%PUBLIC_URL%/favicon.png">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="theme-color" content="#000000">
+	<link rel="manifest" href="%PUBLIC_URL%/manifest.json">
+	
+	<title>MCF -- Event Registration System</title>
+    </head>
+    <body>
+	
+	<h2>Members</h2>	
+
+	<form id="update_member_form" action="{{ url_for('update_member') }}" method="post">
+	    
+	    <table id="event_details" class="u-full-width">
+		<thead>
+		    <tr>
+			<th>MCF ID</th>
+			<th>MCF Name</th>
+			<th>Gender</th>
+			<th>Year of Birth</th>
+			<th>State</th>
+			<th>National Rating</th>
+			<th>Events</th>		    
+		    </tr>
+		</thead>
+		<tbody>
+		    <tr>
+			<td>
+			    <input type="text" id="mcfId" name="mcfId" value="{{ m.mcfId }}" readonly="readonly"><br>			    
+			</td>
+			<td name = "mdfName">{{ m.mcfName }}</td>
+			<td name = "gender">{{ m.gender }}</td>
+			<td name = "yearOfBirth">{{ m.yearOfBirth }}</td>
+			<td name = "state">{{ m.state }}</td>
+			<td name = "nationalRating">{{ m.nationalRating }}</td>
+			<td name = "eventsSelect">
+			    <select name="events" id="e_id">
+				{% for e in es %}
+				<option value={{ e.id }}>{{ e.tournamentName }}</option>
+				{% endfor %}
+			    </select>
+			</td>
+		    </tr>
+		</tbody>
+	    </table>
+
+	    <input type="submit" value="Submit">
+	</form>			
+	
+    </body>
+</html>
+

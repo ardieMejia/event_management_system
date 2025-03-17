@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+	<meta charset="utf-8">
+	<link rel="shortcut icon" href="%PUBLIC_URL%/favicon.png">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="theme-color" content="#000000">
+	<link rel="manifest" href="%PUBLIC_URL%/manifest.json">
+	
+	<title>MCF: Event Registration Page</title>
+    </head>
+    <body>
+
+	<ul>
+	    <li>
+		<a href={{ url_for('main_page')}}>Main Page</a>      
+	    </li>
+	    <li>     
+		<a href={{ url_for('find_events')}}>Show all events</a>      
+	    </li>
+	    <li>     
+		<a href={{ url_for('find_members')}}>Show all members</a>      
+	    </li>
+	</ul>
+	
+	{% block content %} 
+	{% endblock %} 	  
+    </body>
+</html>
+

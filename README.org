@@ -20,3 +20,30 @@ pip install Flask
 
 
 #+end_quote
+<<<<<<< Updated upstream
+=======
+* TODO
+
+create and run an app from code
+
+add a database config, for URI for the sqlalchemy
+
+as part of the processing of the POST request, we assign it to a variable each, then create an object instance of our favourite object
+
+using alchemy, we then commit this new object
+* advantages of excel over database
+** easy for him
+** he can easily create a dropdown himself
+** he can use his helper functions to easily view specific events at will
+** 
+* advantages of database over excel
+** more predictable in thesystem
+** easy to ensure data integrity, of something happens such as a connection problem right when the user registers 
+** we have to ask him, if he changes tae category all tae time
+*** if sometimes this might be more ticky than usual
+** if the above is true, this means we either:
+*** create a specific "data entry" form just for him
+*** he retains the Excel workfow, and i have to think of uploading it to database
+* we have to read on this:
+** https://trumpexcel.com/extract-data-from-drop-down-list/
+>>>>>>> Stashed changes

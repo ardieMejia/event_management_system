@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+	<meta charset="utf-8">
+	<link rel="shortcut icon" href="%PUBLIC_URL%/favicon.png">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="theme-color" content="#000000">
+	<link rel="manifest" href="%PUBLIC_URL%/manifest.json">
+	
+	<title>Urban Hero</title>
+    </head>
+      <body>
+
+	  <h2>Event details saved!!</h2>
+
+	  
+	      <!-- ==================== -->
+	      <table id="event_details" class="u-full-width">
+		  <thead>
+		      <tr>
+			  <th>Tournament Name</th>
+			  <th>Start Date</th>
+			  <th>End Date</th>
+			  <th>Discipline</th>
+		      </tr>
+		  </thead>
+		  <tbody>
+		      <tr>
+			  <td name = "tournamentName">{{ e.tournamentName }}</td>
+			  <td id = "startDate">{{ e.startDate }}</td>
+			  <td id = "endDate">{{ e.endDate }}</td>
+			  <td id = "discipline">{{ e.discipline }}</td>			  
+		      </tr>
+		  </tbody>
+
+
+	  <!-- <form id="my-form" action="{{ url_for('create_event') }}" method="post"> -->
+	  <!--   <\!-- <label for="MEMBER ID">MEMBER ID</label><br> -\-> -->
+	  <!--   <\!-- <input type="text" id="MEMBER ID" name="MEMBER ID" value=""><br> -\-> -->
+	  <!--   <label for="tournamentName">Tournament Name</label> -->
+	  <!--   <input type="text" id="tournamentName" name="tournamentName" value=""><br> -->
+	    
+	  <!--   <label for="startDate">Start Date</label> -->
+	  <!--   <input type="text" id="startDate" name="startDate" value=""><br> -->
+	    
+	  <!--   <label for="endDate">End Date</label> -->
+	  <!--   <input type="text" id="endDate" name="endDate" value=""><br> -->
+	    
+	  <!--   <label for="discipline">Discipline</label> -->
+	  <!--   <input type="text" id="discipline" name="discipline" value=""><br> -->
+	    
+	    
+	    
+	    
+	    
+	  <!--   <input type="submit" value="Save to Database"> -->
+	  <!-- </form> -->
+	  
+	  
+      </body>
+</html>
+

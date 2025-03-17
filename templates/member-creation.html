@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+	<meta charset="utf-8">
+	<link rel="shortcut icon" href="%PUBLIC_URL%/favicon.png">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="theme-color" content="#000000">
+	<link rel="manifest" href="%PUBLIC_URL%/manifest.json">
+	
+	<title>Urban Hero</title>
+    </head>
+      <body>
+
+	  <h2></h2>
+
+	  
+	      <!-- ==================== -->
+
+
+	  <form id="temp" action="{{ url_for('temp') }}" method="post">
+	    <!-- <label for="MEMBER ID">MEMBER ID</label><br> -->
+	    <!-- <input type="text" id="MEMBER ID" name="MEMBER ID" value=""><br> -->
+
+	    
+	    
+	    
+
+	    <!-- <label for="mylist">EVENTS</label> -->
+	    <!-- <select name="not_used" id="mylist">		       -->
+	      <!--     {% for e in event %} -->
+	      <!--     <option value={{ e['EVENT ID'] }}>{{ e['EVENT NAME'] }}</option> -->
+	      <!--     {% endfor %} -->
+	      
+	      <!-- </select> -->
+	    <label for="NAME">only once</label>
+	    
+	    
+	    <input type="submit" value="Submit">
+		  
+		  
+	      </form>
+	      		       
+	      <form id="my-form" action="{{ url_for('process_form') }}" method="post">
+		  <!-- <label for="MEMBER ID">MEMBER ID</label><br> -->
+		  <!-- <input type="text" id="MEMBER ID" name="MEMBER ID" value=""><br> -->
+			  <label for="NAME">NAME</label>
+			  <input type="text" id="NAME" name="NAME" value=""><br>
+			  <label for="CONTACT NUMBER">CONTACT NUMBER</label>
+			  <input type="text" id="CONTACT NUMBER" name="CONTACT NUMBER" value=""><br>
+			  <label for="EMAIL ADDRESS">EMAIL ADDRESS</label>
+			  <input type="text" id="EMAIL ADDRESS" name="EMAIL ADDRESS" value=""><br>
+			  <input type="hidden" id="EVENT ID" name="EVENT ID" value=""><br>
+	  
+	  
+
+		  <!-- <label for="mylist">EVENTS</label> -->
+		  <!-- <select name="not_used" id="mylist">		       -->
+		  <!--     {% for e in event %} -->
+		  <!--     <option value={{ e['EVENT ID'] }}>{{ e['EVENT NAME'] }}</option> -->
+		  <!--     {% endfor %} -->
+		      
+		  <!-- </select> -->
+		  
+		  
+		  
+		  <input type="submit" value="Submit">
+		  
+		  
+	      </form>
+
+
+
+
+	      
+
+	      
+
+
+
+
+
+
+
+      </body>
+</html>
+
