@@ -6,6 +6,8 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<meta name="theme-color" content="#000000">
 	<link rel="manifest" href="%PUBLIC_URL%/manifest.json">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css" type="text/css" rel="stylesheet">
+
 	
 	<title>MCF: Event Registration Page</title>
     </head>
@@ -22,9 +24,12 @@
 		<a href={{ url_for('find_members')}}>Show all members</a>      
 	    </li>
 	</ul>
-	
+	<div class="container">
+	    
+
 	{% block content %} 
 	{% endblock %} 	  
+	</div>
     </body>
 </html>
 
