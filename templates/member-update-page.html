@@ -1,87 +1,93 @@
-{% extends "base_form.html" %}
+{% extends "base_form_h.html" %}
 
-{% block heading_underline %}
+
+
+
+
+{% block heading_1 %}
 Members
 {% endblock %}
 
 {% block form %}
-
-
-
 
 <br>
 
 
 <form id="update_member_form" action="{{ url_for('update_member') }}" method="post">
 
-    <table>
-	<thead>
-	    <tr>
-		<th>
-		    MCF ID
-		</th>
-		<th>
-		    MCF Name
-		</th>
-		<th>
-		    Gender
-		</th>
-		<th>
-		    Year of Birth
-		</th>
-		<th>
-		    State
-		</th>
-		<th>
-		    National Rating
-		</th>
-		<th>
-		    Events
-		</th>
-	    </tr>
-	</thead>
-	<tbody>
-	    <tr>
-		
-		
-		<td>
-		    <input type="text" id="mcfId" name="mcfId" value="{{ m.mcfId }}" readonly="readonly"><br>
-		</td>
-		<td>
-		    {{ m.mcfName }}
-		</td>
-		<td>
-		    {{ m.gender }}
-		</td>
-		<td>
-		    {{ m.yearOfBirth }}
-		</td>
-		<td>
-		    {{ m.state }}
-		</td>
-		<td>
-		    {{ m.nationalRating }}
-		</td>
-		<td>
-		    <select name="events" id="e_id">
-			{% for e in es %}
-			<option value={{ e.id }}>{{ e.tournamentName }}</option>
-			{% endfor %}
-		    </select>
-		</td>
-	    </tr>
-	    <tr>
-		<td colspan="6"></td>
-		<td>
-		    <div class="p-8">
+
+	    <table class="border border-yellow-400 border-2 w-full">
+		<thead>
+		    <tr class="bg-yellow-400">
+			<th class="border border-yellow-400  border-1">
+			    <div class="m-3">MCF ID</div>
+			</th>
+			<th class="border border-yellow-400  border-1">
+			    <div class="m-3">MCF Name</div>
+			</th>
+			<th class="border border-yellow-400  border-1">
+			    <div class="m-3">Gender</div>
+			</th>
+			<th class="border border-yellow-400  border-1">
+			    <div class="m-3">Year of Birth</div>
+			</th>
+			<th class="border border-yellow-400  border-1">
+			    <div class="m-3">State</div>
+			</th>
+			<th class="border border-yellow-400  border-1">
+			    <div class="m-3">National Rating</div>
+			</th>
+			<th class="border border-yellow-400  border-1">
+			    <div class="m-3">Events</div>
+			</th>
+		    </tr>
+		</thead>
+		<tbody>
+		    <tr class="border border-yellow-400  border-2">
 			
-			<button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Submit</button>
-		    </div>
-		</td>
-	    </tr>
-	</tbody>
-    </table>
-    
+			
+			<td>
+			    <div class="m-3"><input type="text" id="mcfId" name="mcfId" value="{{ m.mcfId }}" readonly="readonly"><br></div>
+			</td>
+			<td>
+			    <div class="m-3">{{ m.mcfName }}</div>
+			</td>
+			<td>
+			    <div class="m-3">{{ m.gender }}</div>
+			</td>
+			<td>
+			    <div class="m-3">{{ m.yearOfBirth }}</div>
+			</td>
+			<td>
+			    <div class="m-3">{{ m.state }}</div>
+			</td>
+			<td>
+			    <div class="m-3">{{ m.nationalRating }}</div>
+			</td>
+			<td>
+			    <div class="m-3">
+				<select name="events" id="e_id">
+				    {% for e in es %}
+				    <option value={{ e.id }}>{{ e.tournamentName }}</option>
+				    {% endfor %}
+				</select>
+			    </div>
+			</td>
+		    </tr>
+		    <tr>
+			<td colspan="6"></td>
+			<td>
+			    <div class="m-2">
+				
+				<button type="submit" class="w-full mt-6 rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none">Submit</button>
+			    </div>
+			</td>
+		    </tr>
+		</tbody>
+	    </table>
+
+
+  
 </form>	
 
 

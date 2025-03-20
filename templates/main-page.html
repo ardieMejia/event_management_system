@@ -1,35 +1,63 @@
-{% extends "base.html" %} 
+{% extends "base_form_h.html" %} 
 
 
 
 
-{% block content %}
-<h2>Welcome to MCF Event Registration System</h2>
-	
-	<table id="event_details" class="u-full-width">
-	    <tbody>
-		<tr>
-		    <th>Upload Events CSV</th>
-		    <td>
-			<a href="{{ url_for('bulk_upload_events_csv') }}">We should be selecting file here</a>      
-		    </td>
-		</tr>
-		<tr>
-		    <th>Upload Members CSV</th>
-		    <td>
-			<a href="{{ url_for('bulk_upload_members_csv') }}">We should be selecting file here</a>      
-		    </td>
-		</tr>
-		<tr>
-		    <th>Duplicate Checker</th>
-		    <td>			
-			<a>url_for('read_upload_csv')</a>      
-		    </td>
-		</tr>
-	    </tbody>
-	</table>
-	{% endblock %}
+{% block heading_1 %}
+    MCF Event Registration System
+{% endblock %}
 
-	
-	
+
+
+
+{% block form %}
+
+
+<br>
+<table id="event_details" class="table-auto border border-yellow-400">
+    <tbody>
+	<tr class="borders border-yellow-400  border-2">
+	    <th class="bg-yellow-400">Upload Events CSV</th>
+	    <td>
+		<div class="m-3">
+		    <a href="{{ url_for('bulk_upload_events_csv') }}">We should be selecting file here</a>      
+		</div>
+	    </td>
+	</tr>
+	<tr class="borders border-yellow-400  border-2">
+	    <th class="bg-yellow-400">Upload Members CSV</th>
+	    <td>
+		<div class="m-3">
+		    <a href="{{ url_for('bulk_upload_members_csv') }}">We should be selecting file here</a>      
+		</div>
+	    </td>
+	</tr>
+	<tr class="borders border-yellow-400  border-2">
+	    <th class="bg-yellow-400">Duplicate Checker</th>
+	    <td>
+		<div class="m-3">
+
+		    <a href="#"> some link to a duplicate checker</a>      
+		</div>
+	    </td>
+	</tr>
+	<tr class="borders border-yellow-400  border-2">
+	    <td class="bg-yellow-400"></td>
+	    <td>
+		<div class="m-3">
+<button type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none">Submit</button>
+		</div>
+	    </td>
+	</tr>
+    </tbody>
+</table>
+
+
+
+
+
+
+{% endblock %}
+
+
 

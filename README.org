@@ -17,6 +17,7 @@ pip install pandas
 pip install tabulate
 pip install openpyxl
 pip install Flask
+pip install Flask-SQLAlchemy
 
 
 #+end_quote

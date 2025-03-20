@@ -1,15 +1,19 @@
-{% extends "base.html" %}
-
-{% block content %}
-	<h2>Members</h2>
+{% extends "base_form_h.html" %}
 
 
-	
-	
-			
-	<table id="event_details" class="u-full-width">
+{% block heading_1 %}
+Members
+{% endblock %}
+
+{% block form %}
+
+
+<br>
+
+
+<table id="event_details" class="table-auto border border-yellow-400 border-2">
 	    <thead>
-		<tr>
+		<tr class="bg-yellow-400">
 		    <th>MCF ID</th>
 		    <th>MCF Name</th>
 		    <th>Gender</th>
@@ -21,9 +25,9 @@
 		    <th></th>		    
 		</tr>
 	    </thead>
-	    <tbody>
+	    <tbody class="text-center">
 		{% for m in ms %}
-		<tr>
+		<tr class="border border-yellow-400 border-2">
 		    <td id = "mcfId">{{ m.mcfId }}</td>
 		    <td id = "mdfName">{{ m.mcfName }}</td>
 		    <td id = "gender">{{ m.gender }}</td>
@@ -36,10 +40,18 @@
 		      {% endfor %}
 		    </td>
 		    <td>
-			<a href={{ url_for('member_update_page', mcfId=m.mcfId )}}>Update Event</a>			
+			<div class="m-2">
+			    <button type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none">
+				<a href={{ url_for('member_update_page', mcfId=m.mcfId )}}>Update Member</a>						    
+			    </button>
+			</div>
 		    </td>			  
 		    <td>
-			<a href={{ url_for('kill_member', mcfId=m.mcfId )}}>Remove Event</a>			
+			<div class="m-2">
+			    <button type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none">
+				<a href={{ url_for('kill_member', mcfId=m.mcfId )}}>Remove Member</a>			
+			    </button>
+			</div>
 		    </td>			  
 		</tr>
 		{% endfor %}
@@ -49,13 +61,24 @@
 		    <td></td>
 		    <td></td>
 		    <td></td>
-		    <td colspan=4>
-			<a href={{ url_for('create_member')}}>Add Members</a>      
+		    <td></td>
+		    <td></td>
+		    <td></td>
+		    <td>
+			<div class="m-3">
+			    <button type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none">
+
+						    <a href={{ url_for('create_member')}}>Add Member</a>      
+			    </button>
+			</div>			
 		    </td>
 		</tr>
 	    </tbody>
 	</table>
 
+
 	
+	
+
 	
 {% endblock %}

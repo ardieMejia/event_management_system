@@ -1,50 +1,82 @@
-	{% extends "base.html" %}
-	<ul>
-	    <li>
-		<a href={{ url_for('main_page')}}>Main Page</a>      
-	    </li>
-	    <li>     
-		<a href={{ url_for('find_events')}}>Show all events</a>      
-	    </li>
-	</ul>
+{% extends "base_form_h.html" %}
 
-	{%  block content %}
 
-		<h2>Events</h2>
-	
-	<table id="event_details" class="u-full-width">
-	    <thead>
-		<tr>
-		    <th>Tourname Name</th>
-		    <th>Start Date</th>
-		    <th>End Date</th>
-		    <th>Discipline</th>
-		</tr>
-	    </thead>
-	    <tbody>
-		{% for e in es %}
-		<tr>
-		    <td id = "id">{{ e.id }}</td>
-		    <td id = "startDate">{{ e.startDate }}</td>
-		    <td id = "endDate">{{ e.endDate }}</td>
-		    <td id = "discipline">{{ e.discipline }}</td>			  
-		    <td>
-			<a href={{ url_for('kill_event', id=e.id )}}>Remove Event</a>      
-			
-		    </td>			  
-		</tr>
-		{% endfor %}
-		<tr>
-		    <td></td>
-		    <td></td>
-		    <td></td>
-		    <td>
-		    <a href={{ url_for('event_create')}}>Add Event</a>      
-		    </td>
-		    <td></td>
-		</tr>
-	    </tbody>
-	</table>
 
-	{% endblock %}
+
+{% block heading_1 %}
+Events
+{% endblock %}
+
+
+{%  block form %}
+
+<br>
+
+
+<table id="member_details" class="table-auto border border-yellow-400 border-2">
+      <thead>
+	  <tr class="bg-yellow-400">
+	  <th>
+	    <div class="m-3">Tourname Name</div>
+	  </th>
+	  <th>
+	    <div class="m-3">Start Date</div>
+	  </th>
+	  <th>
+	    <div class="m-3">End Date</div>
+	  </th>
+	  <th>
+	    <div class="m-3">Discipline</div>
+	  </th>
+	  <th>
+	      <div class="m-3"></div>
+	  </th>
+	  <th>
+	  </th>
+	  </tr>
+      </thead>
+      <tbody>
+	{% for e in es %}
+	  <tr class="border border-yellow-400 border-2">
+	  
+	  
+	  <td >
+	    <div class="m-3">{{ e.tournamentName }}</div>
+	  </td>
+	  <td >
+	    <div class="m-3">{{ e.startDate }}</div>
+	  </td>
+	  <td >
+	    <div class="m-3">{{ e.endDate }}</div>
+	  </td>
+	  <td >
+	    <div class="m-3">{{ e.discipline }}</div>
+	  </td>
+	  <td>
+	      <div class="m-2">
+		  			    <button type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none">
+
+					    <a href={{ url_for('kill_event', id=e.id )}}>Remove Event</a>
+					    </button>
+	    </div>
+	  </td>
+	</tr>
+	{% endfor %}
+	<tr>
+	  <td colspan="4"></td>
+	  <td>
+	      <div class="m-2">
+		  			    <button type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none">
+
+					    <a href={{ url_for('event_create')}}>Add Event</a>      
+					    </button>
+	    </div>
+	  </td>
+	</tr>
+      </tbody>
+    </table>
+
+
+
+{% endblock %}
 
