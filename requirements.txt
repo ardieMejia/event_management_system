@@ -1,0 +1,7 @@
+Jinja2
+pandas
+tabulate
+openpyxl
+Flask
+Flask-SQLAlchemy
+Flask-Migrate
