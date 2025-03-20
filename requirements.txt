@@ -1,9 +1,7 @@
-pip install Jinja2
-pip install simple-http-server-jinja
-pip instlal python-lsp-server
-pip install pandas
-pip install tabulate
-pip install openpyxl
-pip install Flask
-pip install Flask-SQLAlchemy
-pip install Flask-Migrate
+Jinja2
+pandas
+tabulate
+openpyxl
+Flask
+Flask-SQLAlchemy
+Flask-Migrate
