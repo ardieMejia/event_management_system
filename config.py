@@ -10,6 +10,6 @@ class Config:
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'sqlite:///' + os.path.join(basedir, 'app.db')
     if os.environ.get('YOURAPPLICATION_MODE') == "production":
-        SQLALCHEMY_DATABASE_URI = "postgresql://tailwind_test_postgres_user:Cf2tRDhIrySSXRpANQIbrgkyqCzSWkSz@dpg-cve40i3qf0us738eth40-a.singapore-postgres.render.com/tailwind_test_postgres"
+        SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI')
         SECRET_KEY = os.environ.get('SECRET_KEY')
         

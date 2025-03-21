@@ -1,1 +1,0 @@
-* Just an empty org file. Coz im too lazy to get out of Emacs.
