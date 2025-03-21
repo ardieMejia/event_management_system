@@ -47,4 +47,4 @@ using alchemy, we then commit this new object
 *** he retains the Excel workfow, and i have to think of uploading it to database
 * we have to read on this:
 ** https://trumpexcel.com/extract-data-from-drop-down-list/
->>>>>>> Stashed changes
+** https://trumpexcel.com/extract-data-from-drop-down-list/
