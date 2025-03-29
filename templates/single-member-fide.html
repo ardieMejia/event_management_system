@@ -1,0 +1,93 @@
+{% extends "base_form_h.html" %}
+
+
+
+
+
+{% block heading_1 %}
+Registration
+{% endblock %}
+
+{% block form %}
+
+
+<br>
+
+<!-- ==================== -->
+
+
+
+<h2 class="text-red-600 text-3xl font-bold underline">
+    Please provide FIDE details
+</h2>
+<br>
+
+<form name="FIDEform" action="{{ url_for('update_fide', mcfId=m.mcfId ) }}" method="post">
+
+
+    <table class="border border-yellow-400 border-2 w-full">
+	<tbody>
+	    <tr class="bg-yellow-400">
+		<th class="border border-yellow-400  border-1">
+		    <div class="m-4 mb-1 ml-1 text-left">
+			<label for="fideId" class="block text-gray-900 text-sm">FIDE ID</label>
+			<input id="fideId" name="fideId" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
+		    </div>
+		</th>
+	    </tr>
+
+	    
+
+
+	    
+	    <tr class="bg-yellow-400">
+		<th class="border border-yellow-400  border-1">
+		    <div class="m-4 mb-1 ml-1 text-left">
+			<label for="fideName" class="block text-gray-900 text-sm">FIDE Name</label>
+			<input id="fideName" name="fideName" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
+		    </div>
+		</th>
+	    </tr>
+	    
+
+	    
+	    <tr class="bg-yellow-400">
+		<th class="border border-yellow-400  border-1">
+		    <div class="m-4 mb-1 ml-1 text-left">
+			<label for="fideRating" class="block text-gray-900 text-sm">FIDE Rating</label>
+			<input id="fideRating" name="fideRating" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
+		    </div>
+		</th>
+	    </tr>
+	    
+	    
+
+	    
+	</tbody>
+    </table>
+
+
+
+    <button type="submit" class="m-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Submit</button>
+</form>
+
+<br>
+<br>
+<br>
+
+
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

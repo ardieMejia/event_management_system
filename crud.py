@@ -56,9 +56,26 @@ class Member(db.Model):
     yearOfBirth = db.Column(db.String(64), index=True)
     state = db.Column(db.String(64), index=True)
     nationalRating = db.Column(db.String(64), index=True)
-    events = db.relationship('Event', secondary=event_member, back_populates='members')    
+    events = db.relationship('Event', secondary=event_member, back_populates='members')
+    fide = db.relationship("Fide", backref="member", uselist=False, cascade="save-update, merge, delete", passive_deletes=True)
+    
     def __repr__(self):
         return '<mcfName {tn}> <events {m}>'.format(tn=self.mcfName, m=self.events)
+
+
+
+class Fide(db.Model):
+    __tablename__ = "fide"
+    
+    fideId = db.Column(db.Integer, primary_key=True)
+    fideName = db.Column(db.String(80))
+    fideRating = db.Column(db.Integer(), index=True)
+    mcfId = db.Column(db.Integer, db.ForeignKey('member.mcfId', ondelete="CASCADE"))
+
+    def __repr__(self):
+        return '<fideName {fn}>'.format(fn=self.fideName)
+
+
 
     
 # class Event(db.Model):

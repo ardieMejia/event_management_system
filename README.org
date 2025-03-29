@@ -48,3 +48,7 @@ using alchemy, we then commit this new object
 * we have to read on this:
 ** https://trumpexcel.com/extract-data-from-drop-down-list/
 >>>>>>> Stashed changes
+pip install Flask-Migrate
+flask_jwt_extended
+flask_bcrypt
+psycopg2_binary

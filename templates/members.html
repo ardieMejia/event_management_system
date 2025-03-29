@@ -11,74 +11,102 @@ Members
 <br>
 
 
-<table id="event_details" class="table-auto border border-yellow-400 border-2">
-	    <thead>
-		<tr class="bg-yellow-400">
-		    <th>MCF ID</th>
-		    <th>MCF Name</th>
-		    <th>Gender</th>
-		    <th>Year of Birth</th>
-		    <th>State</th>
-		    <th>National Rating</th>
-		    <th>Events</th>		    
-		    <th></th>		    
-		    <th></th>		    
-		</tr>
-	    </thead>
-	    <tbody class="text-center">
-		{% for m in ms %}
-		<tr class="border border-yellow-400 border-2">
-		    <td id = "mcfId">{{ m.mcfId }}</td>
-		    <td id = "mdfName">{{ m.mcfName }}</td>
-		    <td id = "gender">{{ m.gender }}</td>
-		    <td id = "yearOfBirth">{{ m.yearOfBirth }}</td>
-		    <td id = "state">{{ m.state }}</td>
-		    <td id = "nationalRating">{{ m.nationalRating }}</td>
-		    <td id = "events">
-		      {% for e in m.events %}
-		      {{ e.tournamentName }}
-		      {% endfor %}
-		    </td>
-		    <td>
-			<div class="m-2">
-			    <button type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none">
-				<a href={{ url_for('member_update_page', mcfId=m.mcfId )}}>Update Member</a>						    
-			    </button>
-			</div>
-		    </td>			  
-		    <td>
-			<div class="m-2">
-			    <button type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none">
-				<a href={{ url_for('kill_member', mcfId=m.mcfId )}}>Remove Member</a>			
-			    </button>
-			</div>
-		    </td>			  
-		</tr>
+<table id="member_details" class="table-auto border border-yellow-400 border-2">
+    <thead>
+	<tr class="bg-yellow-400">
+	    <th class="w-30 p-1">MCF ID</th>
+	    <th class="w-200 p-1">MCF Name</th>
+	    <th class="w-10 p-1">Gender</th>
+	    <th class="w-30 p-1">Year of Birth</th>
+	    <th class="w-30 p-1">State</th>
+	    <th class="w-20 p-1">National Rating</th>
+	    <th class="w-30 p-1">Events</th>		    
+	    <th class="w-30 p-1">FIDE ID</th>		    
+	    <th class="w-30 p-1">FIDE Name</th>
+	    <th class="w-30 p-1">FIDE Rating</th>		    
+	    <th></th>		    
+	    <th></th>		    
+	</tr>
+    </thead>
+    <tbody class="text-center">
+	{% for m in ms %}
+	<tr class="border border-yellow-400 border-2">
+	    <td id = "mcfId">{{ m.mcfId }}</td>
+	    <td id = "mdfName">{{ m.mcfName }}</td>
+	    <td id = "gender">{{ m.gender }}</td>
+	    <td id = "yearOfBirth">{{ m.yearOfBirth }}</td>
+	    <td id = "state">{{ m.state }}</td>
+	    <td id = "nationalRating">{{ m.nationalRating }}</td>
+	    <td id = "events">
+		{% for e in m.events %}
+		{{ e.tournamentName }}
 		{% endfor %}
-		<tr>
-		    <td></td>
-		    <td></td>
-		    <td></td>
-		    <td></td>
-		    <td></td>
-		    <td></td>
-		    <td></td>
-		    <td></td>
-		    <td>
-			<div class="m-3">
-			    <button type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none">
+	    </td>
+	    <td id = "fide">
+		{{ m.fide.fideId }}			
+	    </td>
+	    <td id = "fideName">
+		{{ m.fide.fideName }}			
+	    </td>
+	    <td id = "fideRating">
+		{{ m.fide.fideRating }}			
+	    </td>
+	    <td>
+		<div class="m-2">
+		    <button type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none">
+			<a href={{ url_for('member_update_page', mcfId=m.mcfId )}}>Update Member</a>						    
+		    </button>
+		</div>
+	    </td>			  
+	    <td>
+		<div class="m-2">
+		    <button type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none">
+			<a href={{ url_for('kill_member', mcfId=m.mcfId )}}>Remove Member</a>			
+		    </button>
+		</div>
+	    </td>			  
+	</tr>
+	{% endfor %}
+	<tr>
+	    <td></td>
+	    <td></td>
+	    <td></td>
+	    <td></td>
+	    <td></td>
+	    <td></td>
+	    <td></td>
+	    <td></td>
+	    <td></td>
+	    <td></td>
+	    <td></td>
+	    <td>
+		<div class="m-3">
+		    <button type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none">
 
-						    <a href={{ url_for('create_member')}}>Add Member</a>      
-			    </button>
-			</div>			
-		    </td>
-		</tr>
-	    </tbody>
-	</table>
+			<a href={{ url_for('create_member')}}>Add Member</a>      
+		    </button>
+		</div>			
+	    </td>
+	</tr>
+    </tbody>
+</table>
 
+<br>
 
+<div class="grid grid-cols-6 ml-5 mr-5 mb-5">
+    <div class="m-2">
 	
-	
+	<button id="Simple" type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4  border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none " >
+	    Simple
+	</button>
+    </div>
+    
+    <div class="m-2">
+	<button id="showAll" type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4  border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none" >
+	    Show All
+	</button>
+    </div>
+</div>
 
-	
+
 {% endblock %}

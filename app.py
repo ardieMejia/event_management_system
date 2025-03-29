@@ -53,20 +53,50 @@ def hello():
     
     return render_template("form.html", testvar = "hello", old_event = old_event.data.to_dict('records'))
 
-# @app.route('/temp', methods = ['POST']) 
-# def temp():
 
-#     m = Member(mcfName = "ardie wiranata", gender='male', yearOfBirth='26-01-1995', state='Selangor', nationalRating='1600')
-#     db.session.add(m)
-#     db.session.commit()
-#     app.logger.info('========== event ==========')
-#     # app.logger.info(request.form['EVENT ID'])
-#     # app.logger.info(type(old_event.data.values.tolist()))
-#     app.logger.info(m)
-#     app.logger.info('========== event ==========')
+
+@app.route('/single-member/<int:mcfId>', methods = ['GET']) 
+def single_member(mcfId):
+
+
+    query = sa.select(Member).where(Member.mcfId == mcfId)
+    m = db.session.scalar(query)
+    return render_template("single-member.html", m=m)
+
+@app.route('/single-member-fide/<int:mcfId>', methods = ['GET']) 
+def single_member_fide(mcfId):
+
+    
+    query = sa.select(Member).where(Member.mcfId == mcfId)
+    m = db.session.scalar(query)
+    return render_template("single-member-fide.html", m=m)
+    # return m
+
+
+@app.route('/update-fide', methods = ['POST']) 
+def update_fide():
+    mcfId = request.args.get("mcfId")
+    # query = sa.select(Member).where(Member.mcfId == mcfId)
+    # m = db.session.scalar(query)
+    f = Fide(fideId=request.form['fideId'], fideName=request.form["fideName"], fideRating=request.form['fideRating'], mcfId=request.args.get('mcfId'))
+    app.logger.info(f.fideId)
+    if f.isDataValid(p_fideId=f.fideId, p_fideRating=f.fideRating):
+        errorsList = f.isDataValid(p_fideId=f.fideId, p_fideRating=f.fideRating)
+        return C_templater.custom_render_template("Invalid Input Error", errorsList, True)
+        
+
+    db.session.add(f)
+    try:
+        db.session.commit()
+    except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
+        db.session.rollback()
+        return C_templater.custom_render_template("Data entry error", i._message, False)
+    except DataError as d:
+        db.session.rollback()
+        return C_templater.custom_render_template("DB API DataError", "this is some basic DB error, nothing special", False)
     
     
-#     return "thank you data inserted"
+    return "new FIDE saved"
 
 @app.route('/event-create')
 def event_create():
@@ -375,6 +405,30 @@ def bulk_upload_members_csv():
     # return redirect('/events')
 
 
+
+@app.route('/bulk_upload_fide_csv')
+def bulk_upload_fide_csv():
+    # ========== we upload CSV using the kinda cool declarative_base, might not be good practice for readability
+    with open(r'./input/fide.csv', newline='') as csvfile:
+        dictreader = csv.DictReader(csvfile, delimiter=',')
+        for row in dictreader:
+            f = Fide(fideId=row['fideId'], fideName=row['fideName'], fideRating=row['fideRating'], mcfId=row['mcfId'])
+
+            # query = sa.select(Member).where(Member.mcfId == row[''])
+            # f = db.session.scalar(query)
+            # m.fide = f                           
+            db.session.add(f)
+                
+            try:
+                db.session.commit()
+            except IntegrityError as i:
+                db.session.rollback()
+                app.logger.info(i._message())
+                # return C_templater.custom_render_template("Data entry error", i._message(), False)
+                return C_templater.custom_render_template("DB-API IntegrityError", [i._message()], True)        
+
+
+    return C_templater.custom_render_template("Successfull bulk upload", "member data", False)
 
 if __name__=='__main__': 
     app.run(debug=True)
