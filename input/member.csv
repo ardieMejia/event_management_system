@@ -1,3 +1,4 @@
-mcfId,mcfName,gender,yearOfBirth,state,nationalRating
-156,Vikram,Male,26-02-1983,Selangor,1300
-157,Palanivel,Female,08-05-1983,Pahang,1250
+mcfId,mcfName,password,gender,yearOfBirth,state,nationalRating,fideId
+156,Vikram,999,M,1983,Selangor,1300,35815787
+157,Palanivel,imHotToo,F,1984,Pahang,1250,11115125
+158,Yeoh Li Tian,888,M,1999,Perak,1350,

@@ -7,15 +7,6 @@
 	<meta name="theme-color" content="#000000">
 	<link rel="manifest" href="%PUBLIC_URL%/manifest.json">
 	<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-	<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-
-	
-
-	
-	
-	
-
-
 	<link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
 	<title>MCF: Event Registration Page</title>
     </head>
@@ -52,7 +43,9 @@
 				<li>
 				    <a href="{{ url_for('single_member', mcfId=157 )}}" class="block py-2 px-3 text-white bg-blue-700 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500" aria-current="page">Members register sample page</a>
 				</li>
-
+				<li>
+				    <a href="{{ url_for('main_page')}}" class="block py-2 px-3 text-white bg-blue-700 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500" aria-current="page">Main Page</a>
+				</li>
 			    </ul>
 		    </div>
 		</div>
@@ -60,61 +53,12 @@
 	    <input type="text" id="current_user" name="current_user" value="{{access_token}}" hidden>
 
 	    
-	    {% block form %} 
+	    {% block error %} 
 	    {% endblock %}
 	</div>
 
 	<script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
 
-	<script>
-
-
-
-
-	 function validateNumberInput() {
-	     var fideId_val = document.forms["FIDEform"]["fideId"].value;
-	     if ( !(isNaN(fideId_val)) && fideId_val!='' ) {
-		 alert("It's a Number!");
-		 return true;
-	     } else {
-		 alert("It's not a Number!");
-		 return false;
-	     }
-	 }
-
-	 /* $( "table tbody tr td:nth-child(2)" ).append( "<span> - 2nd!</span>" ); */
-
-	 $(document).ready(function() {
-	     /* $("#member_details td:nth-child(1)").css( "border", "3px solid red" ); */
-	     
-	     $( "#Simple" ).on( "click", function() {
-		 $("#member_details td:nth-child(8)").css( "border", "3px solid red" );
-		 $("#member_details thead tr th:nth-child(9)").hide();
-		 $("#member_details tbody tr td:nth-child(9)").hide();
-		 $("#member_details thead tr th:nth-child(10)").hide();
-		 $("#member_details tbody tr td:nth-child(10)").hide();
-		 $("#member_details thead tr th:nth-child(11)").hide();
-		 $("#member_details tbody tr td:nth-child(11)").hide();
-		 $("#member_details thead tr th:nth-child(12)").hide();
-		 $("#member_details tbody tr td:nth-child(12)").hide();
-	     });
-	     $( "#showAll" ).on( "click", function() {
-		 $("#member_details td:nth-child(8)").css( "border", "none" );
-		 $("#member_details thead tr th:nth-child(9)").show();
-		 $("#member_details tbody tr td:nth-child(9)").show();
-		 $("#member_details thead tr th:nth-child(10)").show();
-		 $("#member_details tbody tr td:nth-child(10)").show();
-		 $("#member_details thead tr th:nth-child(11)").show();
-		 $("#member_details tbody tr td:nth-child(11)").show();
-		 $("#member_details thead tr th:nth-child(12)").show();
-		 $("#member_details tbody tr td:nth-child(12)").show();
-	     });
-	 });
-	 
-
-	</script>
-
-	 
 
 
     </body>

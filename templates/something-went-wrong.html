@@ -1,0 +1,42 @@
+{% extends "base_error_h.html" %}
+
+
+
+
+
+{% block heading_1 %}
+Something Went Wrong
+{% endblock %}
+
+{% block error %}
+
+<br><br>
+
+
+
+<div class="flex p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400" role="alert">
+
+    {% include 'invalidInputError.j2' %}
+
+    <span class="sr-only">Info</span>
+    <div>
+	<span class="text-lg">Ensure that:</span>
+	<ul class="mt-2 list-disc list-inside">
+	    {% for e in errorsList %}
+            <li>{{ e }}</li>
+	    {% endfor %}
+	</ul>
+    </div>
+</div>
+
+
+
+
+
+
+
+{% endblock %}
+
+
+
+

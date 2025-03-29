@@ -5,10 +5,12 @@ import random
 import os
 import sys
 import pandas as pd
+import logging
+
 
 import sqlalchemy as sa
 import sqlalchemy.orm as so
-from app import db
+from app import db, bcrypt, app
 # from sqlalchemy import Column, Table, ForeignKey, Integer, String
 # from flask_sqlalchemy import SQLAlchemy
 
@@ -45,48 +47,62 @@ class Event(db.Model):
     discipline = db.Column(db.String(64), index=True)
     members = db.relationship('Member', secondary=event_member, back_populates='events')
     def __repr__(self):
-        return '<tournament name {tn}> <members {m}>'.format(tn=self.tournamentName, m=self.members)
+        return '<tournament name {tn}> <members {ms}>'.format(tn=self.tournamentName, ms=self.members)
 
 class Member(db.Model):
     __tablename__ = "member"
 
     mcfId = db.Column(db.Integer, primary_key=True)
+    password = db.Column(db.String(80))
     mcfName = db.Column(db.String(128), index=True)
     gender = db.Column(db.String(64), index=True)
     yearOfBirth = db.Column(db.String(64), index=True)
     state = db.Column(db.String(64), index=True)
     nationalRating = db.Column(db.String(64), index=True)
-    events = db.relationship('Event', secondary=event_member, back_populates='members')    
+    events = db.relationship('Event', secondary=event_member, back_populates='members')
+    fide = db.relationship("Fide", backref="member", uselist=False, cascade="save-update, merge, delete", passive_deletes=True)
     def __repr__(self):
-        return '<mcfName {tn}> <events {m}>'.format(tn=self.mcfName, m=self.events)
+        return '<mcfName {mn}> <events {es}>'.format(mn=self.mcfName, es=self.events)
+
+    def set_password(self, password):
+        hashedPassword = bcrypt.generate_password_hash(password).decode('utf-8')
+        return hashedPassword
+
+
+    def check_password(self, password):
+        # isPasswordVerified = bcrypt.check_password_hash(self.password, password)
+        app.logger.info(self.password)
+        # return isPasswordVerified
+        
+        
+        
+        
+        # isPasswordVerified = bcrypt.check_password_hash(bcrypt.generate_password_hash(password).decode('utf-8'), m.password)
+        return True
 
     
-# class Event(db.Model):
-#     id: so.Mapped[int] = so.mapped_column(primary_key=True)
-#     tournamentName: so.Mapped[str] = so.mapped_column(sa.String(128), index=True, unique=True)
-#     startDate: so.Mapped[str] = so.mapped_column(sa.String(64), index=True,
-#                                                  unique=False)
-#     endDate: so.Mapped[str] = so.mapped_column(sa.String(64), index=True,
-#                                              unique=False)
-#     discipline: so.Mapped[str] = so.mapped_column(sa.String(64), index=True,
-#                                              unique=False)
-#     # eligibility: so.Mapped[str] = so.mapped_column(sa.String(64), index=True,
-#     #                                          unique=True)
-#     # limitation: so.Mapped[str] = so.mapped_column(sa.String(64), index=True,
-#     #                                          unique=True)
-#     # rounds: so.Mapped[str] = so.mapped_column(sa.String(64), index=True,
-#     #                                          unique=True)
-#     # timeControl: so.Mapped[str] = so.mapped_column(sa.String(64), index=True,
-#     #                                          unique=True)
-#     # eventType: so.Mapped[str] = so.mapped_column(sa.String(64), index=True,
-#     #                                          unique=True)
-#     # ageGroup: so.Mapped[str] = so.mapped_column(sa.String(64), index=True,
-#     #                                          unique=True)
-#     # participants: so.Mapped[str] = so.relationship(back_populates='events')
 
-#     def __repr__(self):
-#         return '<tournament name {tn}> <start date {sd}>'.format(tn=self.tournamentName, sd=self.startDate)
+class Fide(db.Model):
+    __tablename__ = "fide"
+    
+    fideId = db.Column(db.Integer, primary_key=True)
+    fideName = db.Column(db.String(80))
+    fideRating = db.Column(db.Integer(), index=True)
+    mcfId = db.Column(db.Integer, db.ForeignKey('member.mcfId', ondelete="CASCADE"))
 
+    def __repr__(self):
+        return '<fideName {fn}>'.format(fn=self.fideName)
+
+    def isDataValid(self, p_fideId, p_fideRating):
+        errorsList = []
+        if p_fideId.isnumeric() and p_fideRating.isnumeric():
+            return True
+        if not p_fideId.isnumeric():
+            errorsList.append("FIDE ID should be a number")
+        if not p_fideRating.isnumeric():
+            errorsList.append("FIDE Rating should be a number")
+        return errorsList
+        
 
     
 

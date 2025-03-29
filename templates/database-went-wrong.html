@@ -1,0 +1,41 @@
+{% extends "base_error_h.html" %}
+
+
+
+
+
+{% block heading_1 %}
+Something Went Wrong
+{% endblock %}
+
+{% block error %}
+
+<br><br>
+
+
+
+<div class="flex p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400" role="alert">
+
+
+    {% include 'database.j2' %}
+    <div>
+	<span class="text-lg">DB API Error (just contact te guy who made this): </span>
+	<ul class="mt-2 list-disc list-inside">
+	    {% for e in errorsList %}
+            <li>{{ e }}</li>
+	    {% endfor %}
+	</ul>
+    </div>
+</div>
+
+
+
+
+
+
+
+{% endblock %}
+
+
+
+
