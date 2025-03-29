@@ -7,6 +7,7 @@ from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from sqlalchemy.exc import IntegrityError
+import os
 
 
 
@@ -36,7 +37,15 @@ import csv
 old_member = old_Member(r"./Members_Data.xlsx","./Used_MembersID.xlsx")
 old_event = old_Event(r"./Events_Data.xlsx","./Used_EventsID.xlsx")
 crud = Crud()
-  
+
+
+# ===== we assume only this will solve production problems. 
+with app.app_context():
+    if os.environ.get('YOURAPPLICATION_MODE') == "production":
+        db.drop_all()
+        db.create_all()
+
+    
 # A decorator used to tell the application 
 # which URL is associated function 
 @app.route('/form')       
