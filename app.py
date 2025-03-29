@@ -39,11 +39,7 @@ old_event = old_Event(r"./Events_Data.xlsx","./Used_EventsID.xlsx")
 crud = Crud()
 
 
-# ===== we assume only this will solve production problems. 
-with app.app_context():
-    if os.environ.get('YOURAPPLICATION_MODE') == "production":
-        db.drop_all()
-        db.create_all()
+
 
     
 # A decorator used to tell the application 
