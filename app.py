@@ -21,7 +21,7 @@ migrate = Migrate(app, db)
 from Models.declarative import EventListing # ===== remove this
 import sqlalchemy as sa
 app.app_context().push()
-from crud import old_Member, old_Event, Crud, Event, Member
+from crud import old_Member, old_Event, Crud, Event, Member, Fide
 
 
 from c_templater import C_templater
