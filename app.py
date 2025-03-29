@@ -36,6 +36,12 @@ import csv
 old_member = old_Member(r"./Members_Data.xlsx","./Used_MembersID.xlsx")
 old_event = old_Event(r"./Events_Data.xlsx","./Used_EventsID.xlsx")
 crud = Crud()
+
+# ===== we assume only this will solve production problems. 
+with app.app_context():
+    db.drop_all()
+    db.create_all()
+
   
 # A decorator used to tell the application 
 # which URL is associated function 
