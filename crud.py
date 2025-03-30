@@ -8,7 +8,7 @@ import pandas as pd
 
 import sqlalchemy as sa
 import sqlalchemy.orm as so
-from app import db
+from app import db, bcrypt
 # from sqlalchemy import Column, Table, ForeignKey, Integer, String
 # from flask_sqlalchemy import SQLAlchemy
 
@@ -62,6 +62,14 @@ class Member(db.Model):
     def __repr__(self):
         return '<mcfName {tn}> <events {m}>'.format(tn=self.mcfName, m=self.events)
 
+    def set_password(self, password):
+        hashedPassword = bcrypt.generate_password_hash(password).decode('utf-8')
+        return hashedPassword
+
+
+    def check_password(self, password):
+        # isPasswordVerified = bcrypt.check_password_hash(self.password, password)
+        app.logger.info(self.password)
 
 
 class Fide(db.Model):

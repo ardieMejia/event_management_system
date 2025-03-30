@@ -1,0 +1,16 @@
+{% include "base_error.html" %}
+<div class="md:flex md:flex-row gap-1 justify-left">
+
+    <div class="md:size-32 md:w-1/3"></div>
+    <div>
+	<br>
+	<h1 class="text-gray-600 text-3xl font-bold underline"> 
+	    {% block heading_1 %} 
+	    {% endblock %}
+	</h1>
+
+	{% block error %} 
+	{% endblock %}
+    </div>
+    <div class="md:size-32 md:w-1/3"></div>  
+</div>

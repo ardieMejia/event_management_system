@@ -7,6 +7,7 @@ from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from sqlalchemy.exc import IntegrityError
+from flask_bcrypt import Bcrypt
 import os
 
 
@@ -16,6 +17,7 @@ app = Flask(__name__)   # Flask constructor
 app.config.from_object(Config)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+bcrypt = Bcrypt(app)
 # app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 
@@ -75,7 +77,7 @@ def single_member_fide(mcfId):
     query = sa.select(Member).where(Member.mcfId == mcfId)
     m = db.session.scalar(query)
     return render_template("single-member-fide.html", m=m)
-    # return m
+# return m
 
 
 @app.route('/update-fide', methods = ['POST']) 
@@ -88,7 +90,7 @@ def update_fide():
     if f.isDataValid(p_fideId=f.fideId, p_fideRating=f.fideRating):
         errorsList = f.isDataValid(p_fideId=f.fideId, p_fideRating=f.fideRating)
         return C_templater.custom_render_template("Invalid Input Error", errorsList, True)
-        
+    
 
     db.session.add(f)
     try:
@@ -160,7 +162,7 @@ def update_member():
     except IntegrityError as i:
         db.session.rollback()
         return C_templater.custom_render_template("Data entry error", i._message)
-        
+    
     app.logger.info('========== event ==========')
     app.logger.info('========== event ==========')
 
@@ -178,7 +180,7 @@ def create_event():
     except IntegrityError:
         db.session.rollback()
         return C_templater.custom_render_template("Data entry error", "tournament name duplicate")
-        # this ones good ===== return c_templater("Data entry error", "tournament name duplicate", "error.html")
+    # this ones good ===== return c_templater("Data entry error", "tournament name duplicate", "error.html")
         
     app.logger.info('========== event ==========')
     # app.logger.info(request.form['EVENT ID'])
@@ -208,7 +210,7 @@ def create_member():
     except IntegrityError as i:
         db.session.rollback()
         return C_templater.custom_render_template("Data entry error", i._message)
-        # example of final form ===== return c_templater("Data entry error", "tournament name duplicate", "error.html")
+    # example of final form ===== return c_templater("Data entry error", "tournament name duplicate", "error.html")
         
     app.logger.info('========== event ==========')
     # app.logger.info(request.form['EVENT ID'])
@@ -224,7 +226,7 @@ def create_member():
 
 @app.route('/kill-event/<int:id>') 
 def kill_event(id):
-                
+    
     
     stmt = sa.delete(Event).where(Event.id == id)
     db.session.execute(stmt)
@@ -240,7 +242,7 @@ def kill_event(id):
 
 @app.route('/kill-member/<int:mcfId>') 
 def kill_member(mcfId):
-                
+    
     
     stmt = sa.delete(Member).where(Member.mcfId == mcfId)
     db.session.execute(stmt)
@@ -257,7 +259,7 @@ def kill_member(mcfId):
 
 @app.route('/events') 
 def find_events():
-        
+    
     # e = Event(tournamentName=request.form['tournamentName'], startDate=request.form['startDate'], endDate=request.form['endDate'], discipline=request.form['discipline'])
     # db.session.add(e)
     # db.session.commit()
@@ -383,12 +385,13 @@ def bulk_upload_events_csv():
             except IntegrityError as i:
                 db.session.rollback()
                 app.logger.info(i._message())
-                return C_templater.custom_render_template("Data entry error", i._message())        
+                return C_templater.custom_render_template("DB-API IntegrityError", [i._message()], True)        
 
 
-    return C_templater.custom_render_template("Successfull bulk upload", "event data")
-    # return redirect('/events')
+    return C_templater.custom_render_template("Successfull bulk upload", "event data", False)
+# return redirect('/events')
 
+    
 
 @app.route('/bulk_upload_members_csv')
 def bulk_upload_members_csv():
@@ -397,17 +400,23 @@ def bulk_upload_members_csv():
         dictreader = csv.DictReader(csvfile, delimiter=',')
         for row in dictreader:
             m = Member(mcfId=row['mcfId'], mcfName=row['mcfName'], gender=row['gender'], yearOfBirth=row['yearOfBirth'], state=row['state'], nationalRating=row['nationalRating'])
-            db.session.add(m)        
+            m.set_password(row['password'])
+
+            # query = sa.select(Fide).where(Fide.fideId == row['fideId'])
+            # f = db.session.scalar(query)
+            # m.fide = f                           
+            db.session.add(m)
+            
             try:
                 db.session.commit()
             except IntegrityError as i:
                 db.session.rollback()
                 app.logger.info(i._message())
-                return C_templater.custom_render_template("Data entry error", i._message())        
+                # return C_templater.custom_render_template("Data entry error", i._message(), False)
+                return C_templater.custom_render_template("DB-API IntegrityError", [i._message()], True)        
 
 
-    return C_templater.custom_render_template("Successfull bulk upload", "member data")
-    # return redirect('/events')
+    return C_templater.custom_render_template("Successfull bulk upload", "member data", False)
 
 
 
@@ -423,7 +432,7 @@ def bulk_upload_fide_csv():
             # f = db.session.scalar(query)
             # m.fide = f                           
             db.session.add(f)
-                
+            
             try:
                 db.session.commit()
             except IntegrityError as i:
