@@ -87,7 +87,7 @@ def update_fide():
     # m = db.session.scalar(query)
     f = Fide(fideId=request.form['fideId'], fideName=request.form["fideName"], fideRating=request.form['fideRating'], mcfId=request.args.get('mcfId'))
     app.logger.info(f.fideId)
-    if f.isDataValid(p_fideId=f.fideId, p_fideRating=f.fideRating):
+    if not f.isDataValid(p_fideId=f.fideId, p_fideRating=f.fideRating):
         errorsList = f.isDataValid(p_fideId=f.fideId, p_fideRating=f.fideRating)
         return C_templater.custom_render_template("Invalid Input Error", errorsList, True)
     
@@ -97,10 +97,10 @@ def update_fide():
         db.session.commit()
     except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
         db.session.rollback()
-        return C_templater.custom_render_template("Data entry error", i._message, False)
+        return C_templater.custom_render_template("DB-API IntegrityError", [i._message], True)
     except DataError as d:
         db.session.rollback()
-        return C_templater.custom_render_template("DB API DataError", "this is some basic DB error, nothing special", False)
+        return C_templater.custom_render_template("DB API DataError", [i._message], True)
     
     
     return "new FIDE saved"
@@ -369,6 +369,37 @@ def ajax_get_event():
 def main_page():
     return render_template("main-page.html")
 
+
+@app.route('/login', methods=['POST', 'GET'])
+def login():
+    if request.method == 'POST':
+
+        mcfId = request.form['mcfId']
+        password = request.form['password']
+
+        app.logger.info('========== ---------- ++++++++++')
+        app.logger.info('Received data:', mcfId , password)
+        app.logger.info('========== ---------- ++++++++++')
+
+        m = Member.query.filter_by(mcfId=mcfId).first()
+        if m is None:
+            return "member ID does NOT exist"
+        # isPasswordVerified = bcrypt.check_password_hash(bcrypt.generate_password_hash(password).decode('utf-8'), m.password)
+        m.check_password(password)
+        if True:    
+            return render_template("single-member.html", m=m)
+        else:
+            return "wrong password"
+        # access_token = create_access_token(identity=m.mcfId)
+
+        # session['token'] = 'TOKEN123'  # store token, use it as a dict
+
+        
+
+        # return jsonify(access_token=access_token)
+
+    else:
+        return render_template("login.html")
 
 
 

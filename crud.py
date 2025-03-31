@@ -8,7 +8,7 @@ import pandas as pd
 
 import sqlalchemy as sa
 import sqlalchemy.orm as so
-from app import db, bcrypt
+from app import db, bcrypt, app
 # from sqlalchemy import Column, Table, ForeignKey, Integer, String
 # from flask_sqlalchemy import SQLAlchemy
 
@@ -51,6 +51,7 @@ class Member(db.Model):
     __tablename__ = "member"
 
     mcfId = db.Column(db.Integer, primary_key=True)
+    password = db.Column(db.String(80))
     mcfName = db.Column(db.String(128), index=True)
     gender = db.Column(db.String(64), index=True)
     yearOfBirth = db.Column(db.String(64), index=True)
@@ -84,7 +85,15 @@ class Fide(db.Model):
         return '<fideName {fn}>'.format(fn=self.fideName)
 
 
-
+    def isDataValid(self, p_fideId, p_fideRating):
+        errorsList = []
+        if p_fideId.isnumeric() and p_fideRating.isnumeric():
+            return True
+        if not p_fideId.isnumeric():
+            errorsList.append("FIDE ID should be a number")
+        if not p_fideRating.isnumeric():
+            errorsList.append("FIDE Rating should be a number")
+        return errorsList
     
 # class Event(db.Model):
 #     id: so.Mapped[int] = so.mapped_column(primary_key=True)
