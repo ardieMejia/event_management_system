@@ -14,67 +14,79 @@ Events
 
 
 <table id="member_details" class="table-auto border border-yellow-400 border-2">
-      <thead>
-	  <tr class="bg-yellow-400">
-	  <th>
-	    <div class="m-3">Tourname Name</div>
-	  </th>
-	  <th>
-	    <div class="m-3">Start Date</div>
-	  </th>
-	  <th>
-	    <div class="m-3">End Date</div>
-	  </th>
-	  <th>
-	    <div class="m-3">Discipline</div>
-	  </th>
-	  <th>
-	      <div class="m-3"></div>
-	  </th>
-	  <th>
-	  </th>
-	  </tr>
-      </thead>
-      <tbody>
+    <caption class="caption-top text-red-600 italic p-2" >
+	{{ whatHappened }}
+    </caption>
+    <thead>
+	<tr class="bg-yellow-400">
+	    <th class="w-100">
+		<div class="m-3">Tourname Name</div>
+	    </th>
+	    <th>
+		<div class="m-3">Start Date</div>
+	    </th>
+	    <th>
+		<div class="m-3">End Date</div>
+	    </th>
+	    <th>
+		<div class="m-3">Discipline</div>
+	    </th>
+	    <th>
+		<div class="m-3"></div>
+	    </th>
+	    <th>
+	    </th>
+	</tr>
+    </thead>
+    <tbody>
 	{% for e in es %}
-	  <tr class="border border-yellow-400 border-2">
-	  
-	  
-	  <td >
-	    <div class="m-3">{{ e.tournamentName }}</div>
-	  </td>
-	  <td >
-	    <div class="m-3">{{ e.startDate }}</div>
-	  </td>
-	  <td >
-	    <div class="m-3">{{ e.endDate }}</div>
-	  </td>
-	  <td >
-	    <div class="m-3">{{ e.discipline }}</div>
-	  </td>
-	  <td>
-	      <div class="m-2">
-		  			    <button type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none">
+	<tr class="border border-yellow-400 border-2">
+	    
+	    
+	    <td >
+		<div class="m-3">{{ e.tournamentName }}</div>
+	    </td>
+	    <td >
+		<div class="m-3">{{ e.startDate }}</div>
+	    </td>
+	    <td >
+		<div class="m-3">{{ e.endDate }}</div>
+	    </td>
+	    <td >
+		<div class="m-3">{{ e.discipline }}</div>
+	    </td>
+	    <td>
+		<div class="m-2">
+		    <button type="submit" >
+			
+			<a href={{ url_for('kill_event', id=e.id )}}>{% include 'trash.j2' %}</a>			
+		    </button>
+		</div>
+	    </td>			  
 
-					    <a href={{ url_for('kill_event', id=e.id )}}>Remove Event</a>
-					    </button>
-	    </div>
-	  </td>
 	</tr>
 	{% endfor %}
 	<tr>
-	  <td colspan="4"></td>
-	  <td>
-	      <div class="m-2">
-		  			    <button type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none">
+	    <td colspan="3"></td>
+	    <td>
+		<div class="m-3">
+		    <button type="submit" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">
 
-					    <a href={{ url_for('event_create')}}>Add Event</a>      
-					    </button>
-	    </div>
-	  </td>
+			<a href={{ url_for('kill_events')}}>Remove All</a>      
+		    </button>
+		</div>			
+	    </td>
+	    <td>
+		<div class="m-2">
+		    <button type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none">
+
+			<a href={{ url_for('event_create')}}>Add Event</a>      
+		    </button>
+		</div>
+	    </td>
 	</tr>
-      </tbody>
-    </table>
+    </tbody>
+</table>
 
 
 

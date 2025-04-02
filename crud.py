@@ -67,11 +67,22 @@ class Member(db.Model):
         hashedPassword = bcrypt.generate_password_hash(password).decode('utf-8')
         return hashedPassword
 
-
     def check_password(self, password):
         # isPasswordVerified = bcrypt.check_password_hash(self.password, password)
         app.logger.info(self.password)
 
+    @classmethod
+    def doesUserExist(cls, id):
+        # isPasswordVerified = bcrypt.check_password_hash(self.password, password)
+        ret = cls.query.filter_by(mcfId=id).first()
+        app.logger.info("++++++++++")
+        app.logger.info(ret)
+        if ret:
+            return True
+        return False
+
+
+        
 
 class Fide(db.Model):
     __tablename__ = "fide"
@@ -94,6 +105,16 @@ class Fide(db.Model):
         if not p_fideRating.isnumeric():
             errorsList.append("FIDE Rating should be a number")
         return errorsList
+
+    @classmethod
+    def doesFideExist(cls, id):
+        # isPasswordVerified = bcrypt.check_password_hash(self.password, password)
+        ret = cls.query.filter_by(fideId=id).first()
+        app.logger.info("++++++++++")
+        app.logger.info(ret)
+        if ret:
+            return True
+        return False
     
 # class Event(db.Model):
 #     id: so.Mapped[int] = so.mapped_column(primary_key=True)

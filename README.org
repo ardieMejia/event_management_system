@@ -52,3 +52,8 @@ pip install Flask-Migrate
 flask_jwt_extended
 flask_bcrypt
 psycopg2_binary
+* Explain:
+** Show the mapping, and why this makes it easy for first time bulk upload. But its tied to filename
+** show LOGIN system
+** Show the FIDE check feature, it checks if number fields should be numbers
+** show all duplicates error, of each file

@@ -15,32 +15,75 @@ MCF Event Registration System
 
 <br>
 <table id="event_details" class="table-auto border border-yellow-400">
+    <caption class="caption-top {{ 'text-purple-600' if whyHappened else 'text-green-600' }} italic p-2">
+	{{ whatHappened }}
+    </caption>
     <tbody>
 	<tr class="borders border-yellow-400  border-2">
-	    <th class="bg-yellow-400">Upload Events CSV (opinionated)</th>
+	    <th class="bg-yellow-400 w-80 p-2">Process sample Events CSV</th>
 	    <td>
 		<div class="m-3">
-		    <a href="{{ url_for('bulk_upload_events_csv') }}">Load a file</a>      
+		    <a href="{{ url_for('bulk_upload_events_csv') }}">Process a file</a>      
 		</div>
 	    </td>
 	</tr>
 	<tr class="borders border-yellow-400  border-2">
-	    <th class="bg-yellow-400">Upload Members CSV (opinionated)</th>
+	    <th class="bg-yellow-400">Process sample Members CSV</th>
 	    <td>
 		<div class="m-3">
-		    <a href="{{ url_for('bulk_upload_members_csv') }}">Load a file</a>      
+		    <a href="{{ url_for('bulk_upload_members_csv') }}">Process a file</a>      
 		</div>
 	    </td>
 	</tr>
 	
+
 	<tr class="borders border-yellow-400  border-2">
-	    <th class="bg-yellow-400">Upload Fide CSV (opinionated)</th>
+	    <th class="bg-yellow-400">Process sample FIDE CSV</th>
 	    <td>
 		<div class="m-3">
-		    <a href="{{ url_for('bulk_upload_fide_csv') }}">Load a file</a>      
+		    <a href="{{ url_for('bulk_upload_fide_csv') }}">Process a file</a>      
 		</div>
 	    </td>
 	</tr>
+	<tr class="borders border-yellow-400  border-2">
+	    <th class="bg-yellow-400 italic text-orange-600">Upload TRUE files</th>
+	    <td>
+		<div class="m-3">
+		    <form action="{{ url_for('bulk_upload_all_files')  }}" method="post" enctype="multipart/form-data">
+			<input data-tooltip-target="tooltip-files-allowed" type="file" name="file1">
+			<input data-tooltip-target="tooltip-files-allowed" type="file" name="file2">
+
+			<div id="tooltip-files-allowed" role="tooltip" placement="bottom" class="absolute z-10  inline-block border border-1 w-60 px-3 py-2 text-sm font-medium text-black transition-opacity opacity-0  duration-300 bg-white rounded-lg shadow-xl tooltip">
+			    Upload file must be named MCF.csv and FRL.csv. Mapping of column names are fixed. If you have custom headers, inform the Web Admin
+
+			</div>
+			<div class="m-3">
+			    
+			    <button type="submit" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Upload</button>
+			</div>
+		    </form>
+		    
+		</div>
+	    </td>
+	</tr>
+
+	<tr class="borders border-yellow-400  border-2">
+	    <th class="bg-yellow-400 italic text-orange-600">Process TRUE files</th>
+	    <td>
+		<div class="m-3">
+
+
+
+		    <p href="{{ url_for('find_members') }}" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 " >Process both files</p>      
+		    
+			     
+		    
+		</div>
+	    </td>
+	</tr>
+
+	
+
 	
 	<tr class="borders border-yellow-400  border-2">
 
@@ -87,6 +130,39 @@ MCF Event Registration System
 		</div>
 	    </td>
 	</tr>
+
+	<tr class="borders border-yellow-400  border-2">
+	    <td colspan="2">
+		<div class="m-3">
+
+		    {% for w in whyHappened %}
+		    
+		    {% if w.fideName %}
+		    <label for="fideName">FIDE ID</label>
+		    <input type="text" id="fideName" name="fideName" value="{{ w.fideId }}" readonly><br>
+		    <label for="fideId">MCF ID</label>
+		    <input type="text" id="fideId" name="fideId" value="{{ w.mcfId }}" readonly><br>
+		    <label for="fideName">FIDE Name</label>
+		    <input type="text" id="fideName" name="fideName" value="{{ w.fideName }}" readonly><br>
+
+
+		    {% else %}
+		    
+		    <label for="fideId">MCF ID</label>
+		    <input type="text" id="fideId" name="fideId" value="{{ w.mcfId }}" readonly><br>
+		    <label for="fideName">MCF Name</label>
+		    <input type="text" id="fideName" name="fideName" value="{{ w.mcfName }}" readonly><br>
+
+
+		    
+		    {% endif %}
+		    {% endfor %}
+
+		</div>
+	    </td>
+	</tr>
+
+	
     </tbody>
 </table>
 
