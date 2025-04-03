@@ -8,6 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from sqlalchemy.exc import IntegrityError
 from flask_bcrypt import Bcrypt
+from flask_login import LoginManager, current_user, login_user, logout_user
 from werkzeug.utils import secure_filename
 import os
 
@@ -21,6 +22,7 @@ app.config.from_object(Config)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 bcrypt = Bcrypt(app)
+login = LoginManager(app)
 # app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 
@@ -420,35 +422,43 @@ def main_page():
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     if request.method == 'POST':
+        if current_user.is_authenticated:
+            return redirect(url_for('main_page'))
 
         mcfId = request.form['mcfId']
         password = request.form['password']
 
-        app.logger.info('========== ---------- ++++++++++')
-        app.logger.info('Received data:', mcfId , password)
-        app.logger.info('========== ---------- ++++++++++')
+        # app.logger.info('========== ---------- ++++++++++')
+        # app.logger.info('Received data:', mcfId , password)
+        # app.logger.info('========== ---------- ++++++++++')
 
         m = Member.query.filter_by(mcfId=mcfId).first()
         if m is None:
             # return "member ID does NOT exist"
             return C_templater.custom_render_template("Login Problem", ["Member does not exist"], True)        
         # isPasswordVerified = bcrypt.check_password_hash(bcrypt.generate_password_hash(password).decode('utf-8'), m.password)
-        m.check_password(password)
-        if True:    
-            return render_template("single-member.html", m=m)
-        else:
+        
+        if not m.check_password(password):    
             return C_templater.custom_render_template("Login Problem", ["Wrong password"], True)
+        else:
+            login_user(m)
+            return render_template("single-member.html", m=m)
+
+        
         # access_token = create_access_token(identity=m.mcfId)
 
         # session['token'] = 'TOKEN123'  # store token, use it as a dict
-
-        
 
         # return jsonify(access_token=access_token)
 
     else:
         return render_template("login.html")
 
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('main_page'))
 
 
 @app.route('/bulk-upload-events-csv')

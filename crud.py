@@ -8,7 +8,8 @@ import pandas as pd
 
 import sqlalchemy as sa
 import sqlalchemy.orm as so
-from app import db, bcrypt, app
+from app import db, bcrypt, app, login
+from flask_login import UserMixin
 # from sqlalchemy import Column, Table, ForeignKey, Integer, String
 # from flask_sqlalchemy import SQLAlchemy
 
@@ -26,6 +27,11 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship# , declarative_ba
 # class Base(DeclarativeBase):
 #     pass
 
+
+# Flask_Login is not "DB aware", so it needs the DBs/app help in this
+@login.user_loader
+def load_user(id):
+    return db.session.get(Member, int(id))
 
 # note for a Core table, we use the sqlalchemy.Column construct,
 # not sqlalchemy.orm.mapped_column
@@ -47,7 +53,7 @@ class Event(db.Model):
     def __repr__(self):
         return '<tournament name {tn}> <members {m}>'.format(tn=self.tournamentName, m=self.members)
 
-class Member(db.Model):
+class Member(UserMixin, db.Model):
     __tablename__ = "member"
 
     mcfId = db.Column(db.Integer, primary_key=True)
@@ -64,12 +70,16 @@ class Member(db.Model):
         return '<mcfName {tn}> <events {m}>'.format(tn=self.mcfName, m=self.events)
 
     def set_password(self, password):
-        hashedPassword = bcrypt.generate_password_hash(password).decode('utf-8')
-        return hashedPassword
+        self.password = bcrypt.generate_password_hash(password).decode('utf-8')
+        
+        # return hashedPassword
 
     def check_password(self, password):
-        # isPasswordVerified = bcrypt.check_password_hash(self.password, password)
-        app.logger.info(self.password)
+        # password = password.encode('utf-8')
+
+        isPasswordVerified = bcrypt.check_password_hash(self.password, password)
+        return isPasswordVerified
+        # app.logger.info(self.password)
 
     @classmethod
     def doesUserExist(cls, id):
@@ -80,6 +90,9 @@ class Member(db.Model):
         if ret:
             return True
         return False
+
+    def get_id(self):
+        return self.mcfId
 
 
         
