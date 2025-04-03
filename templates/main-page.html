@@ -48,22 +48,28 @@ MCF Event Registration System
 	<tr class="borders border-yellow-400  border-2">
 	    <th class="bg-yellow-400 italic text-orange-600">Upload TRUE files</th>
 	    <td>
-		<div class="m-3">
-		    <form action="{{ url_for('bulk_upload_all_files')  }}" method="post" enctype="multipart/form-data">
-			<input data-tooltip-target="tooltip-files-allowed" type="file" name="file1">
-			<input data-tooltip-target="tooltip-files-allowed" type="file" name="file2">
+		
+		<form action="{{ url_for('bulk_upload_all_files')  }}" method="post" enctype="multipart/form-data" data-tooltip-target="tooltip-files-allowed">
+		    <div class="m-2 mb-5">
+			<label class="block m-2 text-sm font-medium text-gray-900 dark:text-white" for="file1">Upload file</label>
+			<input  type="file" name="file1" class="border border-gray-500">
+		    </div>
+		    <div  class="m-2 mb-5">
+			<label class="block m-2 text-sm font-medium text-gray-900 dark:text-white" for="file2">Upload file</label>
+			<input  type="file" name="file2" class="border border-gray-500">
+		    </div>
 
-			<div id="tooltip-files-allowed" role="tooltip" placement="bottom" class="absolute z-10  inline-block border border-1 w-60 px-3 py-2 text-sm font-medium text-black transition-opacity opacity-0  duration-300 bg-white rounded-lg shadow-xl tooltip">
-			    Upload file must be named MCF.csv and FRL.csv. Mapping of column names are fixed. If you have custom headers, inform the Web Admin
+		    <div id="tooltip-files-allowed" role="tooltip" placement="bottom" class="absolute z-10  inline-block border border-1 w-60 px-3 py-2 text-m font-medium text-black transition-opacity opacity-0  duration-300 bg-white rounded-lg shadow-xl tooltip">
+			Upload file must be named MCF.csv and FRL.csv. Mapping of column names are fixed. If you have custom headers, inform the Web Admin
 
-			</div>
-			<div class="m-3">
-			    
-			    <button type="submit" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Upload</button>
-			</div>
-		    </form>
-		    
-		</div>
+		    </div>
+		    <div class="m-3">
+			
+			<button type="submit" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Upload</button>
+		    </div>
+		</form>
+		
+		
 	    </td>
 	</tr>
 
@@ -74,9 +80,9 @@ MCF Event Registration System
 
 
 
-		    <p href="{{ url_for('find_members') }}" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 " >Process both files</p>      
+		    <a href="{{ url_for('bulk_process_all_members') }}" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 " >Process both files</a>      
 		    
-			     
+		    
 		    
 		</div>
 	    </td>

@@ -580,19 +580,21 @@ def bulk_upload_fide_csv():
 
 
 def processMcfList():
-    filename="MCF.csv"
+    filename="mcf.csv"
     duplicatesList= []
 
     mapFrom = C_mapper.excelToDatabase[filename]
-    with open(r'./input/'+filename, newline='') as csvfile:
+    with open(r'./storage/'+filename, newline='') as csvfile:
         dictreader = csv.DictReader(csvfile, delimiter=',')
         for row in dictreader:
 
-            m = Member(mcfId=row[mapFrom['mcfId']], mcfName=row[mapFrom['mcfName']], gender=row[mapFrom['gender']], yearOfBirth=row[mapFrom['yearOfBirth']], state=row[mapFrom['state']], nationalRating=row[mapFrom['nationalRating']], fideId=row[mapFrom['fideId']])
+            m = Member(mcfId=row[mapFrom['mcfId']], mcfName=row[mapFrom['mcfName']], gender=row[mapFrom['gender']], yearOfBirth=row[mapFrom['yearOfBirth']], state=row[mapFrom['state']], nationalRating=row[mapFrom['nationalRating']])
+            f = Fide(fideId=row[mapFrom['fideId']])
             m.set_password(row[mapFrom['password']])
             
             if not m.doesUserExist(m.mcfId):
                 db.session.add(m)
+                db.session.add(f)
             else:
                 duplicatesList.append(m)
 
@@ -611,25 +613,16 @@ def processMcfList():
 
 
 
-
-
-
-    
 def processFideList():
-    filename="FIDE.csv"
+    filename="frl.csv"
     duplicatesList= []
 
     mapFrom = C_mapper.excelToDatabase[filename]
-    with open(r'./input/'+filename, newline='') as csvfile:
+    with open(r'./storage/'+filename, newline='') as csvfile:
         dictreader = csv.DictReader(csvfile, delimiter=',')
         for row in dictreader:
 
-
-                            
-
-            
-
-            stmt = sa.select(Member).where(fideId == row[mapFrom['fideId']]).first()
+            stmt = sa.select(Fide).where(fideId == row[mapFrom['fideId']]).first()
             m = db.session.execute(stmt)
             if m:                          
                 m.fideId=row[mapFrom['fideId']]
@@ -637,9 +630,6 @@ def processFideList():
                 m.fideRating=row[mapFrom['fideRating']]                           
             else:
                 duplicatesList.append(m)
-                
-
-
 
         # ===== try uploading bulk    
         try:
@@ -656,60 +646,64 @@ def processFideList():
 
 
 
-
-
-    
-
 @app.route('/bulk-process-all-members')
 def bulk_process_all_members():
-
-    
     
     whyHappened = processMcfList()
-    
-
     whyHappened = processFideList()
-
 
     if not whyHappened:            
         whatHappened = "Upload successful with no duplicates"
     else:
         whatHappened = "Upload successful with some duplicates"
 
-
-
-
     return render_template("main-page.html", whatHappened=whatHappened, whyHappened=duplicatesList)
     
 
 
 
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
+def allowed_bulk_upload(filename):
+    return "mcf.csv" in filename.lower() or "frl.csv" in filename.lower()
+    # return '.' in filename and \
+    #        filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 @app.route('/bulk-upload-all-files', methods=['POST'])
 def bulk_upload_all_files():
 
     
-    app.logger.info("==========")
-    app.logger.info(request.files)
+    # app.logger.info("==========")
+    # app.logger.info(request.files)
     
     # if 'file' not in request.files:
         # return redirect(request.url)
+        
     file1 = request.files['file1']
     file2 = request.files['file2']
 
     if file1.filename == '' or file2.filename == '':
-        return redirect(request.url)
-    if file1 and file2: # and allowed_file(file.filename):
+        return render_template("main-page.html", whatHappened="File must be named mcf.csv and frl.csv", whyHappened=[])
+
+
+    app.logger.info("==========")
+    app.logger.info(allowed_bulk_upload(file1.filename))
+    app.logger.info(allowed_bulk_upload(file2.filename))
+    if file1 and file2 \
+       and allowed_bulk_upload(file1.filename) \
+       and allowed_bulk_upload(file2.filename):
         filename1 = secure_filename(file1.filename)
-        file1.save(os.path.join('./storage/', filename1))
+        file1.save(os.path.join('./storage/', filename1.lower()))
         filename2 = secure_filename(file2.filename)
-        file2.save(os.path.join('./storage/', filename2))
+        file2.save(os.path.join('./storage/', filename2.lower()))
         # return 'File successfully uploaded'
         return render_template("main-page.html", whatHappened="Both files successfully uploaded")
     else:
-        return 'Invalid file type'
+        return C_templater.custom_render_template("Invalid Upload Name", [format(app.config['ALLOWED_EXTENSIONS']), "files must be named either mcf.csv or frl.csv"], True)
+        # return 'Invalid file type'
     # return "wait"
 
 

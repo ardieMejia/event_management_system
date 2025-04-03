@@ -7,7 +7,8 @@ c_templatesDict = {
     "DB-API IntegrityError": "database-went-wrong.html",
     "Invalid Input Error": "something-went-wrong.html",
     "DB API DataError": "database-went-wrong.html",
-    "Login Problem": "login-went-wrong.html"
+    "Login Problem": "login-went-wrong.html",
+    "Invalid Upload Name": "upload-went-wrong.html"
 }
 
 class C_templater:

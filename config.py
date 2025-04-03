@@ -8,6 +8,8 @@ class Config:
     # print(os.environ['YOURAPPLICATION_MODE'], file=sys.stderr)
     
     SECRET_KEY = os.environ.get('SECRET_KEY')
+    UPLOAD_FOLDER = './storage'
+    ALLOWED_EXTENSIONS = {'txt', 'png', 'pdf', 'jpg', 'jpeg'}
     
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'sqlite:///' + os.path.join(basedir, 'app.db')
