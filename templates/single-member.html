@@ -18,6 +18,9 @@ Registration
 <!-- ==================== -->
 
 <table class="w-full">
+    <caption class="caption-top {{ 'text-purple-600' if whyHappened else 'text-green-600' }} italic p-2">
+	{{ whatHappened }}
+    </caption>
     <tbody>
 	<tr >
 	    <th >
@@ -129,14 +132,14 @@ Registration
 	    <td  colspan="2">
 		<div class="p-5">
 
-		    {% if m.fide %}
+		    {% if m.fideId %}
 
 		    <label for="fideId">FIDE ID</label>
-		    <input type="text" id="fideId" name="fideId" value="{{ m.fide.fideId }}" readonly><br>
+		    <input type="text" id="fideId" name="fideId" value="{{ m.fideId }}" readonly><br>
 		    <label for="fideName">FIDE Name</label>
-		    <input type="text" id="fideName" name="fideName" value="{{ m.fide.fideName }}" readonly><br>
+		    <input type="text" id="fideName" name="fideName" value="{{ m.fideName }}" readonly><br>
 		    <label for="fideRating">FIDE Rating</label>
-		    <input type="text" id="fideRating" name="fideRating" value="{{ m.fide.fideRating }}" readonly><br>
+		    <input type="text" id="fideRating" name="fideRating" value="{{ m.fideRating }}" readonly><br>
 		    {% else %}
 		    <a href="{{ url_for('single_member_fide', mcfId=m.mcfId) }}" class="block p-6 bg-white border border-gray-200 rounded-lg shadow-md hover:bg-gray-200">
 			{% include 'fideSvg.j2' %}

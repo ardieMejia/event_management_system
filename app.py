@@ -29,7 +29,7 @@ login = LoginManager(app)
 from Models.declarative import EventListing # ===== remove this
 import sqlalchemy as sa
 app.app_context().push()
-from crud import old_Member, old_Event, Crud, Event, Member, Fide
+from crud import old_Member, old_Event, Crud, Event, Member
 
 
 from c_templater import C_templater
@@ -91,14 +91,18 @@ def update_fide():
     mcfId = request.args.get("mcfId")
     # query = sa.select(Member).where(Member.mcfId == mcfId)
     # m = db.session.scalar(query)
-    f = Fide(fideId=request.form['fideId'], fideName=request.form["fideName"], fideRating=request.form['fideRating'], mcfId=request.args.get('mcfId'))
-    app.logger.info(f.fideId)
-    if not f.isDataValid(p_fideId=f.fideId, p_fideRating=f.fideRating):
-        errorsList = f.isDataValid(p_fideId=f.fideId, p_fideRating=f.fideRating)
+    m = db.session(Member).where(Member.mcfId == mcfId )
+    m.fideId = request.form['fideId']
+    m.fideName = request.form['fideName']
+    m.fideRating = request.form['fideRating']
+    app.logger.info(m.fideId)
+    # TODO: do something about this one
+    if not m.isDataValid(p_fideId=m.fideId, p_fideRating=m.fideRating):
+        errorsList = m.isDataValid(p_fideId=m.fideId, p_fideRating=m.fideRating)
         return C_templater.custom_render_template(errorTopic="Invalid Input Error", errorsList=errorsList, isTemplate=True)
     
 
-    db.session.add(f)
+    db.session.add(m)
     try:
         db.session.commit()
     except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
@@ -110,9 +114,8 @@ def update_fide():
 
 
     
-    
     # return "new FIDE saved"
-    return render_template("single_member.html", es=es, whatHappened="new FIDE")
+    return render_template("single-member.html", m=m, whatHappened="new FIDE saved")
 
 @app.route('/event-create')
 def event_create():
@@ -543,24 +546,31 @@ def bulk_upload_fide_csv():
         for row in dictreader:
 
 
-            
 
-            try:
-                f = Fide(fideId=row[mapFrom['fideId']], fideName=row[mapFrom['fideName']], fideRating=row[mapFrom['fideRating']], mcfId=row[mapFrom['mcfId']])
+
+            statement = db.select(Member).where(Member.mcfId == row[mapFrom['mcfId']])
+            m = db.session.scalars(statement).first()
             
-                if not f.doesFideExist(f.fideId):
-                    db.session.add(f)
-                else:
-                    duplicatesList.append(f)
-            except IntegrityError as i:
-                return C_templater.custom_render_template("DB-API IntegrityError", [i._message()], True)        
+            # (Member).where(mcfid == row['mcfId'])
+            m.fideId = row[mapFrom['fideId']]
+            m.fideName = row[mapFrom['fideName']]
+            m.fideRating = row[mapFrom['fideRating']]
                 
+            # if m.doesUserExist(m.mcfId):
+            #     duplicatesList.append(m)
+            #     continue
+            # db.session.add(m)
+        # ===== try uploading bulk    
+        try:
+            db.session.commit()
+        except IntegrityError as i:
+            return C_templater.custom_render_template("DB-API IntegrityError", [i._message()], True)        
+        
             # query = sa.select(Member).where(Member.mcfId == row[''])
             # f = db.session.scalar(query)
             # m.fide = f                           
 
 
-        # ===== try uploading bulk    
         try:
             db.session.commit()
         except IntegrityError as i:
@@ -569,79 +579,104 @@ def bulk_upload_fide_csv():
                 # return C_templater.custom_render_template("Data entry error", i._message(), False)
             return C_templater.custom_render_template("DB-API IntegrityError", [i._message()], True)        
 
-    if not duplicatesList:            
-        whatHappened = "Upload successful with no duplicates"
-    else:
-        whatHappened = "Upload successful with some duplicates"
+    # if not duplicatesList:            
+    #     whatHappened = "Upload successful with no duplicates"
+    # else:
+    #     whatHappened = "Upload successful with some duplicates"
 
-    return render_template("main-page.html", whatHappened=whatHappened, whyHappened=duplicatesList)
+    return render_template("main-page.html", whatHappened="", whyHappened=[])
 
 
 
 
 def processMcfList():
     filename="mcf.csv"
-    duplicatesList= []
+
 
     mapFrom = C_mapper.excelToDatabase[filename]
     with open(r'./storage/'+filename, newline='') as csvfile:
         dictreader = csv.DictReader(csvfile, delimiter=',')
         for row in dictreader:
 
-            m = Member(mcfId=row[mapFrom['mcfId']], mcfName=row[mapFrom['mcfName']], gender=row[mapFrom['gender']], yearOfBirth=row[mapFrom['yearOfBirth']], state=row[mapFrom['state']], nationalRating=row[mapFrom['nationalRating']])
-            f = Fide(fideId=row[mapFrom['fideId']])
+            m = Member(mcfId=row[mapFrom['mcfId']],
+                       mcfName=row[mapFrom['mcfName']],
+                       gender=row[mapFrom['gender']],
+                       yearOfBirth=row[mapFrom['yearOfBirth']],
+                       state=row[mapFrom['state']],
+                       nationalRating=row[mapFrom['nationalRating']],
+                       fideId=Member.empty_string_to_zero(num = row[mapFrom['fideId']])
+                       )
             m.set_password(row[mapFrom['password']])
             
-            if not m.doesUserExist(m.mcfId):
-                db.session.add(m)
-                db.session.add(f)
-            else:
-                duplicatesList.append(m)
+            # if not m.doesUserExist(m.mcfId):
+            #     db.session.add(m)
+            #     db.session.add(f)
+            # else:
+            #     duplicatesList.append(m)
 
 
-        # ===== try uploading bulk    
-        try:
-            db.session.commit()
+            # ===== try uploading bulk
 
-        except IntegrityError as i:
-            db.session.rollback()
-            app.logger.info(i._message())
-                # return C_templater.custom_render_template("Data entry error", i._message(), False)
-            return C_templater.custom_render_template("DB-API IntegrityError", [i._message()], True)
+            db.session.add(m)
+    try:
+        db.session.commit()
 
-        return duplicatesList
+    except IntegrityError as i:
+        db.session.rollback()
+        app.logger.info(i._message())
+        # return C_templater.custom_render_template("Data entry error", i._message(), False)
+        return C_templater.custom_render_template("DB-API IntegrityError", [i._message()], True)
+
+
 
 
 
 def processFideList():
-    filename="frl.csv"
-    duplicatesList= []
+    filename = "frl.csv"
+    whyHappened = []
 
     mapFrom = C_mapper.excelToDatabase[filename]
     with open(r'./storage/'+filename, newline='') as csvfile:
         dictreader = csv.DictReader(csvfile, delimiter=',')
         for row in dictreader:
 
-            stmt = sa.select(Fide).where(fideId == row[mapFrom['fideId']]).first()
-            m = db.session.execute(stmt)
+            # stmt = sa.select(Member).where(Member.fideId == row[mapFrom['fideId']]).first()
+            # m = db.session.execute(stmt)
+            statement = db.select(Member).where(Member.fideId == row[mapFrom['fideId']])
+            m = db.session.scalars(statement).first()
             if m:                          
                 m.fideId=row[mapFrom['fideId']]
                 m.fideName=row[mapFrom['fideName']]                       
                 m.fideRating=row[mapFrom['fideRating']]                           
             else:
-                duplicatesList.append(m)
+                whyHappened.append({
+                    "fideId": row[mapFrom['fideId']],
+                    "fideName": row[mapFrom['fideName']],
+                    "fideRating": row[mapFrom['fideRating']]
+                                    })
 
         # ===== try uploading bulk    
-        try:
-            db.session.commit()
+    try:
+        db.session.commit()
 
-        except IntegrityError as i:
-            db.session.rollback()
-            app.logger.info(i._message())
-                # return C_templater.custom_render_template("Data entry error", i._message(), False)
-            return C_templater.custom_render_template("DB-API IntegrityError", [i._message()], True)
+    except IntegrityError as i:
+        db.session.rollback()
+        app.logger.info(i._message())
+        # return C_templater.custom_render_template("Data entry error", i._message(), False)
+        return C_templater.custom_render_template("DB-API IntegrityError", [i._message()], True)
 
-        return duplicatesList
+    if not whyHappened:            
+        whatHappened = "Upload successful with no inconsistencies"
+    else:
+        whatHappened = "Upload successful BUT with the FIDE ID listed with no matching MCF ID"
+
+        
+    app.logger.info("\\\\\\\\\\\\\\\\\\\\")
+    app.logger.info(whyHappened)
+    app.logger.info("\\\\\\\\\\\\\\\\\\\\")
+
+    return whatHappened, whyHappened
+
 
 
 
@@ -649,15 +684,12 @@ def processFideList():
 @app.route('/bulk-process-all-members')
 def bulk_process_all_members():
     
-    whyHappened = processMcfList()
-    whyHappened = processFideList()
+    processMcfList()
+    whatHappened, whyHappened = processFideList()
 
-    if not whyHappened:            
-        whatHappened = "Upload successful with no duplicates"
-    else:
-        whatHappened = "Upload successful with some duplicates"
 
-    return render_template("main-page.html", whatHappened=whatHappened, whyHappened=duplicatesList)
+
+    return render_template("main-page.html", whatHappened=whatHappened, whyHappened=whyHappened)
     
 
 

@@ -64,7 +64,11 @@ class Member(UserMixin, db.Model):
     state = db.Column(db.String(64), index=True)
     nationalRating = db.Column(db.String(64), index=True)
     events = db.relationship('Event', secondary=event_member, back_populates='members')
-    fide = db.relationship("Fide", backref="member", uselist=False, cascade="save-update, merge, delete", passive_deletes=True)
+    fideId = db.Column(db.Integer)
+    fideName = db.Column(db.String(80))
+    fideRating = db.Column(db.Integer(), index=True)
+
+
     
     def __repr__(self):
         return '<mcfName {tn}> <events {m}>'.format(tn=self.mcfName, m=self.events)
@@ -81,6 +85,16 @@ class Member(UserMixin, db.Model):
         return isPasswordVerified
         # app.logger.info(self.password)
 
+
+    def empty_string_to_zero(num):
+        # for those confused
+        # the basic shape
+        # <statement-to-try> if <return-if-true> else <return-if-else>
+        return int(num) if num and num.isdigit() else 0
+        
+
+
+    
     @classmethod
     def doesUserExist(cls, id):
         # isPasswordVerified = bcrypt.check_password_hash(self.password, password)
@@ -94,21 +108,6 @@ class Member(UserMixin, db.Model):
     def get_id(self):
         return self.mcfId
 
-
-        
-
-class Fide(db.Model):
-    __tablename__ = "fide"
-    
-    fideId = db.Column(db.Integer, primary_key=True)
-    fideName = db.Column(db.String(80))
-    fideRating = db.Column(db.Integer(), index=True)
-    mcfId = db.Column(db.Integer, db.ForeignKey('member.mcfId', ondelete="CASCADE"))
-
-    def __repr__(self):
-        return '<fideName {fn}>'.format(fn=self.fideName)
-
-
     def isDataValid(self, p_fideId, p_fideRating):
         errorsList = []
         if p_fideId.isnumeric() and p_fideRating.isnumeric():
@@ -119,15 +118,26 @@ class Fide(db.Model):
             errorsList.append("FIDE Rating should be a number")
         return errorsList
 
-    @classmethod
-    def doesFideExist(cls, id):
-        # isPasswordVerified = bcrypt.check_password_hash(self.password, password)
-        ret = cls.query.filter_by(fideId=id).first()
-        app.logger.info("++++++++++")
-        app.logger.info(ret)
-        if ret:
-            return True
-        return False
+    # @classmethod
+    # def doesFideExist(cls, id):
+    #     # isPasswordVerified = bcrypt.check_password_hash(self.password, password)
+    #     ret = cls.query.filter_by(fideId=id).first()
+    #     app.logger.info("++++++++++")
+    #     app.logger.info(ret)
+    #     if ret:
+    #         return True
+    #     return False
+
+
+        
+
+
+    
+
+
+
+
+
     
 # class Event(db.Model):
 #     id: so.Mapped[int] = so.mapped_column(primary_key=True)
