@@ -43,6 +43,7 @@ event_member = db.Table(
 
 class Event(db.Model):
     __tablename__ = "event"
+    __table_args__ = {'extend_existing': True}
 
     id = db.Column(db.Integer, primary_key=True)
     tournamentName = db.Column(db.String(128), index=True, unique=True)
@@ -55,6 +56,7 @@ class Event(db.Model):
 
 class Member(UserMixin, db.Model):
     __tablename__ = "member"
+    __table_args__ = {'extend_existing': True}
 
     mcfId = db.Column(db.Integer, primary_key=True)
     password = db.Column(db.String(80))
