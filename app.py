@@ -31,7 +31,6 @@ login = LoginManager(app)
 from Models.declarative import EventListing # ===== remove this
 import sqlalchemy as sa
 app.app_context().push()
-from crud import old_Member, old_Event, Crud, Event, Member
 from sqlalchemy.engine import reflection
 from sqlalchemy.schema import (
         MetaData,
@@ -40,23 +39,6 @@ from sqlalchemy.schema import (
         ForeignKeyConstraint,
         DropConstraint,
         )
-
-from c_templater import C_templater
-
-# ========== CSV
-import csv
-
-
-# ========== CSV
-
-
-old_member = old_Member(r"./Members_Data.xlsx","./Used_MembersID.xlsx")
-old_event = old_Event(r"./Events_Data.xlsx","./Used_EventsID.xlsx")
-crud = Crud()
-from c_mapper import C_mapper
-
-
-
 def db_DropEverything(db):
     # From http://www.sqlalchemy.org/trac/wiki/UsageRecipes/DropEverything
 
@@ -104,6 +86,24 @@ with app.app_context():
     db_DropEverything(db)
     db.create_all()
     # =======
+from crud import old_Member, old_Event, Crud, Event, Member
+
+from c_templater import C_templater
+
+# ========== CSV
+import csv
+
+
+# ========== CSV
+
+
+old_member = old_Member(r"./Members_Data.xlsx","./Used_MembersID.xlsx")
+old_event = old_Event(r"./Events_Data.xlsx","./Used_EventsID.xlsx")
+crud = Crud()
+from c_mapper import C_mapper
+
+
+
 start=0
 end=0
 
