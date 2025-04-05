@@ -11,6 +11,8 @@ from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, current_user, login_user, logout_user
 from werkzeug.utils import secure_filename
 import os
+import time
+import pandas as pd
 
 import json
 
@@ -46,7 +48,8 @@ old_event = old_Event(r"./Events_Data.xlsx","./Used_EventsID.xlsx")
 crud = Crud()
 from c_mapper import C_mapper
 
-
+start=0
+end=0
 
 
     
@@ -594,30 +597,46 @@ def processMcfList():
 
 
     mapFrom = C_mapper.excelToDatabase[filename]
-    with open(r'./storage/'+filename, newline='') as csvfile:
-        dictreader = csv.DictReader(csvfile, delimiter=',')
-        for row in dictreader:
 
-            m = Member(mcfId=row[mapFrom['mcfId']],
-                       mcfName=row[mapFrom['mcfName']],
-                       gender=row[mapFrom['gender']],
-                       yearOfBirth=row[mapFrom['yearOfBirth']],
-                       state=row[mapFrom['state']],
-                       nationalRating=row[mapFrom['nationalRating']],
-                       fideId=Member.empty_string_to_zero(num = row[mapFrom['fideId']])
-                       )
-            m.set_password(row[mapFrom['password']])
+    wanted_columns = [mapFrom['mcfId'], mapFrom['mcfName'], mapFrom['gender'], mapFrom['yearOfBirth'], mapFrom['state'], mapFrom['nationalRating'], mapFrom['fideId']]
+                      
+                      
+    df = pd.read_csv(r'./storage/'+filename, usecols=wanted_columns)
+                           
+
+    values=[]
+    df = df.astype(str)
+    for index, row in df.iterrows():
+
+        values.append(
+            {
+            "mcfId": row[mapFrom['mcfId']],
+            "mcfName": row[mapFrom['mcfName']],
+            "gender": row[mapFrom['gender']],
+            "yearOfBirth": row[mapFrom['yearOfBirth']],
+            "state": row[mapFrom['state']],
+            "nationalRating": row[mapFrom['nationalRating']],
+            "fideId": Member.empty_string_to_zero(num = row[mapFrom['fideId']]),
+            "password": bcrypt.generate_password_hash(row[mapFrom['password']]).decode('utf-8')
+            }
+        )
+
+
             
-            # if not m.doesUserExist(m.mcfId):
-            #     db.session.add(m)
-            #     db.session.add(f)
-            # else:
-            #     duplicatesList.append(m)
+        # if not m.doesUserExist(m.mcfId):
+        #     db.session.add(m)
+        #     db.session.add(f)
+        # else:
+        #     duplicatesList.append(m)
+        
+
+        # ===== try uploading bulk
+
+    statement = db.insert(Member)
+    db.session.execute(statement, values)
 
 
-            # ===== try uploading bulk
-
-            db.session.add(m)
+    
     try:
         db.session.commit()
 
@@ -640,8 +659,7 @@ def processFideList():
         dictreader = csv.DictReader(csvfile, delimiter=',')
         for row in dictreader:
 
-            # stmt = sa.select(Member).where(Member.fideId == row[mapFrom['fideId']]).first()
-            # m = db.session.execute(stmt)
+
             statement = db.select(Member).where(Member.fideId == row[mapFrom['fideId']])
             m = db.session.scalars(statement).first()
             if m:                          
@@ -671,9 +689,9 @@ def processFideList():
         whatHappened = "Upload successful BUT with the FIDE ID listed with no matching MCF ID"
 
         
-    app.logger.info("\\\\\\\\\\\\\\\\\\\\")
+
     app.logger.info(whyHappened)
-    app.logger.info("\\\\\\\\\\\\\\\\\\\\")
+
 
     return whatHappened, whyHappened
 
@@ -683,10 +701,14 @@ def processFideList():
 
 @app.route('/bulk-process-all-members')
 def bulk_process_all_members():
-    
+    start = time.time()
     processMcfList()
     whatHappened, whyHappened = processFideList()
-
+    end = time.time()
+    length = end - start
+    app.logger.info("\\\\\\\\\\\\\\\\\\\\")
+    app.logger.info(length)
+    app.logger.info("\\\\\\\\\\\\\\\\\\\\")
 
 
     return render_template("main-page.html", whatHappened=whatHappened, whyHappened=whyHappened)
