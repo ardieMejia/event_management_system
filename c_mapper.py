@@ -27,7 +27,7 @@ class C_mapper:
                         
                         # ========== sample MCF
 
-                        "MCF":
+                        "mcf.csv":
                         {
                             "mcfId":"ID_No", 
                             "mcfName":"Name", 
@@ -39,7 +39,7 @@ class C_mapper:
                             "fideId":"fide_no"
                         },
                         # ========== sample FRL
-                        "FRL":
+                        "frl.csv":
                         {
                             "fideId":"ID Number",
                             "fideName":"Name",

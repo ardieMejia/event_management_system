@@ -8,8 +8,11 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from sqlalchemy.exc import IntegrityError
 from flask_bcrypt import Bcrypt
+from flask_login import LoginManager, current_user, login_user, logout_user
 from werkzeug.utils import secure_filename
 import os
+import time
+import pandas as pd
 
 import json
 
@@ -21,13 +24,14 @@ app.config.from_object(Config)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 bcrypt = Bcrypt(app)
+login = LoginManager(app)
 # app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 
 from Models.declarative import EventListing # ===== remove this
 import sqlalchemy as sa
 app.app_context().push()
-from crud import old_Member, old_Event, Crud, Event, Member, Fide
+from crud import old_Member, old_Event, Crud, Event, Member
 
 
 from c_templater import C_templater
@@ -45,10 +49,15 @@ crud = Crud()
 from c_mapper import C_mapper
 
 
+
 # ===== we assume only this will solve production problems. 
 with app.app_context():
     db.drop_all()
     db.create_all()
+=======
+start=0
+end=0
+
 
   
 
@@ -93,14 +102,18 @@ def update_fide():
     mcfId = request.args.get("mcfId")
     # query = sa.select(Member).where(Member.mcfId == mcfId)
     # m = db.session.scalar(query)
-    f = Fide(fideId=request.form['fideId'], fideName=request.form["fideName"], fideRating=request.form['fideRating'], mcfId=request.args.get('mcfId'))
-    app.logger.info(f.fideId)
-    if not f.isDataValid(p_fideId=f.fideId, p_fideRating=f.fideRating):
-        errorsList = f.isDataValid(p_fideId=f.fideId, p_fideRating=f.fideRating)
+    m = db.session(Member).where(Member.mcfId == mcfId )
+    m.fideId = request.form['fideId']
+    m.fideName = request.form['fideName']
+    m.fideRating = request.form['fideRating']
+    app.logger.info(m.fideId)
+    # TODO: do something about this one
+    if not m.isDataValid(p_fideId=m.fideId, p_fideRating=m.fideRating):
+        errorsList = m.isDataValid(p_fideId=m.fideId, p_fideRating=m.fideRating)
         return C_templater.custom_render_template(errorTopic="Invalid Input Error", errorsList=errorsList, isTemplate=True)
     
 
-    db.session.add(f)
+    db.session.add(m)
     try:
         db.session.commit()
     except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
@@ -112,9 +125,8 @@ def update_fide():
 
 
     
-    
     # return "new FIDE saved"
-    return render_template("single_member.html", es=es, whatHappened="new FIDE")
+    return render_template("single-member.html", m=m, whatHappened="new FIDE saved")
 
 @app.route('/event-create')
 def event_create():
@@ -424,35 +436,43 @@ def main_page():
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     if request.method == 'POST':
+        if current_user.is_authenticated:
+            return redirect(url_for('main_page'))
 
         mcfId = request.form['mcfId']
         password = request.form['password']
 
-        app.logger.info('========== ---------- ++++++++++')
-        app.logger.info('Received data:', mcfId , password)
-        app.logger.info('========== ---------- ++++++++++')
+        # app.logger.info('========== ---------- ++++++++++')
+        # app.logger.info('Received data:', mcfId , password)
+        # app.logger.info('========== ---------- ++++++++++')
 
         m = Member.query.filter_by(mcfId=mcfId).first()
         if m is None:
             # return "member ID does NOT exist"
             return C_templater.custom_render_template("Login Problem", ["Member does not exist"], True)        
         # isPasswordVerified = bcrypt.check_password_hash(bcrypt.generate_password_hash(password).decode('utf-8'), m.password)
-        m.check_password(password)
-        if True:    
-            return render_template("single-member.html", m=m)
-        else:
+        
+        if not m.check_password(password):    
             return C_templater.custom_render_template("Login Problem", ["Wrong password"], True)
+        else:
+            login_user(m)
+            return render_template("single-member.html", m=m)
+
+        
         # access_token = create_access_token(identity=m.mcfId)
 
         # session['token'] = 'TOKEN123'  # store token, use it as a dict
-
-        
 
         # return jsonify(access_token=access_token)
 
     else:
         return render_template("login.html")
 
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('main_page'))
 
 
 @app.route('/bulk-upload-events-csv')
@@ -537,24 +557,31 @@ def bulk_upload_fide_csv():
         for row in dictreader:
 
 
-            
 
-            try:
-                f = Fide(fideId=row[mapFrom['fideId']], fideName=row[mapFrom['fideName']], fideRating=row[mapFrom['fideRating']], mcfId=row[mapFrom['mcfId']])
+
+            statement = db.select(Member).where(Member.mcfId == row[mapFrom['mcfId']])
+            m = db.session.scalars(statement).first()
             
-                if not f.doesFideExist(f.fideId):
-                    db.session.add(f)
-                else:
-                    duplicatesList.append(f)
-            except IntegrityError as i:
-                return C_templater.custom_render_template("DB-API IntegrityError", [i._message()], True)        
+            # (Member).where(mcfid == row['mcfId'])
+            m.fideId = row[mapFrom['fideId']]
+            m.fideName = row[mapFrom['fideName']]
+            m.fideRating = row[mapFrom['fideRating']]
                 
+            # if m.doesUserExist(m.mcfId):
+            #     duplicatesList.append(m)
+            #     continue
+            # db.session.add(m)
+        # ===== try uploading bulk    
+        try:
+            db.session.commit()
+        except IntegrityError as i:
+            return C_templater.custom_render_template("DB-API IntegrityError", [i._message()], True)        
+        
             # query = sa.select(Member).where(Member.mcfId == row[''])
             # f = db.session.scalar(query)
             # m.fide = f                           
 
 
-        # ===== try uploading bulk    
         try:
             db.session.commit()
         except IntegrityError as i:
@@ -563,147 +590,182 @@ def bulk_upload_fide_csv():
                 # return C_templater.custom_render_template("Data entry error", i._message(), False)
             return C_templater.custom_render_template("DB-API IntegrityError", [i._message()], True)        
 
-    if not duplicatesList:            
-        whatHappened = "Upload successful with no duplicates"
-    else:
-        whatHappened = "Upload successful with some duplicates"
+    # if not duplicatesList:            
+    #     whatHappened = "Upload successful with no duplicates"
+    # else:
+    #     whatHappened = "Upload successful with some duplicates"
 
-    return render_template("main-page.html", whatHappened=whatHappened, whyHappened=duplicatesList)
+    return render_template("main-page.html", whatHappened="", whyHappened=[])
 
 
 
 
 def processMcfList():
-    filename="MCF.csv"
-    duplicatesList= []
+    filename="mcf.csv"
+
 
     mapFrom = C_mapper.excelToDatabase[filename]
-    with open(r'./input/'+filename, newline='') as csvfile:
-        dictreader = csv.DictReader(csvfile, delimiter=',')
-        for row in dictreader:
 
-            m = Member(mcfId=row[mapFrom['mcfId']], mcfName=row[mapFrom['mcfName']], gender=row[mapFrom['gender']], yearOfBirth=row[mapFrom['yearOfBirth']], state=row[mapFrom['state']], nationalRating=row[mapFrom['nationalRating']], fideId=row[mapFrom['fideId']])
-            m.set_password(row[mapFrom['password']])
+    wanted_columns = [mapFrom['mcfId'], mapFrom['mcfName'], mapFrom['gender'], mapFrom['yearOfBirth'], mapFrom['state'], mapFrom['nationalRating'], mapFrom['fideId']]
+                      
+                      
+    df = pd.read_csv(r'./storage/'+filename, usecols=wanted_columns)
+                           
+
+    values=[]
+    df = df.astype(str)
+    for index, row in df.iterrows():
+
+        values.append(
+            {
+            "mcfId": row[mapFrom['mcfId']],
+            "mcfName": row[mapFrom['mcfName']],
+            "gender": row[mapFrom['gender']],
+            "yearOfBirth": row[mapFrom['yearOfBirth']],
+            "state": row[mapFrom['state']],
+            "nationalRating": row[mapFrom['nationalRating']],
+            "fideId": Member.empty_string_to_zero(num = row[mapFrom['fideId']]),
+            "password": bcrypt.generate_password_hash(row[mapFrom['password']]).decode('utf-8')
+            }
+        )
+
+
             
-            if not m.doesUserExist(m.mcfId):
-                db.session.add(m)
-            else:
-                duplicatesList.append(m)
+        # if not m.doesUserExist(m.mcfId):
+        #     db.session.add(m)
+        #     db.session.add(f)
+        # else:
+        #     duplicatesList.append(m)
+        
 
+        # ===== try uploading bulk
 
-        # ===== try uploading bulk    
-        try:
-            db.session.commit()
-
-        except IntegrityError as i:
-            db.session.rollback()
-            app.logger.info(i._message())
-                # return C_templater.custom_render_template("Data entry error", i._message(), False)
-            return C_templater.custom_render_template("DB-API IntegrityError", [i._message()], True)
-
-        return duplicatesList
-
-
-
-
+    statement = db.insert(Member)
+    db.session.execute(statement, values)
 
 
     
+    try:
+        db.session.commit()
+
+    except IntegrityError as i:
+        db.session.rollback()
+        app.logger.info(i._message())
+        # return C_templater.custom_render_template("Data entry error", i._message(), False)
+        return C_templater.custom_render_template("DB-API IntegrityError", [i._message()], True)
+
+
+
+
+
 def processFideList():
-    filename="FIDE.csv"
-    duplicatesList= []
+    filename = "frl.csv"
+    whyHappened = []
 
     mapFrom = C_mapper.excelToDatabase[filename]
-    with open(r'./input/'+filename, newline='') as csvfile:
+    with open(r'./storage/'+filename, newline='') as csvfile:
         dictreader = csv.DictReader(csvfile, delimiter=',')
         for row in dictreader:
 
 
-                            
-
-            
-
-            stmt = sa.select(Member).where(fideId == row[mapFrom['fideId']]).first()
-            m = db.session.execute(stmt)
+            statement = db.select(Member).where(Member.fideId == row[mapFrom['fideId']])
+            m = db.session.scalars(statement).first()
             if m:                          
                 m.fideId=row[mapFrom['fideId']]
                 m.fideName=row[mapFrom['fideName']]                       
                 m.fideRating=row[mapFrom['fideRating']]                           
             else:
-                duplicatesList.append(m)
-                
-
-
+                whyHappened.append({
+                    "fideId": row[mapFrom['fideId']],
+                    "fideName": row[mapFrom['fideName']],
+                    "fideRating": row[mapFrom['fideRating']]
+                                    })
 
         # ===== try uploading bulk    
-        try:
-            db.session.commit()
+    try:
+        db.session.commit()
 
-        except IntegrityError as i:
-            db.session.rollback()
-            app.logger.info(i._message())
-                # return C_templater.custom_render_template("Data entry error", i._message(), False)
-            return C_templater.custom_render_template("DB-API IntegrityError", [i._message()], True)
+    except IntegrityError as i:
+        db.session.rollback()
+        app.logger.info(i._message())
+        # return C_templater.custom_render_template("Data entry error", i._message(), False)
+        return C_templater.custom_render_template("DB-API IntegrityError", [i._message()], True)
 
-        return duplicatesList
+    if not whyHappened:            
+        whatHappened = "Upload successful with no inconsistencies"
+    else:
+        whatHappened = "Upload successful BUT with the FIDE ID listed with no matching MCF ID"
+
+        
+
+    app.logger.info(whyHappened)
+
+
+    return whatHappened, whyHappened
 
 
 
 
-
-
-    
 
 @app.route('/bulk-process-all-members')
 def bulk_process_all_members():
-
-    
-    
-    whyHappened = processMcfList()
-    
-
-    whyHappened = processFideList()
-
-
-    if not whyHappened:            
-        whatHappened = "Upload successful with no duplicates"
-    else:
-        whatHappened = "Upload successful with some duplicates"
+    start = time.time()
+    processMcfList()
+    whatHappened, whyHappened = processFideList()
+    end = time.time()
+    length = end - start
+    app.logger.info("\\\\\\\\\\\\\\\\\\\\")
+    app.logger.info(length)
+    app.logger.info("\\\\\\\\\\\\\\\\\\\\")
 
 
-
-
-    return render_template("main-page.html", whatHappened=whatHappened, whyHappened=duplicatesList)
+    return render_template("main-page.html", whatHappened=whatHappened, whyHappened=whyHappened)
     
 
 
 
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
+def allowed_bulk_upload(filename):
+    return "mcf.csv" in filename.lower() or "frl.csv" in filename.lower()
+    # return '.' in filename and \
+    #        filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 @app.route('/bulk-upload-all-files', methods=['POST'])
 def bulk_upload_all_files():
 
     
-    app.logger.info("==========")
-    app.logger.info(request.files)
+    # app.logger.info("==========")
+    # app.logger.info(request.files)
     
     # if 'file' not in request.files:
         # return redirect(request.url)
+        
     file1 = request.files['file1']
     file2 = request.files['file2']
 
     if file1.filename == '' or file2.filename == '':
-        return redirect(request.url)
-    if file1 and file2: # and allowed_file(file.filename):
+        return render_template("main-page.html", whatHappened="File must be named mcf.csv and frl.csv", whyHappened=[])
+
+
+    app.logger.info("==========")
+    app.logger.info(allowed_bulk_upload(file1.filename))
+    app.logger.info(allowed_bulk_upload(file2.filename))
+    if file1 and file2 \
+       and allowed_bulk_upload(file1.filename) \
+       and allowed_bulk_upload(file2.filename):
         filename1 = secure_filename(file1.filename)
-        file1.save(os.path.join('./storage/', filename1))
+        file1.save(os.path.join('./storage/', filename1.lower()))
         filename2 = secure_filename(file2.filename)
-        file2.save(os.path.join('./storage/', filename2))
+        file2.save(os.path.join('./storage/', filename2.lower()))
         # return 'File successfully uploaded'
         return render_template("main-page.html", whatHappened="Both files successfully uploaded")
     else:
-        return 'Invalid file type'
+        return C_templater.custom_render_template("Invalid Upload Name", [format(app.config['ALLOWED_EXTENSIONS']), "files must be named either mcf.csv or frl.csv"], True)
+        # return 'Invalid file type'
     # return "wait"
 
 

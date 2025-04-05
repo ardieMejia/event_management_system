@@ -1,0 +1,42 @@
+k
+{% extends "base_error_h.html" %}
+
+
+
+
+
+{% block heading_1 %}
+Oops!
+{% endblock %}
+
+{% block error %}
+
+<br><br>
+
+
+
+<div class="flex p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400" role="alert">
+
+
+    {% include 'invalidFileType.j2' %}
+    <div>
+	<span class="text-lg">Allowed extension and filenames: </span>
+	<ul class="mt-2 list-disc list-inside">
+	    {% for e in errorsList %}
+            <li>{{ e }}</li>
+	    {% endfor %}
+	</ul>
+    </div>
+</div>
+
+
+
+
+
+
+
+{% endblock %}
+
+
+
+
