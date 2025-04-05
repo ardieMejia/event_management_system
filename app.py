@@ -32,7 +32,14 @@ from Models.declarative import EventListing # ===== remove this
 import sqlalchemy as sa
 app.app_context().push()
 from crud import old_Member, old_Event, Crud, Event, Member
-
+from sqlalchemy.engine import reflection
+from sqlalchemy.schema import (
+        MetaData,
+        Table,
+        DropTable,
+        ForeignKeyConstraint,
+        DropConstraint,
+        )
 
 from c_templater import C_templater
 
@@ -50,11 +57,53 @@ from c_mapper import C_mapper
 
 
 
+def db_DropEverything(db):
+    # From http://www.sqlalchemy.org/trac/wiki/UsageRecipes/DropEverything
+
+    conn=db.engine.connect()
+
+    # the transaction only applies if the DB supports
+    # transactional DDL, i.e. Postgresql, MS SQL Server
+    trans = conn.begin()
+
+    inspector = reflection.Inspector.from_engine(db.engine)
+
+    # gather all data first before dropping anything.
+    # some DBs lock after things have been dropped in 
+    # a transaction.
+    metadata = MetaData()
+
+    tbs = []
+    all_fks = []
+
+    for table_name in inspector.get_table_names():
+        fks = []
+        for fk in inspector.get_foreign_keys(table_name):
+            if not fk['name']:
+                continue
+            fks.append(
+                ForeignKeyConstraint((),(),name=fk['name'])
+            )
+            t = Table(table_name,metadata,*fks)
+            tbs.append(t)
+            all_fks.extend(fks)
+
+    for fkc in all_fks:
+        conn.execute(DropConstraint(fkc))
+
+    for table in tbs:
+        conn.execute(DropTable(table))
+
+    trans.commit()
+
+
+
 # ===== we assume only this will solve production problems. 
 with app.app_context():
-    db.drop_all()
+    # db.drop_all()
+    db_DropEverything(db)
     db.create_all()
-# =======
+    # =======
 start=0
 end=0
 
@@ -494,7 +543,7 @@ def bulk_upload_events_csv():
 
 
     # return C_templater.custom_render_template("Successfull bulk upload", "event data", False)
-# return redirect('/events')
+    # return redirect('/events')
     return render_template("main-page.html", whatHappened="Upload successfull and no duplicate or other issues")
 
 
@@ -527,7 +576,7 @@ def bulk_upload_members_csv():
         except IntegrityError as i:
             db.session.rollback()
             app.logger.info(i._message())
-                # return C_templater.custom_render_template("Data entry error", i._message(), False)
+            # return C_templater.custom_render_template("Data entry error", i._message(), False)
             return C_templater.custom_render_template("DB-API IntegrityError", [i._message()], True)
         
 
@@ -566,12 +615,12 @@ def bulk_upload_fide_csv():
             m.fideId = row[mapFrom['fideId']]
             m.fideName = row[mapFrom['fideName']]
             m.fideRating = row[mapFrom['fideRating']]
-                
+            
             # if m.doesUserExist(m.mcfId):
             #     duplicatesList.append(m)
             #     continue
             # db.session.add(m)
-        # ===== try uploading bulk    
+            # ===== try uploading bulk    
         try:
             db.session.commit()
         except IntegrityError as i:
@@ -587,7 +636,7 @@ def bulk_upload_fide_csv():
         except IntegrityError as i:
             db.session.rollback()
             app.logger.info(i._message())
-                # return C_templater.custom_render_template("Data entry error", i._message(), False)
+            # return C_templater.custom_render_template("Data entry error", i._message(), False)
             return C_templater.custom_render_template("DB-API IntegrityError", [i._message()], True)        
 
     # if not duplicatesList:            
@@ -607,10 +656,10 @@ def processMcfList():
     mapFrom = C_mapper.excelToDatabase[filename]
 
     wanted_columns = [mapFrom['mcfId'], mapFrom['mcfName'], mapFrom['gender'], mapFrom['yearOfBirth'], mapFrom['state'], mapFrom['nationalRating'], mapFrom['fideId']]
-                      
+    
                       
     df = pd.read_csv(r'./storage/'+filename, usecols=wanted_columns)
-                           
+    
 
     values=[]
     df = df.astype(str)
@@ -618,14 +667,14 @@ def processMcfList():
 
         values.append(
             {
-            "mcfId": row[mapFrom['mcfId']],
-            "mcfName": row[mapFrom['mcfName']],
-            "gender": row[mapFrom['gender']],
-            "yearOfBirth": row[mapFrom['yearOfBirth']],
-            "state": row[mapFrom['state']],
-            "nationalRating": row[mapFrom['nationalRating']],
-            "fideId": Member.empty_string_to_zero(num = row[mapFrom['fideId']]),
-            "password": bcrypt.generate_password_hash(row[mapFrom['password']]).decode('utf-8')
+                "mcfId": row[mapFrom['mcfId']],
+                "mcfName": row[mapFrom['mcfName']],
+                "gender": row[mapFrom['gender']],
+                "yearOfBirth": row[mapFrom['yearOfBirth']],
+                "state": row[mapFrom['state']],
+                "nationalRating": row[mapFrom['nationalRating']],
+                "fideId": Member.empty_string_to_zero(num = row[mapFrom['fideId']]),
+                "password": bcrypt.generate_password_hash(row[mapFrom['password']]).decode('utf-8')
             }
         )
 
@@ -679,7 +728,7 @@ def processFideList():
                     "fideId": row[mapFrom['fideId']],
                     "fideName": row[mapFrom['fideName']],
                     "fideRating": row[mapFrom['fideRating']]
-                                    })
+                })
 
         # ===== try uploading bulk    
     try:
@@ -720,17 +769,17 @@ def bulk_process_all_members():
 
 
     return render_template("main-page.html", whatHappened=whatHappened, whyHappened=whyHappened)
-    
+
 
 
 
 def allowed_file(filename):
     return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+        filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
 def allowed_bulk_upload(filename):
     return "mcf.csv" in filename.lower() or "frl.csv" in filename.lower()
-    # return '.' in filename and \
+# return '.' in filename and \
     #        filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
@@ -742,7 +791,7 @@ def bulk_upload_all_files():
     # app.logger.info(request.files)
     
     # if 'file' not in request.files:
-        # return redirect(request.url)
+    # return redirect(request.url)
         
     file1 = request.files['file1']
     file2 = request.files['file2']
@@ -765,7 +814,7 @@ def bulk_upload_all_files():
         return render_template("main-page.html", whatHappened="Both files successfully uploaded")
     else:
         return C_templater.custom_render_template("Invalid Upload Name", [format(app.config['ALLOWED_EXTENSIONS']), "files must be named either mcf.csv or frl.csv"], True)
-        # return 'Invalid file type'
+    # return 'Invalid file type'
     # return "wait"
 
 
