@@ -9,6 +9,7 @@ from flask_migrate import Migrate
 from sqlalchemy.exc import IntegrityError
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, current_user, login_user, logout_user
+from flask_paginate import Pagination, get_page_args
 from werkzeug.utils import secure_filename
 import os
 import time
@@ -335,21 +336,25 @@ def find_events():
 
 @app.route('/members') 
 def find_members():
+
+    page = request.args.get("page", 1, type=int)
     
     query = sa.select(Member)
+    ms_paginate=db.paginate(query, page=page, per_page=20, error_out=False)
     # ms = db.session.scalars(query).all()
-    ms = db.session.scalars(query).all()
-    # join(Role.users).filter(User.id==cls.user_id).label('user')
-    #      return query
+
+    # prev_url = "a_page/page=23"
+    prev_url = url_for("find_members", page=ms_paginate.prev_num)
+    next_url = url_for("find_members", page=ms_paginate.next_num)
 
 
     app.logger.info('========== event ==========')
-    app.logger.info(ms)
+    app.logger.info(ms_paginate)
     app.logger.info('========== event ==========')
     
     # return "wait"
     # ms_dict = [m.__dict__ for m in ms]
-    return render_template("members.html", ms=ms)
+    return render_template("members.html", ms=ms_paginate.items, prev_url=prev_url, next_url=next_url, page=page, totalPages=ms_paginate.total)
 
                     
 
