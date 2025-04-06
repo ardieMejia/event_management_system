@@ -46,6 +46,7 @@ using alchemy, we then commit this new object
 *** create a specific "data entry" form just for him
 *** he retains the Excel workfow, and i have to think of uploading it to database
 * we have to read on this:
+<<<<<<< Updated upstream
 ** https://trumpexcel.com/extract-data-from-drop-down-list/
 >>>>>>> Stashed changes
 pip install Flask-Migrate
@@ -66,3 +67,5 @@ psycopg2_binary
 ** or 0 or ''
 * Upload
 ** Monthly changes (FIDE rating)
+** https://trumpexcel.com/extract-data-from-drop-down-list/
+
