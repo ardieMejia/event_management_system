@@ -49,6 +49,13 @@ old_event = old_Event(r"./Events_Data.xlsx","./Used_EventsID.xlsx")
 crud = Crud()
 from c_mapper import C_mapper
 
+
+with app.app_context():
+    # db.drop_all()
+    db.drop_all()
+    db.create_all()
+# =======
+    
 start=0
 end=0
 
