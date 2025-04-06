@@ -35,26 +35,26 @@ def load_user(id):
 
 # note for a Core table, we use the sqlalchemy.Column construct,
 # not sqlalchemy.orm.mapped_column
-event_member = db.Table(
-    "event_members",
-    db.Column("event_id", db.ForeignKey("event.id")),
-    db.Column("member_id", db.ForeignKey("member.mcfId"))
-)
+# event_member = db.Table(
+#     "event_members",
+#     db.Column("event_id", db.ForeignKey("event.id")),
+#     db.Column("member_id", db.ForeignKey("member.mcfId"))
+# )
 
 class Event(db.Model):
-    __tablename__ = "event"
+    __tablename__ = "events"
 
     id = db.Column(db.Integer, primary_key=True)
     tournamentName = db.Column(db.String(128), index=True, unique=True)
     startDate = db.Column(db.String(64), index=True)
     endDate = db.Column(db.String(64), index=True)
     discipline = db.Column(db.String(64), index=True)
-    members = db.relationship('Member', secondary=event_member, back_populates='events')
+    # members = db.relationship('Member', back_ref='event')
     def __repr__(self):
-        return '<tournament name {tn}> <members {m}>'.format(tn=self.tournamentName, m=self.members)
+        return '<tournament name {tn}>'.format(tn=self.tournamentName)
 
 class Member(UserMixin, db.Model):
-    __tablename__ = "member"
+    __tablename__ = "members"
 
     mcfId = db.Column(db.Integer, primary_key=True)
     password = db.Column(db.String(80))
@@ -63,7 +63,8 @@ class Member(UserMixin, db.Model):
     yearOfBirth = db.Column(db.String(64), index=True)
     state = db.Column(db.String(64), index=True)
     nationalRating = db.Column(db.String(64), index=True)
-    events = db.relationship('Event', secondary=event_member, back_populates='members')
+    # events = db.relationship('Event', secondary=event_member, back_populates='members')
+    events = db.Column(db.String(300), index=True)
     fideId = db.Column(db.Integer)
     fideName = db.Column(db.String(80))
     fideRating = db.Column(db.Integer(), index=True)
@@ -71,7 +72,7 @@ class Member(UserMixin, db.Model):
 
     
     def __repr__(self):
-        return '<mcfName {tn}> <events {m}>'.format(tn=self.mcfName, m=self.events)
+        return '<mcfName {tn}>'.format(tn=self.mcfName, m=self.events)
 
     def set_password(self, password):
         self.password = bcrypt.generate_password_hash(password).decode('utf-8')

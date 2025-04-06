@@ -138,11 +138,15 @@ def event_create():
 
 
 
-# @app.route('/test2', methods = ['POST']) 
-# def test2():
-#     if request.method == 'POST':
-#         result = old_member.test()
-#         return result
+@app.route('/test2') 
+def test2():
+    query = db.select(Member).where(Member.fideId != None)
+    # ms_paginate=db.paginate(query, page=page, per_page=20, error_out=False)
+    ms = db.session.execute(query).all()
+
+    app.logger.info(ms)
+
+    return "something"
 
 
 @app.route('/member-update-page/<int:mcfId>')
