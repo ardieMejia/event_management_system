@@ -544,7 +544,6 @@ def bulk_upload_fide_csv():
 
 
 
-
 def processMcfList():
     filename="mcf.csv"
 
@@ -553,55 +552,51 @@ def processMcfList():
 
     wanted_columns = [mapFrom['mcfId'], mapFrom['mcfName'], mapFrom['gender'], mapFrom['yearOfBirth'], mapFrom['state'], mapFrom['nationalRating'], mapFrom['fideId']]
                       
-                      
-    df = pd.read_csv(r'./storage/'+filename, usecols=wanted_columns)
-                           
-
-    values=[]
-    df = df.astype(str)
-    for index, row in df.iterrows():
-
-        values.append(
-            {
-            "mcfId": row[mapFrom['mcfId']],
-            "mcfName": row[mapFrom['mcfName']],
-            "gender": row[mapFrom['gender']],
-            "yearOfBirth": row[mapFrom['yearOfBirth']],
-            "state": row[mapFrom['state']],
-            "nationalRating": row[mapFrom['nationalRating']],
-            "fideId": Member.empty_string_to_zero(num = row[mapFrom['fideId']]),
-            "password": bcrypt.generate_password_hash(row[mapFrom['password']]).decode('utf-8')
-            }
-        )
 
 
-            
-        # if not m.doesUserExist(m.mcfId):
-        #     db.session.add(m)
-        #     db.session.add(f)
-        # else:
-        #     duplicatesList.append(m)
-        
-
-        # ===== try uploading bulk
-
-    statement = db.insert(Member)
-    db.session.execute(statement, values)
+    chunksize = 200    
+    df = pd.read_csv(r'./storage/'+filename, usecols=wanted_columns, chunksize=chunksize, dtype=str)
 
 
     
-    try:
-        db.session.commit()
+    for chunk in df:
+        app.logger.info("==========")
+        app.logger.info(type(chunk))
+        app.logger.info(chunk)
+        app.logger.info("==========")
+        values=[]
+        
+        for index, row in chunk.iterrows():
 
-    except IntegrityError as i:
-        db.session.rollback()
-        app.logger.info(i._message())
-        # return C_templater.custom_render_template("Data entry error", i._message(), False)
-        return C_templater.custom_render_template("DB-API IntegrityError", [i._message()], True)
+            values.append(
+                {
+                    "mcfId": row[mapFrom['mcfId']],
+                    "mcfName": row[mapFrom['mcfName']],
+                    "gender": row[mapFrom['gender']],
+                    "yearOfBirth": row[mapFrom['yearOfBirth']],
+                    "state": row[mapFrom['state']],
+                    "nationalRating": row[mapFrom['nationalRating']],
+                    "fideId": Member.empty_string_to_zero(num = str(row[mapFrom['fideId']])),
+                    "password": bcrypt.generate_password_hash(row[mapFrom['password']]).decode('utf-8')
+                }
+            )
+            
+    
+        try:
+            statement = db.insert(Member)
+            db.session.execute(statement, values)
+
+        except IntegrityError as i:
+            db.session.rollback()
+            app.logger.info(i._message())
+            # return C_templater.custom_render_template("Data entry error", i._message(), False)
+            return C_templater.custom_render_template("DB-API IntegrityError", [i._message()], True)
 
 
 
 
+
+   
 
 def processFideList():
     filename = "frl.csv"
