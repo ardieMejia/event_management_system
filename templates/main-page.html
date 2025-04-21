@@ -4,7 +4,7 @@
 
 
 {% block heading_1 %}
-MCF Event Registration System
+    MCF Event Registration System
 {% endblock %}
 
 
@@ -13,180 +13,276 @@ MCF Event Registration System
 {% block form %}
 
 
-<br>
-<table id="event_details" class="table-auto border border-yellow-400">
-    <caption class="caption-top {{ 'text-purple-600' if whyHappened else 'text-green-600' }} italic p-2">
-	{{ whatHappened }}
-    </caption>
-    <tbody>
-	<tr class="borders border-yellow-400  border-2">
-	    <th class="bg-yellow-400 w-80 p-2">Process sample Events CSV</th>
-	    <td>
-		<div class="m-3">
-		    <a href="{{ url_for('bulk_upload_events_csv') }}">Process a file</a>      
-		</div>
-	    </td>
-	</tr>
-	<tr class="borders border-yellow-400  border-2">
-	    <th class="bg-yellow-400">Process sample Members CSV</th>
-	    <td>
-		<div class="m-3">
-		    <a href="{{ url_for('bulk_upload_members_csv') }}">Process a file</a>      
-		</div>
-	    </td>
-	</tr>
-	
+    <br>
+    <table id="event_details" class="table-auto border border-yellow-400">
+	<caption class="caption-top {{ 'text-purple-600' if whyHappened else 'text-green-600' }} italic p-2">
+	    {{ whatHappened }}
+	</caption>
+	<tbody>
+	    <tr class="borders border-yellow-400  border-2">
+		<th class="bg-yellow-400 w-80 p-2">Process sample Events CSV</th>
+		<td>
+		    <div class="m-3">
+			<a href="{{ url_for('bulk_upload_events_csv') }}">Process a file</a>      
+		    </div>
+		</td>
+	    </tr>
+	    <tr class="borders border-yellow-400  border-2">
+		<th class="bg-yellow-400">Process sample Members CSV</th>
+		<td>
+		    <div class="m-3">
+			<a href="{{ url_for('bulk_upload_members_csv') }}">Process a file</a>      
+		    </div>
+		</td>
+	    </tr>
+	    
 
-	<tr class="borders border-yellow-400  border-2">
-	    <th class="bg-yellow-400">Process sample FIDE CSV</th>
-	    <td>
-		<div class="m-3">
-		    <a href="{{ url_for('bulk_upload_fide_csv') }}">Process a file</a>      
-		</div>
-	    </td>
-	</tr>
-	<tr class="borders border-yellow-400  border-2">
-	    <th class="bg-yellow-400 italic text-orange-600">Upload TRUE files</th>
-	    <td>
-		
-		<form action="{{ url_for('bulk_upload_all_files')  }}" method="post" enctype="multipart/form-data" data-tooltip-target="tooltip-files-allowed">
-		    <div class="m-2 mb-5">
-			<label class="block m-2 text-sm font-medium text-gray-900 dark:text-white" for="file1">Upload file</label>
-			<input  type="file" name="file1" class="border border-gray-500">
+	    <tr class="borders border-yellow-400  border-2">
+		<th class="bg-yellow-400">Process sample FIDE CSV</th>
+		<td>
+		    <div class="m-3">
+			<a href="{{ url_for('bulk_upload_fide_csv') }}">Process a file</a>      
 		    </div>
-		    <div  class="m-2 mb-5">
-			<label class="block m-2 text-sm font-medium text-gray-900 dark:text-white" for="file2">Upload file</label>
-			<input  type="file" name="file2" class="border border-gray-500">
-		    </div>
+		</td>
+	    </tr>
+	    <tr class="borders border-yellow-400  border-2">
+		<th class="bg-yellow-400 italic text-orange-600">Upload TRUE files</th>
+		<td>
+		    
+		    <form action="{{ url_for('bulk_upload_all_files_1')  }}" method="post" enctype="multipart/form-data" data-tooltip-target="tooltip-files-allowed">
+			<div class="m-2 mb-5">
+			    <label class="block m-2 text-sm font-medium text-gray-900 dark:text-white" for="file1">Upload MCF file</label>
+			    <input  type="file" name="file1" class="border border-gray-500">
+			</div>
+			<div class="m-3">
+			    
+			    <button type="submit" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Upload</button>
+			</div>
+		    </form>
+		    <form action="{{ url_for('bulk_upload_all_files_2')  }}" method="post" enctype="multipart/form-data" data-tooltip-target="tooltip-files-allowed">
+			<div  class="m-2 mb-5">
+			    <label class="block m-2 text-sm font-medium text-gray-900 dark:text-white" for="file2">Upload FRL file</label>
+			    <input  type="file" name="file2" class="border border-gray-500">
+			</div>
+			<div class="m-3">
+			    
+			    <button type="submit" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Upload</button>
+			</div>
+		    </form>
 
 		    <div id="tooltip-files-allowed" role="tooltip" placement="bottom" class="absolute z-10  inline-block border border-1 w-60 px-3 py-2 text-m font-medium text-black transition-opacity opacity-0  duration-300 bg-white rounded-lg shadow-xl tooltip">
 			Upload file must be named MCF.csv and FRL.csv. Mapping of column names are fixed. If you have custom headers, inform the Web Admin
 
 		    </div>
+
+		    
+		    
+		</td>
+	    </tr>
+
+	    <tr class="borders border-yellow-400  border-2">
+		<th class="bg-yellow-400 italic text-orange-600">Insert</th>
+		<td>
 		    <div class="m-3">
+
+
+
+			<a href="{{ url_for('bulk_process_all_mcf') }}" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 " >Insert MCF file</a>      
 			
-			<button type="submit" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Upload</button>
+			
+			
 		    </div>
-		</form>
-		
-		
-	    </td>
-	</tr>
-
-	<tr class="borders border-yellow-400  border-2">
-	    <th class="bg-yellow-400 italic text-orange-600">Process TRUE files</th>
-	    <td>
-		<div class="m-3">
+		</td>
+	    </tr>
+	    <tr class="borders border-yellow-400  border-2">
+		<th class="bg-yellow-400 italic text-orange-600">Insert</th>
+		<td>
+		    <div class="m-3">
 
 
 
-		    <a href="{{ url_for('bulk_process_all_members') }}" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 " >Process both files</a>      
-		    
-		    
-		    
-		</div>
-	    </td>
-	</tr>
+			<a href="{{ url_for('bulk_process_all_frl') }}" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 " >Insert FRL file</a>      
+			
+			
+			
+		    </div>
+		</td>
+	    </tr>
 
-	
+	    <tr class="borders border-yellow-400  border-2">
+		<th class="bg-yellow-400 italic text-orange-600">Update</th>
+		<td>
+		    <div class="m-3">
 
-	
-	<tr class="borders border-yellow-400  border-2">
 
+
+			<a href="{{ url_for('bulk_update_all_mcf') }}" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 " >Update MCF file</a>
+			<div class="m-3">
+			    
+			    (keep records small)
+			</div>
+			
+			
+		    </div>
+		</td>
+	    </tr>
+
+	    <tr class="borders border-yellow-400  border-2">
+		<th class="bg-yellow-400 italic text-orange-600">Update</th>
+		<td>
+		    <div class="m-3">
+
+
+
+			<a href="{{ url_for('bulk_update_all_frl') }}" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 " >Update FRL file</a>      
+			<div class="m-3">
+			    
+			    (keep records small)
+			</div>
+			
+			
+		    </div>
+		</td>
+	    </tr>
 
 	    
 
-	    <th class="bg-yellow-400 italic font-light p-2" >
-		<div class="w-60 justify-items-end grid grid-cols-2">
-		    <div class="w-15 col-start-1">
-			<svg class="mb-4 text-gray-700" width="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M331.8 224.1c28.29 0 54.88 10.99 74.86 30.97l19.59 19.59c40.01-17.74 71.25-53.3 81.62-96.65c5.725-23.92 5.34-47.08 .2148-68.4c-2.613-10.88-16.43-14.51-24.34-6.604l-68.9 68.9h-75.6V97.2l68.9-68.9c7.912-7.912 4.275-21.73-6.604-24.34c-21.32-5.125-44.48-5.51-68.4 .2148c-55.3 13.23-98.39 60.22-107.2 116.4C224.5 128.9 224.2 137 224.3 145l82.78 82.86C315.2 225.1 323.5 224.1 331.8 224.1zM384 278.6c-23.16-23.16-57.57-27.57-85.39-13.9L191.1 158L191.1 95.99l-127.1-95.99L0 63.1l96 127.1l62.04 .0077l106.7 106.6c-13.67 27.82-9.251 62.23 13.91 85.39l117 117.1c14.62 14.5 38.21 14.5 52.71-.0016l52.75-52.75c14.5-14.5 14.5-38.08-.0016-52.71L384 278.6zM227.9 307L168.7 247.9l-148.9 148.9c-26.37 26.37-26.37 69.08 0 95.45C32.96 505.4 50.21 512 67.5 512s34.54-6.592 47.72-19.78l119.1-119.1C225.5 352.3 222.6 329.4 227.9 307zM64 472c-13.25 0-24-10.75-24-24c0-13.26 10.75-24 24-24S88 434.7 88 448C88 461.3 77.25 472 64 472z"/></svg>
+	    
+	    
+	    
+	    
+	    <tr class="borders border-yellow-400  border-2">
+		<td class="bg-yellow-400"></td>
+		<td>
+		    <div class="m-3">
+			<button type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none">Submit</button>
 		    </div>
-		    <div class="w-40 text-gray-700">Bulk upload of existing CSV</div>		    
-		</div>
-	    </th>
-	    <td>
-		<div class="m-3">
-		    <a href="{{ url_for('main_page') }}">Load a file</a>      
-		</div>
-	    </td>
-	</tr>
-	
-	<tr class="borders border-yellow-400  border-2">
-	    <th class="bg-yellow-400 italic font-light p-2">
-		<div class="w-60 justify-items-end grid grid-cols-2">
-		    <div class="w-15 col-start-1">
-			<svg class="mb-4 text-gray-700" width="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M331.8 224.1c28.29 0 54.88 10.99 74.86 30.97l19.59 19.59c40.01-17.74 71.25-53.3 81.62-96.65c5.725-23.92 5.34-47.08 .2148-68.4c-2.613-10.88-16.43-14.51-24.34-6.604l-68.9 68.9h-75.6V97.2l68.9-68.9c7.912-7.912 4.275-21.73-6.604-24.34c-21.32-5.125-44.48-5.51-68.4 .2148c-55.3 13.23-98.39 60.22-107.2 116.4C224.5 128.9 224.2 137 224.3 145l82.78 82.86C315.2 225.1 323.5 224.1 331.8 224.1zM384 278.6c-23.16-23.16-57.57-27.57-85.39-13.9L191.1 158L191.1 95.99l-127.1-95.99L0 63.1l96 127.1l62.04 .0077l106.7 106.6c-13.67 27.82-9.251 62.23 13.91 85.39l117 117.1c14.62 14.5 38.21 14.5 52.71-.0016l52.75-52.75c14.5-14.5 14.5-38.08-.0016-52.71L384 278.6zM227.9 307L168.7 247.9l-148.9 148.9c-26.37 26.37-26.37 69.08 0 95.45C32.96 505.4 50.21 512 67.5 512s34.54-6.592 47.72-19.78l119.1-119.1C225.5 352.3 222.6 329.4 227.9 307zM64 472c-13.25 0-24-10.75-24-24c0-13.26 10.75-24 24-24S88 434.7 88 448C88 461.3 77.25 472 64 472z"/></svg>
+		</td>
+	    </tr>
+
+	    <tr class="borders border-yellow-400  border-2">
+		<td colspan="2">
+		    <div class="m-3">
+			{% if skippedList %}
+
+			    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+				<table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+				    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+					<tr>
+					    <th scope="col" class="px-6 py-3">
+						Total records skipped
+					    </th>
+					</tr>
+				    </thead>
+				    <tbody>
+					<tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700 border-gray-200">
+					    
+					    <td class="px-6 py-4">
+						{{ skippedList|length }}
+					    </td>
+					</tr>
+				    </tbody>
+				</table>
+			    </div>
+
+			{% endif %}
+			{% if newList %}
+
+			    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+				<table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+				    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+					<tr>
+					    <th scope="col" class="px-6 py-3">
+						Total new records
+					    </th>
+					</tr>
+				    </thead>
+				    <tbody>
+					<tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700 border-gray-200">
+					    
+					    <td class="px-6 py-4">
+						{{ newList|length }}
+					    </td>
+					</tr>
+				    </tbody>
+				</table>
+			    </div>
+
+			{% endif %}
+			{% if updatesList %}
+
+			    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+				<table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+				    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+					<tr>
+					    <th scope="col" class="px-6 py-3">
+						Total updated records
+					    </th>
+					</tr>
+				    </thead>
+				    <tbody>
+					<tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700 border-gray-200">
+					    
+					    <td class="px-6 py-4">
+						{{ updatesList|length }}
+					    </td>
+					</tr>
+				    </tbody>
+				</table>
+			    </div>
+
+			{% endif %}
+			
+
+			{% if whyHappened %}
+			    
+			    {% for w in whyHappened %}
+
+
+
+
+				<div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+				    <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+					<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+					    <tr>
+						<th scope="col" class="px-6 py-3">
+						    FIDE ID
+						</th>
+						<th scope="col" class="px-6 py-3">
+						    FIDE Name
+						</th>
+					    </tr>
+					</thead>
+					<tbody>
+					    <tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700 border-gray-200">
+						<th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+						    {{ w.fideId }}
+						</th>
+						<td class="px-6 py-4">
+						    {{ w.fideName }}
+						</td>
+					    </tr>
+					</tbody>
+				    </table>
+				</div>
+
+
+				
+
+
+
+
+			    {% endfor %}
+			{% endif %}
+
+
 		    </div>
-		    <div class="w-40 text-gray-700">Duplicate Checker</div>		    
-		</div>
-		
-	    </th>
-	    <td>
-		<div class="m-3">
+		</td>
+	    </tr>
 
-		    <a href="#" onclick="return false;"> some link to a duplicate checker</a>      
-		</div>
-	    </td>
-	</tr>
-	<tr class="borders border-yellow-400  border-2">
-	    <td class="bg-yellow-400"></td>
-	    <td>
-		<div class="m-3">
-		    <button type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none">Submit</button>
-		</div>
-	    </td>
-	</tr>
-
-	<tr class="borders border-yellow-400  border-2">
-	    <td colspan="2">
-		<div class="m-3">
-
-		    {% for w in whyHappened %}
-		    
-
-
-		    
-
-		    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-			<table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-			    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-				<tr>
-				    <th scope="col" class="px-6 py-3">
-					FIDE ID
-				    </th>
-				    <th scope="col" class="px-6 py-3">
-					FIDE Name
-				    </th>
-				</tr>
-			    </thead>
-			    <tbody>
-				<tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700 border-gray-200">
-				    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-					{{ w.fideId }}
-				    </th>
-				    <td class="px-6 py-4">
-					{{ w.fideName }}
-				    </td>
-				</tr>
-			    </tbody>
-			</table>
-		    </div>
-
-
-		    
-
-
-
-
-		    {% endfor %}
-
-		</div>
-	    </td>
-	</tr>
-
-	
-    </tbody>
-</table>
+	    
+	</tbody>
+    </table>
 
 
 

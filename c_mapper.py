@@ -31,7 +31,7 @@ class C_mapper:
                         {
                             "mcfId":"ID_No", 
                             "mcfName":"Name", 
-                            "password":"ID_No", 
+                            # "password":"ID_No", 
                             "gender":"Sex", 
                             "yearOfBirth":"birthday", 
                             "state":"FED", 

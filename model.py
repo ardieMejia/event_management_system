@@ -10,6 +10,7 @@ import sqlalchemy as sa
 import sqlalchemy.orm as so
 from app import db, bcrypt, app, login
 from flask_login import UserMixin
+from datetime import datetime
 # from sqlalchemy import Column, Table, ForeignKey, Integer, String
 # from flask_sqlalchemy import SQLAlchemy
 
@@ -125,7 +126,8 @@ class Member(UserMixin, db.Model):
         app.logger.info(ret)
         if ret:
             return True
-        return False
+        else:
+            return False
 
     def get_id(self):
         return self.mcfId
