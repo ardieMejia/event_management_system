@@ -353,7 +353,7 @@ def find_members():
     
     # return "wait"
     # ms_dict = [m.__dict__ for m in ms]
-    return render_template("members.html", ms=ms_paginate.items, prev_url=prev_url, next_url=next_url, page=page, totalPages=ms_paginate.total)
+    return render_template("members.html", ms=ms_paginate.items, prev_url=prev_url, next_url=next_url, page=page, totalPages=ms_paginate.pages)
 
                     
 
