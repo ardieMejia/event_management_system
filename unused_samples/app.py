@@ -6,7 +6,7 @@ from jinja2 import Environment, FileSystemLoader
 from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from sqlalchemy.exc import IntegrityError, DataError
+from sqlalchemy.exc import IntegrityError
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, current_user, login_user, logout_user
 from flask_paginate import Pagination, get_page_args
@@ -48,13 +48,6 @@ import csv
 
 from c_mapper import C_mapper
 
-
-with app.app_context():
-    # db.drop_all()
-    db.drop_all()
-    db.create_all()
-# =======
-    
 start=0
 end=0
 
@@ -107,7 +100,7 @@ def update_fide():
         return C_templater.custom_render_template(errorTopic="DB-API IntegrityError", errorsList=[i._message], isTemplate=True)
     except DataError as d:
         db.session.rollback()
-        return C_templater.custom_render_template(errorTopic="DB API DataError", errorsList=[d._message], isTemplate=True)
+        return C_templater.custom_render_template(errorTopic="DB API DataError", errorsList=[i._message], isTemplate=True)
 
 
     
@@ -345,7 +338,7 @@ def find_members():
 
     page = request.args.get("page", 1, type=int)
     
-    query = sa.select(Member).order_by(Member.mcfName)
+    query = sa.select(Member)
     ms_paginate=db.paginate(query, page=page, per_page=20, error_out=False)
     # ms = db.session.scalars(query).all()
 
@@ -401,39 +394,17 @@ def login():
             return C_templater.custom_render_template("Login Problem", ["Wrong password"], True)
         else:
             login_user(m)
-            return render_template("member-front.html", m=m)
+            return render_template("single-member.html", m=m)
+
+        
+        # access_token = create_access_token(identity=m.mcfId)
+
+        # session['token'] = 'TOKEN123'  # store token, use it as a dict
+
+        # return jsonify(access_token=access_token)
 
     else:
         return render_template("login.html")
-
-
-    
-    
-# @app.route('/member-front')
-# def member_front():
-
-
-    # if current_user.is_authenticated:
-
-
-
-
-    #     m = Member.query.filter_by(mcfId=mcfId).first()
-    #     if m is None:
-    #         # return "member ID does NOT exist"
-    #         return C_templater.custom_render_template("Login Problem", ["Member does not exist"], True)        
-    #     # isPasswordVerified = bcrypt.check_password_hash(bcrypt.generate_password_hash(password).decode('utf-8'), m.password)
-        
-    #     if not m.check_password(password):    
-    #         return C_templater.custom_render_template("Login Problem", ["Wrong password"], True)
-    #     else:
-    #         login_user(m)
-    #         return render_template("single-member.html", m=m)
-
-    # else:
-    #     return render_template("login.html")
-
-    
 
 
 @app.route('/logout')
@@ -604,9 +575,7 @@ def processMcfList():
                     "state": row[mapFrom['state']],
                     "nationalRating": row[mapFrom['nationalRating']],
                     "fideId": Member.empty_string_to_zero(num = str(row[mapFrom['fideId']])),
-                    "password": bcrypt.generate_password_hash(row[mapFrom['mcfId']].strip() \
-                                                              + row[mapFrom['yearOfBirth']].strip() \
-                                                              ).decode('utf-8')
+                    "password": bcrypt.generate_password_hash(row[mapFrom['password']]).decode('utf-8')
                 }
             )
             newList.append({"mcfId": row[mapFrom['mcfId']]})
@@ -697,50 +666,46 @@ def updateMcfList():
     wanted_columns = [mapFrom['mcfId'], mapFrom['mcfName'], mapFrom['gender'], mapFrom['yearOfBirth'], mapFrom['state'], mapFrom['nationalRating'], mapFrom['fideId']]
 
     chunksize = 100   
-    df = pd.read_csv(r'./storage/'+filename, usecols=wanted_columns, dtype=str)
+    df = pd.read_csv(r'./storage/'+filename, usecols=wanted_columns, chunksize=chunksize, dtype=str)
 
-    if df.size > 500:
+    if len(df) > 500:
         return C_templater.custom_render_template("Filesize too huge", [i._message()], True)
 
     
     updatesList = []
-    for index,row in df.iterrows():
+    for chunk in df:
         app.logger.info("==========")
         # app.logger.info(type(chunk))
         # app.logger.info(chunk)
         app.logger.info("==========")
         values=[]
         
+        for index, row in chunk.iterrows():
 
-        m = Member.query.filter_by(mcfId=row[mapFrom['mcfId']]).first()
-        app.logger.info(m.mcfName)
-        app.logger.info(row[mapFrom['mcfName']])
 
-        if m:
-            if m.mcfName != row[mapFrom['mcfName']] or m.gender != row[mapFrom['gender']] or m.yearOfBirth != row[mapFrom['yearOfBirth']] or m.state != row[mapFrom['state']] or m.nationalRating != row[mapFrom['nationalRating']] or m.fideId != row[mapFrom['fideId']]:
-                m.mcfName = row[mapFrom['mcfName']]
-                m.gender = row[mapFrom['gender']]
-                m.yearOfBirth = row[mapFrom['yearOfBirth']]
-                m.state = row[mapFrom['state']]
-                m.nationalRating = row[mapFrom['nationalRating']]
-                m.fideId = row[mapFrom['fideId']]
-                m.password = bcrypt.generate_password_hash(row[mapFrom['mcfId']].strip() \
-                                                           + row[mapFrom['yearOfBirth']].strip() \
-                                                           ).decode('utf-8')
-                updatesList.append({"mcfId": row[mapFrom['mcfId']]})
+            m = Member.query.filter_by(mcfId=row[mapFrom['mcfId']]).first()
 
-            
-        
-
+            if m:
+                if m.mcfName != row[mapFrom['mcfId']] \
+                   or m.gender != row[mapFrom['mcfId']] \
+                   or m.yearOfBirth != row[mapFrom['yearOfBirth']] \
+                   or m.state != row[mapFrom['state']] \
+                   or m.nationalRating != row[mapFrom['nationalRating']] \
+                   or m.fideId != row[mapFrom['fideId']] \
+                   or m.fideName != row[mapFrom['fideName']] \
+                   or m.fideRating != row[mapFrom['fideRating']]:
+                       
+                    db.session.add(m)
                 
-        try:
-            db.session.commit()
-        except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
-            db.session.rollback()
-            return C_templater.custom_render_template(errorTopic="DB-API IntegrityError", errorsList=[i._message], isTemplate=True)
-        except DataError as d:
-            db.session.rollback()
-            return C_templater.custom_render_template(errorTopic="DB API DataError", errorsList=[d._message], isTemplate=True)
+            try:
+                db.session.commit()
+                updatesList.append({"mcfId": row[mapFrom['mcfId']]})
+            except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
+                db.session.rollback()
+                return C_templater.custom_render_template(errorTopic="DB-API IntegrityError", errorsList=[i._message], isTemplate=True)
+            except DataError as d:
+                db.session.rollback()
+                return C_templater.custom_render_template(errorTopic="DB API DataError", errorsList=[i._message], isTemplate=True)
 
 
 
@@ -755,7 +720,7 @@ def updateMcfList():
 
 
 
-def updateFrlList():
+def updateMcfList():
     return "mpthing", "nptin"
 
 
