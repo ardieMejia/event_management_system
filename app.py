@@ -32,7 +32,7 @@ login = LoginManager(app)
 from Models.declarative import EventListing # ===== remove this
 import sqlalchemy as sa
 app.app_context().push()
-from crud import old_Member, old_Event, Crud, Event, Member
+from model import Event, Member
 
 
 from c_templater import C_templater
@@ -44,9 +44,8 @@ import csv
 # ========== CSV
 
 
-old_member = old_Member(r"./Members_Data.xlsx","./Used_MembersID.xlsx")
-old_event = old_Event(r"./Events_Data.xlsx","./Used_EventsID.xlsx")
-crud = Crud()
+
+
 from c_mapper import C_mapper
 
 start=0
@@ -56,19 +55,6 @@ end=0
     
 # A decorator used to tell the application 
 # which URL is associated function 
-@app.route('/form')       
-def hello():
-    event_s =[
-        {'name' : 'ardie'},{'name' : 'what'}
-    ]
-    app.logger.info('========== event ==========')
-    # app.logger.info(request.form['EVENT ID'])
-    app.logger.info(type(old_event.data.values.tolist()))
-    app.logger.info(old_event.data.to_dict('records'))
-    app.logger.info('========== event ==========')
-    
-    
-    return render_template("form.html", testvar = "hello", old_event = old_event.data.to_dict('records'))
 
 
 
@@ -101,7 +87,7 @@ def update_fide():
     m.fideRating = request.form['fideRating']
     app.logger.info(m.fideId)
     # TODO: do something about this one
-    if not m.isDataValid(p_fideId=m.fideId, p_fideRating=m.fideRating):
+    if m.isDataValid(p_fideId=m.fideId, p_fideRating=m.fideRating):
         errorsList = m.isDataValid(p_fideId=m.fideId, p_fideRating=m.fideRating)
         return C_templater.custom_render_template(errorTopic="Invalid Input Error", errorsList=errorsList, isTemplate=True)
     
@@ -126,7 +112,7 @@ def event_create():
     app.logger.info('========== event ==========')
     app.logger.info('========== event ==========')
     
-    return render_template("event-create.html")
+    return render_template("event-create.html", el=Event.disciplinesList)
 
 # @app.route('/member-create')
 # def member_create():
@@ -192,12 +178,20 @@ def update_member():
 @app.route('/create-event', methods = ['POST']) 
 def create_event():                
     e = Event(tournamentName=request.form['tournamentName'], startDate=request.form['startDate'], endDate=request.form['endDate'], discipline=request.form['discipline'])
+
+    if e.isDataValid(p_tournameName=e.tournamentName, p_startDate=e.startDate, p_endDate=e.endDate, p_discipline=e.discipline):
+        errorsList = e.isDataValid(p_tournameName=e.tournamentName, p_startDate=e.startDate, p_endDate=e.endDate, p_discipline=e.discipline)
+        app.logger.info("++++++++++")
+        app.logger.info(errorsList)
+        app.logger.info("++++++++++")
+        app.logger.info("++++++++++")
+        return C_templater.custom_render_template(errorTopic="Invalid Input Error", errorsList=errorsList, isTemplate=True)
     
     db.session.add(e)
     
     try:
         db.session.commit()
-    except IntegrityError:
+    except IntegrityError as i:
         db.session.rollback()
         return C_templater.custom_render_template(errorTopic="DB-API IntegrityError", errorsList=[i._message], isTemplate=True)
     # this ones good ===== return c_templater("Data entry error", "tournament name duplicate", "error.html")
@@ -207,6 +201,7 @@ def create_event():
     # app.logger.info(type(old_event.data.values.tolist()))
     app.logger.info(e)
     app.logger.info('========== event ==========')
+
 
     return render_template("confirmed-event-created.html", e=e)
 
@@ -365,65 +360,7 @@ def find_members():
 
 
 
-@app.route('/process_form', methods = ['POST']) 
-def process_form():
-    if 1 == 1:
-        
-        if request.method == 'POST':
-            old_member.temporary_value = dict(zip(old_member.temporary_value, [
-                "",
-                request.form['NAME'],
-                request.form['CONTACT NUMBER'],
-                request.form['EMAIL ADDRESS'],
-                request.form['EVENT ID']
-            ]))
-            app.logger.info('==========')
-            # app.logger.info(request.form['EVENT ID'])
-            app.logger.info(old_member.temporary_value['EVENT ID'])
-            app.logger.info('==========')
-            
-            result = crud.Input_data_member(old_member)
-            
-            # return "hohoho Merry Christmas!!"
-            return template.render(result=result)
 
-                    
-
-    return "ahaha"
-
-@app.route('/ajax', methods = ['POST','GET']) 
-def ajax_get_event():
-
-    specific_data = crud.Show_specific_data(old_event, request.args.get('event_id'))
-    app.logger.info('========== ---------- ++++++++++')
-    # app.logger.info(request.args.get('event-id'))
-    app.logger.info(specific_data['EVENT NAME'].values[0])
-    # app.logger.info(specific_data['EVENT NAME'])
-    # app.logger.info(type(request.args))
-    app.logger.info('========== ---------- ++++++++++')
-    
-
-    return {
-        # 'event_id': request.args.get('event_id')
-        'event_date': specific_data['EVENT DATE'].values[0],
-        'event_format': specific_data['EVENT FORMAT'].values[0],
-        'no_of_rounds': specific_data['NUMBER OF ROUNDS'].values[0],
-        'gender': specific_data['GENDER'].values[0],
-        'cat': specific_data['CATEGORY'].values[0],
-        'subcat': specific_data['SUB CATEGORY'].values[0],
-        'cost': specific_data['COST'].values[0]
-
-        
-        # 'asd': asdsad,
-        # 'asd'
-        # <div id="event-date" ></div>
-	# <div id="event-format" ></div>
-	# <div id="no-of-rounds" ></div>
-	# <div id="gender" ></div>
-	# <div id="cat" ></div>
-	# <div id="subcat" ></div>
-	# <div id="cost" ></div>
-    }
 
                     
 
