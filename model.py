@@ -43,15 +43,36 @@ def load_user(id):
 
 class Event(db.Model):
     __tablename__ = "events"
+    disciplinesList = ["Standard", "Rapid", "Blitz"]
 
     id = db.Column(db.Integer, primary_key=True)
-    tournamentName = db.Column(db.String(128), index=True, unique=True)
+    tournamentName = db.Column(db.String(128), index=True)
     startDate = db.Column(db.String(64), index=True)
     endDate = db.Column(db.String(64), index=True)
     discipline = db.Column(db.String(64), index=True)
     # members = db.relationship('Member', back_ref='event')
     def __repr__(self):
         return '<tournament name {tn}>'.format(tn=self.tournamentName)
+
+    def isDataValid(self, p_tournameName, p_startDate, p_endDate, p_discipline):
+        errorsList = []
+        if not p_tournameName:
+            errorsList.append("Tournament Name should not be empty")
+        if not p_startDate:
+            errorsList.append("Start Date should not be empty") 
+        if not p_endDate:
+            errorsList.append("End Date should not be empty")
+        app.logger.info("++++++++++")
+        app.logger.info(errorsList)
+        app.logger.info("++++++++++")
+        return errorsList
+        # if errorsList == []:
+        #     return True
+        # return errorsList
+        # return True if not errorsList else errorsList
+
+
+    
 
 class Member(UserMixin, db.Model):
     __tablename__ = "members"
@@ -170,64 +191,10 @@ class Member(UserMixin, db.Model):
     
 
 
-    
-
-class old_Event:
-    def __init__(self, path, usedID_path):
-        print("created event")
-        self.path = path
-        self.usedID_path = usedID_path
-        self.id_field = 'EVENT ID'
-
-                
-
-
-
-        # self.id_field = id_field
-        # print("created member with path of ", self.path)
-        print("used ID is stored at ", self.usedID_path)
-        self.data = pd.read_excel(self.path, dtype= 'str')
-        self.usedID_data = pd.read_excel(self.usedID_path, dtype= 'str')
-        
-        
-        self.temporary_value = {         # This variable is used for storing our input when using menu create and update
-            'EVENT ID': [], 
-            'EVENT DATE': [],
-            'EVENT FORMAT': [],
-            'NUMBER OF ROUNDS': [],
-            'COST': []
-        }
-
-        
 
 
 
 
-class old_Member:
-    def __init__(self, path, usedID_path):
-        print("created member")
-        self.path = path
-        self.usedID_path = usedID_path
-        self.id_field = 'MEMBER ID'                
-
-
-
-        # self.id_field = id_field
-        # print("created member with path of ", self.path)
-        print("used ID is stored at ", self.usedID_path)
-        self.data = pd.read_excel(self.path, dtype= 'str')
-        self.usedID_data = pd.read_excel(self.usedID_path, dtype= 'str')
-        
-        self.temporary_value = {         # This variable is used for storing our input when using menu create and update
-            'MEMBER ID': [],
-            'NAME': [],
-            'CONTACT NUMBER': [],
-            'EMAIL ADDRESS': [],
-            'EVENT ID': []
-        }
-
-    def test(self):
-        return "hahahha spider"
 
 
         
@@ -236,75 +203,5 @@ class old_Member:
 
 
 
-class Crud:
-    def __init__(self):
-        pass
-
-
-    # Menu Read
-    def Show_specific_data(self, model, input_ID):
-        
-        if input_ID in model.data[model.id_field].values:
-            # return model.data.loc[model.data[model.id_field] == input_ID].values
-            # pandas dataframe: i think its beautiful, and anyone who disagrees, is hugely mistaken
-            return model.data[model.data['EVENT ID'] == input_ID]
-        else:
-            return None
-            
 
         
-    def ID_generator(self,model):        
-        id_generator = random.randint(10000,99999)
-        
-        # ========== later should replace this with model.data[model.id_field]
-        all_ids = model.data['MEMBER ID'].tolist() + model.usedID_data['MEMBER ID'].tolist()           
-        while id_generator in all_ids:
-            # name_length += 1
-            # id_generator = f'{DEPARTMENT_initial}{gender}{residence_initial}{name_length}'
-            id_generator = random.randint(10000,99999)
-            
-        model.temporary_value.update({model.id_field: id_generator})
-
-
-        return id_generator
-
- 
-    # Menu Create
-    def Input_data_member(self, member):
-                
-        # global members_path, used_membersID_path
-        
-        # input_NAME = input('NAME: ').title().strip()
-        generated_id = self.ID_generator(member)
-        
-        member.temporary_value['MEMBER ID'] = generated_id
-        member.temporary_value['NAME'] = member.temporary_value['NAME'].title().strip()
-        member.temporary_value['CONTACT NUMBER'] = member.temporary_value['CONTACT NUMBER'].title()
-        member.temporary_value['EMAIL ADDRESS'] = member.temporary_value['EMAIL ADDRESS'].upper().strip()
-        member.temporary_value['EVENT ID'] = member.temporary_value['EVENT ID'].title().strip()
-        # input_EMAIL_ADDRESS = input('EMAIL ADDRESS: ').upper().strip()
-        # input_EVENT_ID = input('EVENT ID: ').title().strip()
-
-
-
-    
-
-        # if self.Input_member_checker(input_NAME, column_input_NAME, parent_model) == True:
-        # self.Input_member_checker(input_EVENT_ID, column_input_EVENT, parent_model) == True:
-        
-        # member.temporary_value.update({'NAME': input_NAME}).title().strip()
-        #                 model.temporary_value.update({'CONTACT NUMBER': input_CONTACT_NUMBER})
-        #                                 model.temporary_value.update({'EMAIL ADDRESS': input_EMAIL_ADDRESS})
-        #                                                 model.temporary_value.update({'EVENT ID': input_EVENT_ID})
-
-
-
-        
-        
-        member.data = pd.concat([member.data, pd.DataFrame.from_dict(member.temporary_value, orient= 'index').T], ignore_index= True)
-        
-        member.data = member.data.astype(str)
-        member.data.to_excel(member.path, index=False)
-        
-
-
