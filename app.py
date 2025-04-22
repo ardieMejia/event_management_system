@@ -149,6 +149,9 @@ def member_update_page(mcfId):
 
 
 
+
+
+
 @app.route('/update-member', methods = ['POST']) 
 def update_member():                
 
@@ -156,23 +159,46 @@ def update_member():
     # app.logger.info(request.form.keys())
     # app.logger.info('========== event ==========')
     # return "what"
-    
+
+    app.logger.info("==========")
+    app.logger.info(request.form.get("mcfId"))
+    app.logger.info(request.form)
+    app.logger.info(request.form.get("button"))
+    app.logger.info("==========")
     m = db.session.query(Member).get(request.form['mcfId'])
-    e = db.session.query(Event).get(request.form['events'])
+    # e = db.session.query(Event).get(request.form['events'])
+
+    m_events = m.getEvents().split(",")
+    if request.form.get("button") == "save":
+        # overwrite only if event non existing in m.events
+        if request.form['mcfId'] not in m_events:        
+            m.events = m.getEvents() + "," + request.form.get("discipline") # WARNING: this is slightly unreadable            
+    elif request.form.get("button") == "delete":
+        try: m_events.remove(request.form.get("discipline"))
+        except: pass # becoz .remove can produce errors
+        m.events = ",".join(m_events)
+
+        
     
-    m.events.append(e)
-    e.members.append(m)    
-    
+    # m.events.append(e)
+    # e.members.append(m)
+
+    # if re                       # 
+        
+        
+
+    # if 1 == 0:
     try:
         db.session.commit()
     except IntegrityError as i:
         db.session.rollback()
         return C_templater.custom_render_template(errorTopic="DB-API IntegrityError", errorsList=[i._message], isTemplate=True)
     
-    app.logger.info('========== event ==========')
-    app.logger.info('========== event ==========')
+    # app.logger.info('========== event ==========')
+    # app.logger.info('========== event ==========')
 
     return "update successfully"
+
 
 
 @app.route('/create-event', methods = ['POST']) 
@@ -394,7 +420,15 @@ def login():
             return C_templater.custom_render_template("Login Problem", ["Wrong password"], True)
         else:
             login_user(m)
-            return render_template("member-front.html", m=m)
+            query = sa.select(Event)
+            es = db.session.scalars(query).all()
+            tr = []
+            for e in m.getEvents().split(","):            
+                statement = db.select(Event).where(Event.id == e)
+                e = db.session.scalars(statement).first()
+                tr.append(e.tournamentName)
+                        
+            return render_template("member-front.html", m=m, tournamentRegistered=tr, tournamentOptions=es)
 
     else:
         return render_template("login.html")
@@ -402,29 +436,34 @@ def login():
 
     
     
-# @app.route('/member-front')
-# def member_front():
+@app.route('/member-front')
+def member_front():
+
+    if current_user.is_authenticated:
+        m = Member.query.filter_by(mcfId=current_user.mcfId).first()
+        query = sa.select(Event)
+        es = db.session.scalars(query).all()
 
 
-    # if current_user.is_authenticated:
+        tr = []
+        for e in m.getEvents().split(","):
+            if e:
+                # app.logger.info(e)
+                statement = db.select(Event).where(Event.id == e)
+                e = db.session.scalars(statement).first()
+                tr.append(e.tournamentName)
+            
+        app.logger.info("+++++")
+        app.logger.info(tr)
+        app.logger.info("+++++")
+
+
+        return render_template("member-front.html", m=m, tournamentRegistered=tr, tournamentOptions=es)
+    else:
+        return render_template("login.html")
 
 
 
-
-    #     m = Member.query.filter_by(mcfId=mcfId).first()
-    #     if m is None:
-    #         # return "member ID does NOT exist"
-    #         return C_templater.custom_render_template("Login Problem", ["Member does not exist"], True)        
-    #     # isPasswordVerified = bcrypt.check_password_hash(bcrypt.generate_password_hash(password).decode('utf-8'), m.password)
-        
-    #     if not m.check_password(password):    
-    #         return C_templater.custom_render_template("Login Problem", ["Wrong password"], True)
-    #     else:
-    #         login_user(m)
-    #         return render_template("single-member.html", m=m)
-
-    # else:
-    #     return render_template("login.html")
 
     
 

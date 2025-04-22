@@ -67,10 +67,8 @@ class Event(db.Model):
         app.logger.info(errorsList)
         app.logger.info("++++++++++")
         return errorsList
-        # if errorsList == []:
-        #     return True
-        # return errorsList
-        # return True if not errorsList else errorsList
+
+
 
 
     
@@ -115,7 +113,8 @@ class Member(UserMixin, db.Model):
         # <statement-to-try> if <return-if-true> else <return-if-else>
         return int(num) if num and num.isdigit() else 0
         
-
+    def getEvents(self):
+        return self.events or ""
 
     
     @classmethod
