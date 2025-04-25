@@ -36,7 +36,8 @@ class C_mapper:
                             "yearOfBirth":"birthday", 
                             "state":"FED", 
                             "nationalRating":"rtg_nat", 
-                            "fideId":"fide_no"
+                            "fideId":"fide_no",
+                            "events":"events"
                         },
                         # ========== sample FRL
                         "frl.csv":

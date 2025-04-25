@@ -19,11 +19,34 @@
 	    {{ whatHappened }}
 	</caption>
 	<tbody>
+	    <tr class="borders border-yellow-400  border-2">
+		<th class="bg-yellow-400 w-80 p-2">Process sample Events CSV</th>
+		<td>
+		    <div class="m-3">
+			<a href="{{ url_for('bulk_upload_events_csv') }}">Process a file</a>      
+		    </div>
+		</td>
+	    </tr>
+	    <tr class="borders border-yellow-400  border-2">
+		<th class="bg-yellow-400">Process sample Members CSV</th>
+		<td>
+		    <div class="m-3">
+			<a href="{{ url_for('bulk_upload_members_csv') }}">Process a file</a>      
+		    </div>
+		</td>
+	    </tr>
 	    
 
-
 	    <tr class="borders border-yellow-400  border-2">
-		<th class="bg-yellow-400 w-60">Upload files</th>
+		<th class="bg-yellow-400">Process sample FIDE CSV</th>
+		<td>
+		    <div class="m-3">
+			<a href="{{ url_for('bulk_upload_fide_csv') }}">Process a file</a>      
+		    </div>
+		</td>
+	    </tr>
+	    <tr class="borders border-yellow-400  border-2">
+		<th class="bg-yellow-400 italic text-orange-600">Upload TRUE files</th>
 		<td>
 		    
 		    <form action="{{ url_for('bulk_upload_all_files_1')  }}" method="post" enctype="multipart/form-data" data-tooltip-target="tooltip-files-allowed">
@@ -58,7 +81,7 @@
 	    </tr>
 
 	    <tr class="borders border-yellow-400  border-2">
-		<th class="bg-yellow-400 text-green-600">Insert</th>
+		<th class="bg-yellow-400 italic text-orange-600">Insert</th>
 		<td>
 		    <div class="m-3">
 
@@ -72,7 +95,7 @@
 		</td>
 	    </tr>
 	    <tr class="borders border-yellow-400  border-2">
-		<th class="bg-yellow-400 text-green-600">Insert</th>
+		<th class="bg-yellow-400 italic text-orange-600">Insert</th>
 		<td>
 		    <div class="m-3">
 

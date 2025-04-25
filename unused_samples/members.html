@@ -122,94 +122,48 @@ Members
 
 
 
-
-<div class="grid grid-flow-col p-3">
-
-    <div class="flex justify-start">		    
-	<div class="w-20 m-2">
-	    <button id="showAll" type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4  border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none">
-		Show All
-	    </button>
-
-	</div>
-	<div class="w-20 m-2">
-			
-	    <button id="Simple" type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4  border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none ">
-		Simple
-	    </button>
-	</div>
-	{% if prev_url %}
-
-	    <div class="m-3 w-10">
-		<a href="{{ prev_url }}">{% include 'backArrow.j2' %}
-		</a>
-	    </div>
-
-	{% endif %}
-
-	<div class="font-bold m-4 w-25">
-			    
-
-	    Page {{ page }} of {{ totalPages }}
-
-	</div>
-
-	{% if next_url %}
-			    
-	    <div class="m-3 w-10">
-		<a href="{{ next_url }}">{% include 'forwardArrow.j2' %}
-		</a>
-	    </div>
-
-	{% endif %}
-    </div>
-    <div class="flex justify-end items-center">
-	<div>
-	    
-	    <!-- <button type="submit" class="w-30 rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none">
-		 <a href="{{ url_for('test_bulk_download')}}">Download excel test</a>
-
-		 
-		 </button> -->
-	</div>
-	<div  class="font-bold w-35">
-	    Download csv
-	</div>
-	<div class="font-bold w-25">
-	    {% if totalCount %}
-	    <form action="{{ url_for('true_download')  }}">
-		<button id="dropdownDefaultButton" data-dropdown-toggle="bulkDownload"  type="button">section
+<table id="member_details" class="table-auto">
+    <tr>
+	<th class="w-10">
+	    <div class="m-2">
+		<button id="showAll" type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4  border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none" >
+		    Show All
 		</button>
-
-		<!-- Dropdown menu -->
-		<div id="bulkDownload" class="z-10 hidden">
-		    <select name="downloadOffset" id="downloadOffset" onchange="this.form.submit()" >
-			<option value="-1">--</option>
-			    {% set steps = totalCount / 20 %}
-			    {% set steps = steps|round(method='ceil')|int + 1 %}
-			    {% for i in range(1,steps) %}
-				<option value={{ i }}>
-
-				    {{ i }}
-				    
-				    <!-- <a href="{{ url_for('test_bulk_download')}}">Download excel test</a> -->
-				    
-				</option>
-			    {% endfor %}
-		    </select>
-
+	    </div>
+	</th>
+	<th class="w-10">
+	    <div class="m-2">
+		
+		<button id="Simple" type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4  border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none " >
+		    Simple
+		</button>
+	    </div>
+	</th>
+	{% if prev_url %}
+	    <th class="w-10">
+	    <div class="m-3 w-10">
+		<a href="{{ prev_url }}" >{% include 'backArrow.j2' %}
+		</a>
+	    </div>
+	</th>
+	{% endif %}
+	<th class="w-30">Page {{ page }} of {{ totalPages }}</th>
+	{% if next_url %}
+	    <th class="w-10">
+		<div class="m-3 w-10">
+		    <a href="{{ next_url }}">{% include 'forwardArrow.j2' %}
+		    </a>
 		</div>
-	    </form>
-	    {% endif %}
-	</div>
-	<div  class="font-bold w-25">
-	    from total 
-	</div>
-	<div class="font-bold w-25">		    
-	    {{ totalCount }}
-	</div>
-    </div>
-</div>
+	    </th>
+	{% endif %}
+	
+    </tr>
+    <tr>
+	
+    </tr>
+	    
+</table>
+
 
 
 

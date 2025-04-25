@@ -38,7 +38,6 @@ using alchemy, we then commit this new object
 ** easy for him
 ** he can easily create a dropdown himself
 ** he can use his helper functions to easily view specific events at will
-** 
 * advantages of database over excel
 ** more predictable in thesystem
 ** easy to ensure data integrity, of something happens such as a connection problem right when the user registers 
@@ -50,9 +49,6 @@ using alchemy, we then commit this new object
 * we have to read on this:
 ** https://trumpexcel.com/extract-data-from-drop-down-list/
 * Explain:
-** show LOGIN system
-** database migration for dummies
-** error checking done so far
 ** Show the mapping, and why this makes it easy for first time bulk upload. But its tied to filename
 ** Show the FIDE check feature, it checks if number fields should be numbers
 ** show all duplicates error, of each file
@@ -62,11 +58,9 @@ using alchemy, we then commit this new object
 ** 1400 - 2800
 ** or 0 or ''
 * Upload
-** Monthly changes (FIDE rating)
 ** https://trumpexcel.com/extract-data-from-drop-down-list/
-* Problems:
-** For now the bulk update feature doesnt allow update of member registered events
 * Tests:
+** Test to make sure mcf and frl.csv files are deleted everytime
 ** Password
 #+begin_quote
 
@@ -79,6 +73,9 @@ using alchemy, we then commit this new object
 220400014
 2011
 
+220300012
+2006
+
 #+end_quote
 ** Events
 #+begin_quote
@@ -89,3 +86,16 @@ National Interstate Chess Championship
 
 
 #+end_quote
+* Video:
+** All the processes from the video
+** Show wrongly uploading a video
+** Test if the same file is uploaded
+** Its simple, 2 types of uploads MCF file, if youre afraid of over-writing anything, use insert. If not, use update. It overwrites based on MCF ID, nothing else.
+** Theres only FRL inserts, becoz FRL are "updates" in nature. (subservient/dependent on existing MCF record).
+** Registering for an event
+** Show removing events registered
+** Showing logging in
+** Showing dropdown download
+** 
+** Searching members of a single event is doable but not implemented
+** 

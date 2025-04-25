@@ -11,6 +11,8 @@ import sqlalchemy.orm as so
 from app import db, bcrypt, app, login
 from flask_login import UserMixin
 from datetime import datetime
+import time
+from c_mapper import C_mapper
 # from sqlalchemy import Column, Table, ForeignKey, Integer, String
 # from flask_sqlalchemy import SQLAlchemy
 
@@ -52,10 +54,19 @@ class Event(db.Model):
     endDate = db.Column(db.String(64), index=True)
     discipline = db.Column(db.String(64), index=True)
     # members = db.relationship('Member', back_ref='event')
+
+    def set_id(self):
+        # acronym = ""
+        # for word in self.tournamentName.split():
+        #     acronym += word[0].upper()
+
+        return str(int(time.time()))
+
+        
     def __repr__(self):
         return '<tournament name {tn}>'.format(tn=self.tournamentName)
 
-    def isDataValid(self, p_tournameName, p_startDate, p_endDate, p_discipline):
+    def isDataInvalid(self, p_tournameName, p_startDate, p_endDate, p_discipline):
         errorsList = []
         if not p_tournameName:
             errorsList.append("Tournament Name should not be empty")
@@ -131,7 +142,7 @@ class Member(UserMixin, db.Model):
     def get_id(self):
         return self.mcfId
 
-    def isDataValid(self, p_fideId, p_fideRating):
+    def isDataInvalid(self, p_fideId, p_fideRating):
         errorsList = []
         if p_fideId.isnumeric() and p_fideRating.isnumeric():
             return True
@@ -140,6 +151,42 @@ class Member(UserMixin, db.Model):
         if not p_fideRating.isnumeric():
             errorsList.append("FIDE Rating should be a number")
         return errorsList
+
+
+
+    
+
+
+    def as_dict_for_file(self,filename):
+        mapFrom = C_mapper.excelToDatabase[filename]
+        return {
+            mapFrom["mcfId"] : self.mcfId, 
+            mapFrom["mcfName"] : self.mcfName,
+            mapFrom["gender"] : self.gender,
+            mapFrom["yearOfBirth"] : self.yearOfBirth,
+            mapFrom["state"] : self.state,
+            mapFrom["nationalRating"] : self.nationalRating,
+            mapFrom["fideId"] : self.fideId,
+            mapFrom["events"] : self.events
+            # "fideId" : self.fideId,
+            # "fideName" : self.fideName,
+            # "fideRating" : self.fideRating
+        }
+
+                
+    def as_dict(self):
+        return {
+            "mcfId" : self.mcfId, 
+            "mcfName" : self.mcfName,
+            "gender" : self.gender,
+            "yearOfBirth" : self.yearOfBirth,
+            "state" : self.state,
+            "nationalRating" : self.nationalRating,
+            "events" : self.events
+            # "fideId" : self.fideId,
+            # "fideName" : self.fideName,
+            # "fideRating" : self.fideRating
+        }
 
     # @classmethod
     # def doesFideExist(cls, id):

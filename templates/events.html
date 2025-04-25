@@ -20,6 +20,9 @@ Events
     <thead>
 	<tr class="bg-yellow-400">
 	    <th class="w-100">
+		<div class="m-3">ID</div>
+	    </th>
+	    <th class="w-100">
 		<div class="m-3">Tourname Name</div>
 	    </th>
 	    <th>
@@ -44,6 +47,9 @@ Events
 	    
 	    
 	    <td >
+		<div class="m-3">{{ e.id }}</div>
+	    </td>
+	    <td >
 		<div class="m-3">{{ e.tournamentName }}</div>
 	    </td>
 	    <td >
@@ -67,7 +73,7 @@ Events
 	</tr>
 	{% endfor %}
 	<tr>
-	    <td colspan="3"></td>
+	    <td colspan="5"></td>
 	    <td>
 		<div class="m-3">
 		    <button type="submit" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">
