@@ -1,0 +1,39 @@
+{% extends "base_error_h.html" %}
+
+
+
+
+
+{% block heading_1 %}
+    Thank You
+{% endblock %}
+
+{% block error %}
+
+    <br><br>
+
+
+
+    <div class="flex p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400" role="alert">
+
+
+	{% include 'thanksSvg.j2' %}
+	<div>
+	    <span class="text-lg">Thanks for Registering: </span>
+	    <ul class="mt-2 list-disc list-inside">
+		<a href="{{ url_for('member_front') }}" class="block py-2 px-3 text-gray-900 rounded-sm hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"  onclick="test2()">Back to main page</a>
+	    </ul>
+	</div>
+    </div>
+
+
+
+
+
+
+
+{% endblock %}
+
+
+
+

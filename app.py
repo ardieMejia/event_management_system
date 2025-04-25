@@ -1,5 +1,5 @@
 import logging
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, send_file
 # from jinja2 import Template
 from jinja2 import Environment, FileSystemLoader
 # environment = Environment(loader=FileSystemLoader("templates/"))
@@ -14,6 +14,7 @@ from werkzeug.utils import secure_filename
 import os
 import time
 import pandas as pd
+from io import StringIO, BytesIO
 
 import json
 
@@ -57,6 +58,16 @@ end=0
 # which URL is associated function 
 
 
+def tryRemoveMcfFile(filename):
+    # myfile = "/tmp/foo.txt"
+    # If file exists, delete it.
+    if os.path.isfile(filename):
+        os.remove(filename)
+    else:
+        pass
+
+    
+
 
 @app.route('/single-member/<int:mcfId>', methods = ['GET']) 
 def single_member(mcfId):
@@ -85,10 +96,9 @@ def update_fide():
     m.fideId = request.form['fideId']
     m.fideName = request.form['fideName']
     m.fideRating = request.form['fideRating']
-    app.logger.info(m.fideId)
     # TODO: do something about this one
-    if m.isDataValid(p_fideId=m.fideId, p_fideRating=m.fideRating):
-        errorsList = m.isDataValid(p_fideId=m.fideId, p_fideRating=m.fideRating)
+    if m.isDataInvalid(p_fideId=m.fideId, p_fideRating=m.fideRating):
+        errorsList = m.isDataInvalid(p_fideId=m.fideId, p_fideRating=m.fideRating)
         return C_templater.custom_render_template(errorTopic="Invalid Input Error", errorsList=errorsList, isTemplate=True)
     
 
@@ -109,15 +119,12 @@ def update_fide():
 
 @app.route('/event-create')
 def event_create():
-    app.logger.info('========== event ==========')
-    app.logger.info('========== event ==========')
-    
+
     return render_template("event-create.html", el=Event.disciplinesList)
 
 # @app.route('/member-create')
 # def member_create():
-#     app.logger.info('========== member ==========')
-#     app.logger.info('========== member ==========')
+
     
 #     return render_template("member-create.html")
 
@@ -160,11 +167,7 @@ def update_member():
     # app.logger.info('========== event ==========')
     # return "what"
 
-    app.logger.info("==========")
-    app.logger.info(request.form.get("mcfId"))
-    app.logger.info(request.form)
-    app.logger.info(request.form.get("button"))
-    app.logger.info("==========")
+
     m = db.session.query(Member).get(request.form['mcfId'])
     # e = db.session.query(Event).get(request.form['events'])
 
@@ -197,22 +200,20 @@ def update_member():
     # app.logger.info('========== event ==========')
     # app.logger.info('========== event ==========')
 
-    return "update successfully"
+
+    return render_template("registration-thanks.html")
 
 
 
 @app.route('/create-event', methods = ['POST']) 
 def create_event():                
-    e = Event(tournamentName=request.form['tournamentName'], startDate=request.form['startDate'], endDate=request.form['endDate'], discipline=request.form['discipline'])
+    e = Event(tournamentName=request.form['tournamentName'], startDate=request.form['startDate'], endDate=request.form['endDate'], discipline=request.form['discipline'])    
 
-    if e.isDataValid(p_tournameName=e.tournamentName, p_startDate=e.startDate, p_endDate=e.endDate, p_discipline=e.discipline):
-        errorsList = e.isDataValid(p_tournameName=e.tournamentName, p_startDate=e.startDate, p_endDate=e.endDate, p_discipline=e.discipline)
-        app.logger.info("++++++++++")
-        app.logger.info(errorsList)
-        app.logger.info("++++++++++")
-        app.logger.info("++++++++++")
+    if e.isDataInvalid(p_tournameName=e.tournamentName, p_startDate=e.startDate, p_endDate=e.endDate, p_discipline=e.discipline):
+        errorsList = e.isDataInvalid(p_tournameName=e.tournamentName, p_startDate=e.startDate, p_endDate=e.endDate, p_discipline=e.discipline)
         return C_templater.custom_render_template(errorTopic="Invalid Input Error", errorsList=errorsList, isTemplate=True)
-    
+
+    e.id = e.set_id()
     db.session.add(e)
     
     try:
@@ -222,11 +223,10 @@ def create_event():
         return C_templater.custom_render_template(errorTopic="DB-API IntegrityError", errorsList=[i._message], isTemplate=True)
     # this ones good ===== return c_templater("Data entry error", "tournament name duplicate", "error.html")
         
-    app.logger.info('========== event ==========')
+
     # app.logger.info(request.form['EVENT ID'])
     # app.logger.info(type(old_event.data.values.tolist()))
-    app.logger.info(e)
-    app.logger.info('========== event ==========')
+
 
 
     return render_template("confirmed-event-created.html", e=e)
@@ -256,8 +256,7 @@ def create_member():
     app.logger.info('========== event ==========')
     # app.logger.info(request.form['EVENT ID'])
     # app.logger.info(type(old_event.data.values.tolist()))
-    app.logger.info(m)
-    app.logger.info('========== event ==========')
+
 
 
     # return C_templater.custom_render_template("Successfully saved", i._message())
@@ -273,11 +272,10 @@ def kill_event(id):
     stmt = sa.delete(Event).where(Event.id == id)
     db.session.execute(stmt)
     db.session.commit()
-    app.logger.info('========== event ==========')
+
     # app.logger.info(request.form['EVENT ID'])
     # app.logger.info(type(old_event.data.values.tolist()))
-    app.logger.info(id)
-    app.logger.info('========== event ==========')
+
 
     query = sa.select(Event)
     es = db.session.scalars(query).all()
@@ -309,11 +307,10 @@ def kill_member(mcfId):
     stmt = sa.delete(Member).where(Member.mcfId == mcfId)
     db.session.execute(stmt)
     db.session.commit()
-    app.logger.info('========== event ==========')
+
     # app.logger.info(request.form['EVENT ID'])
     # app.logger.info(type(old_event.data.values.tolist()))
-    app.logger.info(mcfId)
-    app.logger.info('========== event ==========')
+
 
     query = sa.select(Member)
     ms = db.session.scalars(query).all()
@@ -350,11 +347,10 @@ def find_events():
 
     
     
-    app.logger.info('========== event ==========')
+
     # app.logger.info(request.form['EVENT ID'])
     # app.logger.info(type(old_event.data.values.tolist()))
-    app.logger.info(es)
-    app.logger.info('========== event ==========')
+
 
     return render_template("events.html", es=es)
 
@@ -373,18 +369,18 @@ def find_members():
     next_url = url_for("find_members", page=ms_paginate.next_num)
 
 
-    app.logger.info('========== event ==========')
-    app.logger.info(ms_paginate)
-    app.logger.info('========== event ==========')
+
+
+
+    
+    # https://stackoverflow.com/questions/14754994/why-is-sqlalchemy-count-much-slower-than-the-raw-query
+    statement = db.session.query(db.func.count(Member.mcfId))
+    count = db.session.scalars(statement).first() # coz I dont know a better/faster way to count records
+
     
     # return "wait"
     # ms_dict = [m.__dict__ for m in ms]
-    return render_template("members.html", ms=ms_paginate.items, prev_url=prev_url, next_url=next_url, page=page, totalPages=ms_paginate.pages)
-
-                    
-
-
-
+    return render_template("members.html", ms=ms_paginate.items, prev_url=prev_url, next_url=next_url, page=page, totalPages=ms_paginate.pages, totalCount=count)
 
 
 
@@ -400,6 +396,16 @@ def main_page():
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     if request.method == 'POST':
+
+
+        # ========== TEST ==========
+        next = request.args.get("next")
+        app.logger.info("********")
+        app.logger.info(next)
+        app.logger.info("********")
+        # ========== TEST ==========
+
+        
         if current_user.is_authenticated:
             return redirect(url_for('main_page'))
 
@@ -416,17 +422,21 @@ def login():
             return C_templater.custom_render_template("Login Problem", ["Member does not exist"], True)        
         # isPasswordVerified = bcrypt.check_password_hash(bcrypt.generate_password_hash(password).decode('utf-8'), m.password)
         
-        if not m.check_password(password):    
-            return C_templater.custom_render_template("Login Problem", ["Wrong password"], True)
+        if not m.check_password(password):
+            return render_template("login.html", whatHappened = "Wrong password")
+            # return C_templater.custom_render_template("Login Problem", ["Wrong password"], True)
         else:
             login_user(m)
             query = sa.select(Event)
             es = db.session.scalars(query).all()
+            if not es: es = []
             tr = []
-            for e in m.getEvents().split(","):            
-                statement = db.select(Event).where(Event.id == e)
-                e = db.session.scalars(statement).first()
-                tr.append(e.tournamentName)
+
+            if m.getEvents():
+                for e in m.getEvents().split(","):            
+                    statement = db.select(Event).where(Event.id == e)
+                    e = db.session.scalars(statement).first()
+                    tr.append(e.tournamentName)
                         
             return render_template("member-front.html", m=m, tournamentRegistered=tr, tournamentOptions=es)
 
@@ -453,9 +463,7 @@ def member_front():
                 e = db.session.scalars(statement).first()
                 tr.append(e.tournamentName)
             
-        app.logger.info("+++++")
-        app.logger.info(tr)
-        app.logger.info("+++++")
+
 
 
         return render_template("member-front.html", m=m, tournamentRegistered=tr, tournamentOptions=es)
@@ -488,7 +496,7 @@ def bulk_upload_events_csv():
                 db.session.commit()
             except IntegrityError as i:
                 db.session.rollback()
-                app.logger.info(i._message())
+                # app.logger.info(i._message())
                 return C_templater.custom_render_template("DB-API IntegrityError", [i._message()], True)        
 
 
@@ -525,22 +533,22 @@ def bulk_upload_members_csv():
 
         except IntegrityError as i:
             db.session.rollback()
-            app.logger.info(i._message())
+            # app.logger.info(i._message())
                 # return C_templater.custom_render_template("Data entry error", i._message(), False)
             return C_templater.custom_render_template("DB-API IntegrityError", [i._message()], True)
         
 
-        if not duplicatesList:            
-            whatHappened = "Upload successful with no duplicates"
-        else:
-            whatHappened = "Upload successful with some duplicates"
+        # if not duplicatesList:            
+        #     whatHappened = "Upload successful with no duplicates"
+        # else:
+        #     whatHappened = "Upload successful with some duplicates"
 
 
 
 
         
 
-    return render_template("main-page.html", whatHappened=whatHappened, whyHappened=duplicatesList)
+    return render_template("main-page.html", whatHappened="Upload successful", updatesList=duplicatesList)
 
 
 
@@ -585,7 +593,7 @@ def bulk_upload_fide_csv():
             db.session.commit()
         except IntegrityError as i:
             db.session.rollback()
-            app.logger.info(i._message())
+            # app.logger.info(i._message())
                 # return C_templater.custom_render_template("Data entry error", i._message(), False)
             return C_templater.custom_render_template("DB-API IntegrityError", [i._message()], True)        
 
@@ -594,7 +602,7 @@ def bulk_upload_fide_csv():
     # else:
     #     whatHappened = "Upload successful with some duplicates"
 
-    return render_template("main-page.html", whatHappened="", whyHappened=[])
+    return render_template("main-page.html", whatHappened="frl file successfully uploaded")
 
 
 
@@ -606,17 +614,19 @@ def processMcfList():
 
     wanted_columns = [mapFrom['mcfId'], mapFrom['mcfName'], mapFrom['gender'], mapFrom['yearOfBirth'], mapFrom['state'], mapFrom['nationalRating'], mapFrom['fideId']]
 
-    chunksize = 200    
+    chunksize = 200
+    
     df = pd.read_csv(r'./storage/'+filename, usecols=wanted_columns, chunksize=chunksize, dtype=str)
+
 
 
     skippedList = []
     newList = []
     for chunk in df:
-        app.logger.info("==========")
+
         # app.logger.info(type(chunk))
         # app.logger.info(chunk)
-        app.logger.info("==========")
+
         values=[]
         
         for index, row in chunk.iterrows():
@@ -643,22 +653,21 @@ def processMcfList():
             )
             newList.append({"mcfId": row[mapFrom['mcfId']]})
 
-            app.logger.info("==========")
-            app.logger.info(values)
-            app.logger.info("==========")
+
             
     
         try:
             statement = db.insert(Member)
-            db.session.execute(statement, values)
+            if values: db.session.execute(statement, values)
             db.session.commit()
 
         except IntegrityError as i:
             db.session.rollback()
-            app.logger.info(i._message())
+            # app.logger.info(i._message())
             # return C_templater.custom_render_template("Data entry error", i._message(), False)
             return C_templater.custom_render_template("DB-API IntegrityError", [i._message()], True)
 
+    tryRemoveMcfFile("./storage/mcf.csv")
 
     if not skippedList:            
         whatHappened = "No records skipped"
@@ -674,7 +683,10 @@ def processMcfList():
 
 def processFideList():
     filename = "frl.csv"
-    whyHappened = []
+    noMatchList = []
+
+    # nonlocal noMatchList
+    updatesList = []
 
     mapFrom = C_mapper.excelToDatabase[filename]
     with open(r'./storage/'+filename, newline='') as csvfile:
@@ -687,9 +699,12 @@ def processFideList():
             if m:                          
                 m.fideId=row[mapFrom['fideId']]
                 m.fideName=row[mapFrom['fideName']]                       
-                m.fideRating=row[mapFrom['fideRating']]                           
+                m.fideRating=row[mapFrom['fideRating']]
+                updatesList.append({"mcfId": m.mcfId})
+                                    
             else:
-                whyHappened.append({
+                # nonlocal noMatchList
+                noMatchList.append({
                     "fideId": row[mapFrom['fideId']],
                     "fideName": row[mapFrom['fideName']],
                     "fideRating": row[mapFrom['fideRating']]
@@ -701,21 +716,27 @@ def processFideList():
 
     except IntegrityError as i:
         db.session.rollback()
-        app.logger.info(i._message())
+        # app.logger.info(i._message())
         # return C_templater.custom_render_template("Data entry error", i._message(), False)
         return C_templater.custom_render_template("DB-API IntegrityError", [i._message()], True)
 
-    if not whyHappened:            
-        whatHappened = "Upload successful with no inconsistencies"
-    else:
-        whatHappened = "Upload successful BUT with the FIDE ID listed with no matching MCF ID"
+
+    tryRemoveMcfFile("./storage/frl.csv")
+
+    
+    # if not whyHappened:
+    
+    whatHappened = "Upload done with details below"
+    
+    # else:
+        # whatHappened = "Upload successful BUT with the FIDE ID listed with no matching MCF ID"
 
         
 
-    app.logger.info(whyHappened)
+    # app.logger.info(whyHappened)
 
 
-    return whatHappened, whyHappened
+    return whatHappened, updatesList, noMatchList
 
 
 
@@ -737,16 +758,14 @@ def updateMcfList():
     
     updatesList = []
     for index,row in df.iterrows():
-        app.logger.info("==========")
+
         # app.logger.info(type(chunk))
         # app.logger.info(chunk)
-        app.logger.info("==========")
-        values=[]
+
         
 
         m = Member.query.filter_by(mcfId=row[mapFrom['mcfId']]).first()
-        app.logger.info(m.mcfName)
-        app.logger.info(row[mapFrom['mcfName']])
+
 
         if m:
             if m.mcfName != row[mapFrom['mcfName']] or m.gender != row[mapFrom['gender']] or m.yearOfBirth != row[mapFrom['yearOfBirth']] or m.state != row[mapFrom['state']] or m.nationalRating != row[mapFrom['nationalRating']] or m.fideId != row[mapFrom['fideId']]:
@@ -764,17 +783,6 @@ def updateMcfList():
             
         
 
-                
-        try:
-            db.session.commit()
-        except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
-            db.session.rollback()
-            return C_templater.custom_render_template(errorTopic="DB-API IntegrityError", errorsList=[i._message], isTemplate=True)
-        except DataError as d:
-            db.session.rollback()
-            return C_templater.custom_render_template(errorTopic="DB API DataError", errorsList=[d._message], isTemplate=True)
-
-
 
                 
         if not updatesList:            
@@ -782,18 +790,39 @@ def updateMcfList():
         else:
             whatHappened = "Some updated records"
 
+            
+        try:
+            db.session.commit()
+        except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
+            whatHappened = "DB-API IntegrityError"
+            db.session.rollback()
+            # return C_templater.custom_render_template(errorTopic="DB-API IntegrityError", errorsList=[i._message], isTemplate=True)
+        except DataError as d:
+            whatHappened = "DB API DataError"
+            db.session.rollback()
+            # return C_templater.custom_render_template(errorTopic="DB API DataError", errorsList=[d._message], isTemplate=True)
+
+
+
+    tryRemoveMcfFile("./storage/mcf.csv")
+
+                
+
 
     return whatHappened, updatesList
 
 
 
-def updateFrlList():
-    return "mpthing", "nptin"
+# def updateFrlList():
+#     return "mpthing", "nptin"
 
 
 
 @app.route('/bulk-process-all-mcf')
 def bulk_process_all_mcf():
+
+    if not os.path.isfile("./storage/mcf.csv"):
+        return C_templater.custom_render_template(errorTopic="Invalid Upload Name", errorsList=["files must be a csv and contain \"mcf\" in its filename"], isTemplate=True)
     whatHappened, skippedList, newList = processMcfList()
 
     return render_template("main-page.html", whatHappened=whatHappened, skippedList=skippedList, newList=newList)
@@ -801,23 +830,26 @@ def bulk_process_all_mcf():
 
 @app.route('/bulk-process-all-frl')
 def bulk_process_all_frl():
-    whatHappened, whyHappened = processFideList()
+    whatHappened, updatesList, noMatchList = processFideList()
 
-    return render_template("main-page.html", whatHappened=whatHappened, whyHappened=whyHappened)
+    return render_template("main-page.html", whatHappened=whatHappened, updatesList=updatesList, noMatchList=noMatchList)
 
 
 @app.route('/bulk-update-all-mcf')
 def bulk_update_all_mcf():
+    if not os.path.isfile("./storage/mcf.csv"):
+        return C_templater.custom_render_template(errorTopic="Invalid Upload Name", errorsList=["files must be a csv and contain \"mcf\" in its filename"], isTemplate=True)
+
     whatHappened, updatesList= updateMcfList()
 
     return render_template("main-page.html", whatHappened=whatHappened, updatesList=updatesList)
 
 
-@app.route('/bulk-update-all-frl')
-def bulk_update_all_frl():
-    whatHappened, updatesList= updateFrlList()
+# @app.route('/bulk-update-all-frl')
+# def bulk_update_all_frl():
+#     whatHappened, updatesList= updateFrlList()
 
-    return render_template("main-page.html", whatHappened=whatHappened, updatesList=updatesList)
+#     return render_template("main-page.html", whatHappened=whatHappened, updatesList=updatesList)
 
 
 
@@ -827,7 +859,7 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
 def allowed_bulk_upload(filename):
-    return "mcf.csv" in filename.lower() or "frl.csv" in filename.lower()
+    return "mcf" in filename.lower() or "frl" in filename.lower()
     # return '.' in filename and \
     #        filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -846,18 +878,14 @@ def bulk_upload_all_files_1():
 
 
     if file1.filename == '':
-        return render_template("main-page.html", whatHappened="File must be named mcf.csv", whyHappened=[])
+        return render_template("main-page.html", whatHappened="File must be named mcf.csv")
 
 
-    app.logger.info("==========")
-    app.logger.info(allowed_bulk_upload(file1.filename))
+
     if file1 \
        and allowed_bulk_upload(file1.filename):
         filename1 = secure_filename(file1.filename)
-        file1.save(os.path.join('./storage/', filename1.lower()))
-        # filename2 = secure_filename(file2.filename)
-        # file2.save(os.path.join('./storage/', filename2.lower()))
-        # return 'File successfully uploaded'
+        file1.save(os.path.join('./storage/mcf.csv'))
         return render_template("main-page.html", whatHappened="MCF file successfully uploaded")
     else:
         return C_templater.custom_render_template("Invalid Upload Name", [format(app.config['ALLOWED_EXTENSIONS']), "files must be named either mcf.csv"], True)
@@ -879,21 +907,102 @@ def bulk_upload_all_files_2():
     file2 = request.files['file2']
 
     if file2.filename == '':
-        return render_template("main-page.html", whatHappened="File must be named frl.csv", whyHappened=[])
+        return render_template("main-page.html", whatHappened="File must be named frl.csv")
 
 
-    app.logger.info("==========")
-    app.logger.info(allowed_bulk_upload(file2.filename))
+
     if file2 \
        and allowed_bulk_upload(file2.filename):
         filename2 = secure_filename(file2.filename)
-        file2.save(os.path.join('./storage/', filename2.lower()))
+        file2.save(os.path.join('./storage/frl.csv'))
         # return 'File successfully uploaded'
-        return render_template("main-page.html", whatHappened="Both files successfully uploaded")
+        return render_template("main-page.html", whatHappened="FRL file successfully uploaded")
     else:
         return C_templater.custom_render_template("Invalid Upload Name", [format(app.config['ALLOWED_EXTENSIONS']), "files must be named either frl.csv"], True)
         # return 'Invalid file type'
     # return "wait"
+
+
+
+    
+@app.route('/test_bulk_download') 
+def test_bulk_download():
+    """Dont Delete This Function. this is to self-document
+
+    This function shows different of converting SQLAlchemy results
+    to dicts"""
+
+    range = 100
+
+    query = sa.select(Member).order_by(Member.mcfName)
+    some_object = db.session.query(Member).order_by(Member.mcfName).offset(100).limit(100)
+
+
+
+        
+    
+    ms_paginate=db.paginate(query, page=1, per_page=100, error_out=False)
+    # ms_paginate2=db.paginate(query, page=1, per_page=100, error_out=False)
+    # results = session.query(Member).all()
+
+
+    
+
+
+    
+    df = pd.DataFrame()
+
+    
+    rec = []
+    for m in ms_paginate.items:
+        rec.append(m.as_dict_for_file("mcf.csv"))
+        
+    df = df.from_dict(rec)
+
+    # df = pd.DataFrame(
+    #     {
+    #         "Name": ["Tesla", "Tesla", "Toyota", "Ford", "Ford", "Ford"],
+    #         "Type": ["Model X", "Model Y", "Corolla", "Bronco", "Fiesta", "Mustang"],
+    #     }
+    # )
+
+
+    output = BytesIO()
+    df.to_csv(output, index=False)
+    output.seek(0)
+
+    # return render_template("members.html", ms=ms_paginate.items, prev_url=prev_url, next_url=next_url, page=page, totalPages=ms_paginate.pages)
+    
+    return send_file(output, download_name="haha.csv", as_attachment=True, mimetype="str") # not sure if mimetype is necessary, can try removing
+
+
+@app.route('/true-download') 
+def true_download():
+
+
+    
+    downloadOffset = request.args.get("downloadOffset", type=int)
+
+    query = sa.select(Member).order_by(Member.mcfName)
+    ms_paginate=db.paginate(query, page=downloadOffset, per_page=20, error_out=False)
+    
+    df = pd.DataFrame()
+    rec = []
+    for m in ms_paginate.items:
+        rec.append(m.as_dict_for_file("mcf.csv"))
+        # rec.append(m.as_dict())
+        
+    df = df.from_dict(rec)
+
+    output = BytesIO()
+    df.to_csv(output, index=False)
+    output.seek(0)
+    
+    return send_file(output, download_name="haha.csv", as_attachment=True, mimetype="str") # not sure if mimetype is necessary, can try removing
+
+    # return "nothing burger"
+     
+    
 
 
 if __name__=='__main__': 
