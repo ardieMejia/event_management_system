@@ -19,32 +19,11 @@
 	    {{ whatHappened }}
 	</caption>
 	<tbody>
-	    <tr class="borders border-yellow-400  border-2">
-		<th class="bg-yellow-400 w-80 p-2">Process sample Events CSV</th>
-		<td>
-		    <div class="m-3">
-			<a href="{{ url_for('bulk_upload_events_csv') }}">Process a file</a>      
-		    </div>
-		</td>
-	    </tr>
-	    <tr class="borders border-yellow-400  border-2">
-		<th class="bg-yellow-400">Process sample Members CSV</th>
-		<td>
-		    <div class="m-3">
-			<a href="{{ url_for('bulk_upload_members_csv') }}">Process a file</a>      
-		    </div>
-		</td>
-	    </tr>
+	    
+	    
 	    
 
-	    <tr class="borders border-yellow-400  border-2">
-		<th class="bg-yellow-400">Process sample FIDE CSV</th>
-		<td>
-		    <div class="m-3">
-			<a href="{{ url_for('bulk_upload_fide_csv') }}">Process a file</a>      
-		    </div>
-		</td>
-	    </tr>
+	    
 	    <tr class="borders border-yellow-400  border-2">
 		<th class="bg-yellow-400 italic text-orange-600">Upload TRUE files</th>
 		<td>
@@ -71,7 +50,7 @@
 		    </form>
 
 		    <div id="tooltip-files-allowed" role="tooltip" placement="bottom" class="absolute z-10  inline-block border border-1 w-60 px-3 py-2 text-m font-medium text-black transition-opacity opacity-0  duration-300 bg-white rounded-lg shadow-xl tooltip">
-			Upload file must be named MCF.csv and FRL.csv. Mapping of column names are fixed. If you have custom headers, inform the Web Admin
+			Upload file must be named *mcf*.csv or *frl*.csv (Eg: mcf_9201.csv OR mcf.csv). Mapping of column names are fixed. If you have custom headers, inform the Web Admin
 
 		    </div>
 
@@ -127,23 +106,7 @@
 		</td>
 	    </tr>
 
-	    <tr class="borders border-yellow-400  border-2">
-		<th class="bg-yellow-400 italic text-orange-600">Update</th>
-		<td>
-		    <div class="m-3">
-
-
-
-			<a href="{{ url_for('bulk_update_all_frl') }}" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 " >Update FRL file</a>      
-			<div class="m-3">
-			    
-			    (keep records small)
-			</div>
-			
-			
-		    </div>
-		</td>
-	    </tr>
+	    
 
 	    
 
@@ -232,48 +195,31 @@
 			    </div>
 
 			{% endif %}
-			
-
-			{% if whyHappened %}
+			{% if failedUpdatesList %}
 			    
-			    {% for w in whyHappened %}
+			    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+				<table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+				    <thead class="text-xs text-orange-600 uppercase bg-gray-50">
+					<tr>
+					    <th scope="col" class="px-6 py-3">
+						Total Fail Updates
+					    </th>
+					</tr>
+				    </thead>
+				    <tbody>
+					<tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700 border-gray-200">
+					    
+					    <td class="px-6 py-4">
+						{{ failedUpdatesList|length }}
+					    </td>
+					</tr>
+				    </tbody>
+				</table>
+			    </div>
 
-
-
-
-				<div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-				    <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-					<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-					    <tr>
-						<th scope="col" class="px-6 py-3">
-						    FIDE ID
-						</th>
-						<th scope="col" class="px-6 py-3">
-						    FIDE Name
-						</th>
-					    </tr>
-					</thead>
-					<tbody>
-					    <tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700 border-gray-200">
-						<th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-						    {{ w.fideId }}
-						</th>
-						<td class="px-6 py-4">
-						    {{ w.fideName }}
-						</td>
-					    </tr>
-					</tbody>
-				    </table>
-				</div>
-
-
-				
-
-
-
-
-			    {% endfor %}
 			{% endif %}
+						
+
 
 
 		    </div>

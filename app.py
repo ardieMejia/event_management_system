@@ -65,6 +65,14 @@ end=0
 
 
 
+def tryRemoveMcfFile(filename):
+    # myfile = "/tmp/foo.txt"
+    # If file exists, delete it.
+    if os.path.isfile(filename):
+        os.remove(filename)
+    else:
+        pass
+
 @app.route('/single-member/<int:mcfId>', methods = ['GET']) 
 def single_member(mcfId):
 
@@ -735,14 +743,17 @@ def updateMcfList():
     
     wanted_columns = [mapFrom['mcfId'], mapFrom['mcfName'], mapFrom['gender'], mapFrom['yearOfBirth'], mapFrom['state'], mapFrom['nationalRating'], mapFrom['fideId']]
 
-    chunksize = 100   
+
     df = pd.read_csv(r'./storage/'+filename, usecols=wanted_columns, dtype=str)
 
+
+
     if df.size > 500:
-        return C_templater.custom_render_template("Filesize too huge", [i._message()], True)
+        return "Filesize should not be more than 500", []
 
     
     updatesList = []
+    failedUpdatesList = []
     for index,row in df.iterrows():
         app.logger.info("==========")
         # app.logger.info(type(chunk))
@@ -752,45 +763,48 @@ def updateMcfList():
         
 
         m = Member.query.filter_by(mcfId=row[mapFrom['mcfId']]).first()
-        app.logger.info(m.mcfName)
-        app.logger.info(row[mapFrom['mcfName']])
+
 
         if m:
-            if m.mcfName != row[mapFrom['mcfName']] or m.gender != row[mapFrom['gender']] or m.yearOfBirth != row[mapFrom['yearOfBirth']] or m.state != row[mapFrom['state']] or m.nationalRating != row[mapFrom['nationalRating']] or m.fideId != row[mapFrom['fideId']]:
-                m.mcfName = row[mapFrom['mcfName']]
-                m.gender = row[mapFrom['gender']]
-                m.yearOfBirth = row[mapFrom['yearOfBirth']]
-                m.state = row[mapFrom['state']]
-                m.nationalRating = row[mapFrom['nationalRating']]
-                m.fideId = row[mapFrom['fideId']]
-                m.password = bcrypt.generate_password_hash(row[mapFrom['mcfId']].strip() \
-                                                           + row[mapFrom['yearOfBirth']].strip() \
-                                                           ).decode('utf-8')
-                updatesList.append({"mcfId": row[mapFrom['mcfId']]})
+            m.mcfName = row[mapFrom['mcfName']]
+            m.gender = row[mapFrom['gender']]
+            m.yearOfBirth = row[mapFrom['yearOfBirth']]
+            m.state = row[mapFrom['state']]
+            m.nationalRating = row[mapFrom['nationalRating']]
+            m.fideId = row[mapFrom['fideId']]
+            m.password = bcrypt.generate_password_hash(row[mapFrom['mcfId']].strip() \
+                                                       + row[mapFrom['yearOfBirth']].strip() \
+                                                       ).decode('utf-8')
+            updatesList.append({"mcfId": row[mapFrom['mcfId']]})
 
             
         
 
-                
-        try:
-            db.session.commit()
-        except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
-            db.session.rollback()
-            return C_templater.custom_render_template(errorTopic="DB-API IntegrityError", errorsList=[i._message], isTemplate=True)
-        except DataError as d:
-            db.session.rollback()
-            return C_templater.custom_render_template(errorTopic="DB API DataError", errorsList=[d._message], isTemplate=True)
-
-
-
-                
         if not updatesList:            
             whatHappened = "No updated records"
         else:
-            whatHappened = "Some updated records"
+            whatHappened = "Updated record details below"
+                
+        try:
+            whatHappened = "Updated record details below"
+            db.session.commit()
+        except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
+            # whatHappened = "DB-API IntegrityError"
+            failedUpdatesList.append("DB-API IntegrityError")
+            db.session.rollback()
+            # return C_templater.custom_render_template(errorTopic="DB-API IntegrityError", errorsList=[i._message], isTemplate=True)
+        except DataError as d:
+            failedUpdatesList.append("DB API DataError")
+            db.session.rollback()
+            # return C_templater.custom_render_template(errorTopic="DB API DataError", errorsList=[d._message], isTemplate=True)
 
 
-    return whatHappened, updatesList
+
+    tryRemoveMcfFile("./storage/mcf.csv")                
+                
+
+
+    return whatHappened, updatesList, failedUpdatesList
 
 
 
@@ -815,16 +829,14 @@ def bulk_process_all_frl():
 
 @app.route('/bulk-update-all-mcf')
 def bulk_update_all_mcf():
-    whatHappened, updatesList= updateMcfList()
+    if not os.path.isfile("./storage/mcf.csv"):
+        return C_templater.custom_render_template(errorTopic="Invalid Upload Name", errorsList=["files must be a csv and contain \"mcf\" in its filename"], isTemplate=True)
+    whatHappened, updatesList, failedUpdatesList = updateMcfList()
 
-    return render_template("main-page.html", whatHappened=whatHappened, updatesList=updatesList)
+    return render_template("main-page.html", whatHappened=whatHappened, updatesList=updatesList, failedUpdatesList=failedUpdatesList)
 
 
-@app.route('/bulk-update-all-frl')
-def bulk_update_all_frl():
-    whatHappened, updatesList= updateFrlList()
 
-    return render_template("main-page.html", whatHappened=whatHappened, updatesList=updatesList)
 
 
 
@@ -834,7 +846,8 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
 def allowed_bulk_upload(filename):
-    return "mcf.csv" in filename.lower() or "frl.csv" in filename.lower()
+    # return True
+    return "mcf" in filename.lower() or "frl" in filename.lower()
     # return '.' in filename and \
     #        filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -861,7 +874,7 @@ def bulk_upload_all_files_1():
     if file1 \
        and allowed_bulk_upload(file1.filename):
         filename1 = secure_filename(file1.filename)
-        file1.save(os.path.join('./storage/', filename1.lower()))
+        file1.save(os.path.join('./storage/mcf.csv'))
         # filename2 = secure_filename(file2.filename)
         # file2.save(os.path.join('./storage/', filename2.lower()))
         # return 'File successfully uploaded'
@@ -894,7 +907,7 @@ def bulk_upload_all_files_2():
     if file2 \
        and allowed_bulk_upload(file2.filename):
         filename2 = secure_filename(file2.filename)
-        file2.save(os.path.join('./storage/', filename2.lower()))
+        file2.save(os.path.join('./storage/frl.csv'))
         # return 'File successfully uploaded'
         return render_template("main-page.html", whatHappened="Both files successfully uploaded")
     else:
