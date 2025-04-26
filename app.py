@@ -11,6 +11,8 @@ from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, current_user, login_user, logout_user
 from flask_paginate import Pagination, get_page_args
 from werkzeug.utils import secure_filename
+from sqlalchemy.orm import sessionmaker
+from contextlib import contextmanager
 import os
 import time
 import pandas as pd
@@ -33,6 +35,7 @@ from Models.declarative import EventListing # ===== remove this
 import sqlalchemy as sa
 app.app_context().push()
 from model import Event, Member
+Session = sessionmaker(bind=db.engine)
 
 
 from c_templater import C_templater
@@ -51,7 +54,18 @@ from c_mapper import C_mapper
 start=0
 end=0
 
-
+@contextmanager
+def session_scope():
+    """Provides a transactional scope around a series of operations."""
+    session = Session()
+    try:
+        yield session
+        session.commit()
+    except Exception:
+        session.rollback()
+        raise
+    finally:
+        session.close()
     
 # A decorator used to tell the application 
 # which URL is associated function 
@@ -210,34 +224,33 @@ def update_member():
 
 
 @app.route('/create-event', methods = ['POST']) 
-def create_event():                
-    e = Event(tournamentName=request.form['tournamentName'], startDate=request.form['startDate'], endDate=request.form['endDate'], discipline=request.form['discipline'])
+def create_event():
+    
+    with session_scope() as session:
+        e = Event(tournamentName=request.form['tournamentName'], startDate=request.form['startDate'], endDate=request.form['endDate'], discipline=request.form['discipline'])
 
-    if e.isDataValid(p_tournameName=e.tournamentName, p_startDate=e.startDate, p_endDate=e.endDate, p_discipline=e.discipline):
-        errorsList = e.isDataValid(p_tournameName=e.tournamentName, p_startDate=e.startDate, p_endDate=e.endDate, p_discipline=e.discipline)
-        app.logger.info("++++++++++")
-        app.logger.info(errorsList)
-        app.logger.info("++++++++++")
-        app.logger.info("++++++++++")
-        return C_templater.custom_render_template(errorTopic="Invalid Input Error", errorsList=errorsList, isTemplate=True)
     
-    db.session.add(e)
-    
-    try:
+        if e.isDataInvalid(p_tournameName=e.tournamentName, p_startDate=e.startDate, p_endDate=e.endDate, p_discipline=e.discipline):
+            errorsList = e.isDataInvalid(p_tournameName=e.tournamentName, p_startDate=e.startDate, p_endDate=e.endDate, p_discipline=e.discipline)
+            return C_templater.custom_render_template(errorTopic="Invalid Input Error", errorsList=errorsList, isTemplate=True)
+
+
+        e.id = e.set_id()
+        db.session.add(e)
         db.session.commit()
-    except IntegrityError as i:
-        db.session.rollback()
-        return C_templater.custom_render_template(errorTopic="DB-API IntegrityError", errorsList=[i._message], isTemplate=True)
-    # this ones good ===== return c_templater("Data entry error", "tournament name duplicate", "error.html")
+
+    
+    
+        # try:
+        #     db.session.commit()
+        # except IntegrityError as i:
+        #     db.session.rollback()
+        # return C_templater.custom_render_template(errorTopic="DB-API IntegrityError", errorsList=[i._message], isTemplate=True)
+        # this ones good ===== return c_templater("Data entry error", "tournament name duplicate", "error.html")
         
-    app.logger.info('========== event ==========')
-    # app.logger.info(request.form['EVENT ID'])
-    # app.logger.info(type(old_event.data.values.tolist()))
-    app.logger.info(e)
-    app.logger.info('========== event ==========')
 
 
-    return render_template("confirmed-event-created.html", e=e)
+        return render_template("confirmed-event-created.html", e=e)
 
 
 @app.route('/create-member', methods = ['POST'])
@@ -353,15 +366,24 @@ def find_events():
     # db.session.add(e)
     # db.session.commit()
 
-    query = sa.select(Event)
-    es = db.session.scalars(query).all()
+            
 
-    
-    
+    es = None
+    with session_scope() as session:
+        try:
+            es = session.query(Event).all()
+            # m = sa.select(Event)
+            # es = db.session.scalars(query).all()
+        except Exception as e:
+            session.rollback()
+            return f"An error occurred: {str(e)}", 500    
+
+    if not es:
+        return render_template("events.html")
+        
     app.logger.info('========== event ==========')
     # app.logger.info(request.form['EVENT ID'])
     # app.logger.info(type(old_event.data.values.tolist()))
-    app.logger.info(es)
     app.logger.info('========== event ==========')
 
     return render_template("events.html", es=es)
