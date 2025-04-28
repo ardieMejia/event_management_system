@@ -471,6 +471,7 @@ def login():
         return render_template("login.html")
 
 
+
     
     
 @app.route('/member-front')
@@ -493,6 +494,7 @@ def member_front():
         app.logger.info("+++++")
         app.logger.info(tr)
         app.logger.info("+++++")
+
 
 
         return render_template("member-front.html", m=m, tournamentRegistered=tr, tournamentOptions=es)
@@ -658,12 +660,10 @@ def processMcfList():
         
         for index, row in chunk.iterrows():
 
-            
             if Member.doesUserExist(row[mapFrom['mcfId']]):
                 skippedList.append({"mcfId": row[mapFrom['mcfId']]})
                 continue
 
-                
             values.append(
                 {
                     "mcfId": row[mapFrom['mcfId']],
