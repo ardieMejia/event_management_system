@@ -447,6 +447,7 @@ def login():
         # app.logger.info('Received data:', mcfId , password)
         # app.logger.info('========== ---------- ++++++++++')
 
+
         m = Member.query.filter_by(mcfId=mcfId).first()
         if m is None:
             # return "member ID does NOT exist"
@@ -456,14 +457,16 @@ def login():
         if not m.check_password(password):    
             return C_templater.custom_render_template("Login Problem", ["Wrong password"], True)
         else:
+            es = []
             login_user(m)
             query = sa.select(Event)
             es = db.session.scalars(query).all()
             tr = []
-            for e in m.getEvents().split(","):            
-                statement = db.select(Event).where(Event.id == e)
-                e = db.session.scalars(statement).first()
-                tr.append(e.tournamentName)
+            if m.getEvents():
+                for e in m.getEvents().split(","):            
+                    statement = db.select(Event).where(Event.id == e)
+                    e = db.session.scalars(statement).first()
+                    tr.append(e.tournamentName)
                         
             return render_template("member-front.html", m=m, tournamentRegistered=tr, tournamentOptions=es)
 
