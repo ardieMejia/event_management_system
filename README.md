@@ -12,7 +12,6 @@
   3. [General Python notes in org mode](https://github.com/ardieMejia/my-org-files/blob/main/misc/2021/Python.org): Notes on Python in general. The many peculiar tricks one can do in Python (List comprehension, etc..)
 ### Branch details:
   * Pushed into production is tailwind_1_safe.
->>>>>>> tailwind_1_safe
 ### To run details:
   * flask --app main.py run --debug --extra-files "templates/form.html:crud.py:main.py"
   #### I use this trick with --extra-files
@@ -24,7 +23,6 @@
 	  echo ${extra_f_var}
 }
   ```
-
   * Example of temp_extra_files.txt contains files that need watching like:
   ```
   app.py:config.py:model.py:wsgi.py:xlsx2csv.py:./templates/base_form_h.html
@@ -37,9 +35,9 @@
       <img width="100" src="https://static.cdnlogo.com/logos/y/92/youtube.svg" alt="YouTube">
   </a>
 </p> 
+
 ##### To contribute to my efforts:
   * Im not just a programmer, I do piano interpretations and Emacs exploration. If you believe in the importance of freelance work outside of just corporation constraint including art, writing and music. Please feel free to donate to my PayPal and be generous.## Heading
-
 ##### PayPal link:
 <p>
   <a href="https://paypal.me/ardiemejia83">
