@@ -1,14 +1,18 @@
-# Excel-Based-Event-Registration-Management-Python-CRUD-Application
-This project is a CRUD (Create, Read, Update, Delete) or FUCK (Find, Update, Create, Kill) application for a client. Code is documentation as usual. However:
+# Event-Registration-Management-Python-CRUD-Application
+1. 2 models: Member and Event
+2. Still a work in progress
+3. Flask + Tailwind CSS + PostgreSQL
+4. A CRUD (Create, Read, Update, Delete) or FUCK (Find, Update, Create, Kill) based project application, working prototype for Malaysian Chess Federation
+5. Code is documentation as usual. However:
 
 ---
-### If you like reading my mental shit (basically a diary jotted every day since this project started):
-  1. [My Python Diary](https://github.com/ardieMejia/my-org-files/blob/main/misc/2021/PythonDiary.org): It gets better by day 20 above. But it shows every bit of exploration.
-### If you want something better:
-  1. [Python notes on Frameworks in org mode](https://github.com/ardieMejia/my-org-files/blob/main/misc/2025/frameworks.org): My much better written notes on Python Frameworks. It has links on popular blogs and everything. I recommend reading this and the one below if your only starting to learn Jinja. I now finally understand Django, but Jinja helps a lot if youre only starting.
-  2. [General Python notes in org mode](https://github.com/ardieMejia/my-org-files/blob/main/misc/2021/Python.org): This is basic Python notes. Something I pick up here and there
+### Personal Notes:
+  1. [My Python Diary](https://github.com/ardieMejia/my-org-files/blob/main/misc/2021/PythonDiary.org): gradual writing since day 1.
+  2. [Python notes on Frameworks in org mode](https://github.com/ardieMejia/my-org-files/blob/main/misc/2025/frameworks.org): Links and writings on frameworks in general
+  3. [General Python notes in org mode](https://github.com/ardieMejia/my-org-files/blob/main/misc/2021/Python.org): Notes on Python in general. The many peculiar tricks one can do in Python (List comprehension, etc..)
 ### Branch details:
-  * Pushed into production is tailwind_1_safe. (If Im not updating thie repo anymore, it means we're using main)
+  * Pushed into production is tailwind_1_safe.
+>>>>>>> tailwind_1_safe
 ### To run details:
   * flask --app main.py run --debug --extra-files "templates/form.html:crud.py:main.py"
   #### I use this trick with --extra-files
@@ -20,16 +24,29 @@ This project is a CRUD (Create, Read, Update, Delete) or FUCK (Find, Update, Cre
 	  echo ${extra_f_var}
 }
   ```
+
+  * Example of temp_extra_files.txt contains files that need watching like:
+  ```
+  app.py:config.py:model.py:wsgi.py:xlsx2csv.py:./templates/base_form_h.html
+ ```
 ##### To contact me, if any question:
   * wan_ahmad_ardie@yahoo.com
+##### My other links:
+<p>My YouTube channel: 
+  <a href="https://www.youtube.com/@ArdieMejia83">
+      <img width="100" src="https://static.cdnlogo.com/logos/y/92/youtube.svg" alt="YouTube">
+  </a>
+</p> 
 ##### To contribute to my efforts:
-  * Im struggling with living and contributing to projects. If you believe in the importance of freelance work outside of the constraints of corporations and contributions in everything (art, writing, music). Please feel free to donate to my PayPal and be generous.
+  * Im not just a programmer, I do piano interpretations and Emacs exploration. If you believe in the importance of freelance work outside of just corporation constraint including art, writing and music. Please feel free to donate to my PayPal and be generous.## Heading
+
 ##### PayPal link:
 <p>
   <a href="https://paypal.me/ardiemejia83">
       <img src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" alt="paypal">
   </a>
 </p> 
+
 
 
 

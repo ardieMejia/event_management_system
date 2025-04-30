@@ -18,11 +18,13 @@ pip install tabulate
 pip install openpyxl
 pip install Flask
 pip install Flask-SQLAlchemy
+pip install Flask-Migrate
+flask_jwt_extended
+flask_bcrypt
+psycopg2_binary
 
 
 #+end_quote
-<<<<<<< Updated upstream
-=======
 * TODO
 
 create and run an app from code
@@ -36,7 +38,6 @@ using alchemy, we then commit this new object
 ** easy for him
 ** he can easily create a dropdown himself
 ** he can use his helper functions to easily view specific events at will
-** 
 * advantages of database over excel
 ** more predictable in thesystem
 ** easy to ensure data integrity, of something happens such as a connection problem right when the user registers 
@@ -47,4 +48,54 @@ using alchemy, we then commit this new object
 *** he retains the Excel workfow, and i have to think of uploading it to database
 * we have to read on this:
 ** https://trumpexcel.com/extract-data-from-drop-down-list/
+* Explain:
+** Show the mapping, and why this makes it easy for first time bulk upload. But its tied to filename
+** Show the FIDE check feature, it checks if number fields should be numbers
+** show all duplicates error, of each file
+* unique ID:
+** MCFID+yearofbirth
+* FIDE rating:
+** 1400 - 2800
+** or 0 or ''
+* Upload
 ** https://trumpexcel.com/extract-data-from-drop-down-list/
+* Tests:
+** Test to make sure mcf and frl.csv files are deleted everytime
+** Password
+#+begin_quote
+
+220400066
+2010
+
+220300012
+2006
+
+220400014
+2011
+
+220300012
+2006
+
+#+end_quote
+** Events
+#+begin_quote
+
+MCF Office Blitz Q1 2025
+Malaysian Chess Amateur Championship
+National Interstate Chess Championship
+
+
+#+end_quote
+* Video:
+** All the processes from the video
+** Show wrongly uploading a video
+** Test if the same file is uploaded
+** Its simple, 2 types of uploads MCF file, if youre afraid of over-writing anything, use insert. If not, use update. It overwrites based on MCF ID, nothing else.
+** Theres only FRL inserts, becoz FRL are "updates" in nature. (subservient/dependent on existing MCF record).
+** Registering for an event
+** Show removing events registered
+** Showing logging in
+** Showing dropdown download
+** 
+** Searching members of a single event is doable but not implemented
+** 

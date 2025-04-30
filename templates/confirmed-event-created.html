@@ -1,62 +1,78 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-	<meta charset="utf-8">
-	<link rel="shortcut icon" href="%PUBLIC_URL%/favicon.png">
-	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<meta name="theme-color" content="#000000">
-	<link rel="manifest" href="%PUBLIC_URL%/manifest.json">
-	
-	<title>Urban Hero</title>
-    </head>
-      <body>
-
-	  <h2>Event details saved!!</h2>
-
-	  
-	      <!-- ==================== -->
-	      <table id="event_details" class="u-full-width">
-		  <thead>
-		      <tr>
-			  <th>Tournament Name</th>
-			  <th>Start Date</th>
-			  <th>End Date</th>
-			  <th>Discipline</th>
-		      </tr>
-		  </thead>
-		  <tbody>
-		      <tr>
-			  <td name = "tournamentName">{{ e.tournamentName }}</td>
-			  <td id = "startDate">{{ e.startDate }}</td>
-			  <td id = "endDate">{{ e.endDate }}</td>
-			  <td id = "discipline">{{ e.discipline }}</td>			  
-		      </tr>
-		  </tbody>
+{% extends "base_error_h.html" %}
 
 
-	  <!-- <form id="my-form" action="{{ url_for('create_event') }}" method="post"> -->
-	  <!--   <\!-- <label for="MEMBER ID">MEMBER ID</label><br> -\-> -->
-	  <!--   <\!-- <input type="text" id="MEMBER ID" name="MEMBER ID" value=""><br> -\-> -->
-	  <!--   <label for="tournamentName">Tournament Name</label> -->
-	  <!--   <input type="text" id="tournamentName" name="tournamentName" value=""><br> -->
-	    
-	  <!--   <label for="startDate">Start Date</label> -->
-	  <!--   <input type="text" id="startDate" name="startDate" value=""><br> -->
-	    
-	  <!--   <label for="endDate">End Date</label> -->
-	  <!--   <input type="text" id="endDate" name="endDate" value=""><br> -->
-	    
-	  <!--   <label for="discipline">Discipline</label> -->
-	  <!--   <input type="text" id="discipline" name="discipline" value=""><br> -->
-	    
-	    
-	    
-	    
-	    
-	  <!--   <input type="submit" value="Save to Database"> -->
-	  <!-- </form> -->
-	  
-	  
-      </body>
-</html>
+
+
+
+
+
+{% block error %}
+
+    <br><br>
+
+
+
+    <div class="flex p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400" role="alert">
+	<div>
+	    <span class="text-lg">Event created: </span>
+	    <br>
+	    <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+
+		<tbody>
+		    <tr class="text-xs  uppercase bg-gray-50 border-b border-gray-200">
+			<th  class="text-orange-600 p-6 p-4">
+			    Tournament Name
+			</th>
+			<td class="p-6 p-4">
+			    {{ e.tournamentName }}
+			</td>
+		    </tr>
+		    <tr>
+			<th class="text-xs text-orange-600 uppercase bg-gray-50 p-6 p-4">
+			    Start Date
+			</th>
+			<td class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700 border-gray-200 p-6 p-4">
+			    {{ e.startDate }}
+			</td>
+		    </tr>
+		    <tr class="text-xs  uppercase bg-gray-50 border-b border-gray-200">
+			<th class="text-xs text-orange-600 uppercase bg-gray-50 p-6 p-4">
+			    End Date
+			</th>
+			<td class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700 border-gray-200 p-6 p-4">
+			    {{ e.endDate }}
+			</td>
+		    </tr>
+		    <tr class="text-xs  uppercase bg-gray-50 border-b border-gray-200">
+			<th class="text-xs text-orange-600 uppercase bg-gray-50 p-6 p-4">
+			    Discipline
+			</th>
+			<td class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700 border-gray-200 p-6 p-4">
+			    {{ e.discipline }}
+			</td>
+		    </tr>
+		    <tr class="text-xs  uppercase bg-gray-50 border-b border-gray-200">
+			<td colspan = "2" class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700 border-gray-200 p-6 p-4">
+			    <ul class="mt-2 list-disc list-inside">
+			    <a href="{{ url_for('find_events') }}" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 " >Continue</a>
+			</ul>
+			</td>
+		    </tr>
+
+
+		</tbody>
+	    </table>
+	</div>
+    </div>
+
+
+
+
+
+
+
+{% endblock %}
+
+
+
 
