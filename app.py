@@ -416,6 +416,7 @@ def find_members():
     app.logger.info('========== event ==========')
     app.logger.info(ms_paginate)
     app.logger.info('========== event ==========')
+    db.session.close()
     
     # return "wait"
     # ms_dict = [m.__dict__ for m in ms]
@@ -782,6 +783,7 @@ def updateMcfList():
     
     updatesList = []
     failedUpdatesList = []
+    skippedList = []
     for index,row in df.iterrows():
         app.logger.info("==========")
         # app.logger.info(type(chunk))
@@ -804,17 +806,15 @@ def updateMcfList():
                                                        + row[mapFrom['yearOfBirth']].strip() \
                                                        ).decode('utf-8')
             updatesList.append({"mcfId": row[mapFrom['mcfId']]})
+        else:
+            skippedList.append({"mcfId": row[mapFrom['mcfId']]})
 
             
         
 
-        if not updatesList:            
-            whatHappened = "No updated records"
-        else:
-            whatHappened = "Updated record details below"
+
                 
         try:
-            whatHappened = "Updated record details below"
             db.session.commit()
         except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
             # whatHappened = "DB-API IntegrityError"
@@ -827,12 +827,19 @@ def updateMcfList():
             # return C_templater.custom_render_template(errorTopic="DB API DataError", errorsList=[d._message], isTemplate=True)
 
 
+    if not updatesList and not failedUpdatesList:            
+        whatHappened = "No updated records"
+    if not updatesList and failedUpdatesList:            
+        whatHappened = "No updated records with failed update details below"
+    else:
+        whatHappened = "Updated record details below"
+
 
     tryRemoveMcfFile("./storage/mcf.csv")                
                 
 
 
-    return whatHappened, updatesList, failedUpdatesList
+    return whatHappened, updatesList, failedUpdatesList, skippedList
 
 
 
@@ -859,9 +866,10 @@ def bulk_process_all_frl():
 def bulk_update_all_mcf():
     if not os.path.isfile("./storage/mcf.csv"):
         return C_templater.custom_render_template(errorTopic="Invalid Upload Name", errorsList=["files must be a csv and contain \"mcf\" in its filename"], isTemplate=True)
-    whatHappened, updatesList, failedUpdatesList = updateMcfList()
+    # ===== failedUpdatesList: for now only the length of the list is used in the template
+    whatHappened, updatesList, failedUpdatesList, skippedList = updateMcfList()
 
-    return render_template("main-page.html", whatHappened=whatHappened, updatesList=updatesList, failedUpdatesList=failedUpdatesList)
+    return render_template("main-page.html", whatHappened=whatHappened, updatesList=updatesList, failedUpdatesList=failedUpdatesList, skippedList=skippedList)
 
 
 
