@@ -34,7 +34,7 @@ class C_mapper:
                             # "password":"ID_No", 
                             "gender":"Sex", 
                             "yearOfBirth":"birthday", 
-                            "state":"FED", 
+                            "state":"Clubnumber", 
                             "nationalRating":"rtg_nat", 
                             "fideId":"fide_no"
                         },

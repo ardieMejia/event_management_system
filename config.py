@@ -10,6 +10,17 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY')
     UPLOAD_FOLDER = './storage'
     ALLOWED_EXTENSIONS = {'txt', 'png', 'pdf', 'jpg', 'jpeg'}
+
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        # 'pool': QueuePool(creator),
+        # 'pool_size': 10,
+        # 'pool_recycle': 120,
+        # 'pool_pre_ping': True
+        # 'idle_in_transaction_session_timeout': 1200000,
+        # 'idle_session_timeout': 1200000,
+        # 'poolclass' : NullPool,
+        'connect_args' : {"connect_timeout": 300}
+    }
     
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'sqlite:///' + os.path.join(basedir, 'app.db')

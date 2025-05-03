@@ -13,6 +13,7 @@ from flask_paginate import Pagination, get_page_args
 from werkzeug.utils import secure_filename
 from sqlalchemy.orm import sessionmaker
 from contextlib import contextmanager
+from sqlalchemy.orm import close_all_sessions
 import os
 import time
 import pandas as pd
@@ -54,6 +55,8 @@ from c_mapper import C_mapper
 
 with app.app_context():
     # db.drop_all()
+    close_all_sessions()
+    db.engine.dispose()    
     db.drop_all()
     db.create_all()
 # =======
