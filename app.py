@@ -59,7 +59,7 @@ with app.app_context():
     db.engine.dispose()    
     db.drop_all()
     db.create_all()
-    db.commit()
+    db.session.commit()
 # =======
     
 start=0
@@ -380,22 +380,33 @@ def find_events():
             
 
     es = None
-    with session_scope() as session:
-        try:
-            es = session.query(Event).all()
-            # m = sa.select(Event)
-            # es = db.session.scalars(query).all()
-        except Exception as e:
-            session.rollback()
-            return f"An error occurred: {str(e)}", 500    
+    # with session_scope() as session:
+    #     try:
+    #         es = session.query(Event).all()
+    #         # m = sa.select(Event)
+    #         # es = db.session.scalars(query).all()
+    #     except Exception as e:
+    #         session.rollback()
+    #         return f"An error occurred: {str(e)}", 500
+        
 
-    if not es:
-        return render_template("events.html")
+    try:
+        es = db.session.query(Event).all()
+        # m = sa.select(Event)
+        # es = db.session.scalars(query).all()
+    except Exception as e:
+        session.rollback()
+        return f"An error occurred: {str(e)}", 500    
+
+    # if not es:
+    #     return render_template("events.html")
         
     app.logger.info('========== event ==========')
     # app.logger.info(request.form['EVENT ID'])
     # app.logger.info(type(old_event.data.values.tolist()))
     app.logger.info('========== event ==========')
+    
+    db.session.close()
 
     return render_template("events.html", es=es)
 
@@ -414,6 +425,10 @@ def find_members():
     next_url = url_for("find_members", page=ms_paginate.next_num)
 
 
+    # https://stackoverflow.com/questions/14754994/why-is-sqlalchemy-count-much-slower-than-the-raw-query
+    statement = db.session.query(db.func.count(Member.mcfId))
+    count = db.session.scalars(statement).first() # coz I dont know a better/faster way to count records
+
     app.logger.info('========== event ==========')
     app.logger.info(ms_paginate)
     app.logger.info('========== event ==========')
@@ -421,7 +436,7 @@ def find_members():
     
     # return "wait"
     # ms_dict = [m.__dict__ for m in ms]
-    return render_template("members.html", ms=ms_paginate.items, prev_url=prev_url, next_url=next_url, page=page, totalPages=ms_paginate.pages)
+    return render_template("members.html", ms=ms_paginate.items, prev_url=prev_url, next_url=next_url, page=page, totalPages=ms_paginate.pages, totalCount=count)
 
                     
 
@@ -951,6 +966,75 @@ def bulk_upload_all_files_2():
         return C_templater.custom_render_template("Invalid Upload Name", [format(app.config['ALLOWED_EXTENSIONS']), "files must be named either frl.csv"], True)
         # return 'Invalid file type'
     # return "wait"
+
+    
+
+@app.route('/test_bulk_download') 
+def test_bulk_download():
+    """Dont Delete This Function. this is to self-document
+
+    This function shows difference of converting SQLAlchemy results
+    to dicts"""
+
+    range = 100
+
+    query = sa.select(Member).order_by(Member.mcfName)
+    some_object = db.session.query(Member).order_by(Member.mcfName).offset(100).limit(100)
+
+    ms_paginate=db.paginate(query, page=1, per_page=100, error_out=False)
+    # ms_paginate2=db.paginate(query, page=1, per_page=100, error_out=False)
+    # results = session.query(Member).all()
+
+    df = pd.DataFrame()
+
+    rec = []
+    for m in ms_paginate.items:
+        rec.append(m.as_dict_for_file("mcf.csv"))
+        
+    df = df.from_dict(rec)
+
+    # df = pd.DataFrame(
+    #     {
+    #         "Name": ["Tesla", "Tesla", "Toyota", "Ford", "Ford", "Ford"],
+    #         "Type": ["Model X", "Model Y", "Corolla", "Bronco", "Fiesta", "Mustang"],
+    #     }
+    # )
+
+
+    output = BytesIO()
+    df.to_csv(output, index=False)
+    output.seek(0)
+
+    # return render_template("members.html", ms=ms_paginate.items, prev_url=prev_url, next_url=next_url, page=page, totalPages=ms_paginate.pages)
+    
+    return send_file(output, download_name="haha.csv", as_attachment=True, mimetype="str") # not sure if mimetype is necessary, can try removing when free
+
+@app.route('/true-download') 
+def partial_download():
+
+
+    
+    downloadOffset = request.args.get("downloadOffset", type=int)
+
+    query = sa.select(Member).order_by(Member.mcfName)
+    ms_paginate=db.paginate(query, page=downloadOffset, per_page=20, error_out=False)
+    
+    df = pd.DataFrame()
+    rec = []
+    for m in ms_paginate.items:
+        rec.append(m.as_dict_for_file("mcf.csv"))
+        # rec.append(m.as_dict())
+        
+    df = df.from_dict(rec)
+
+    output = BytesIO()
+    df.to_csv(output, index=False)
+    output.seek(0)
+    
+    return send_file(output, download_name="haha.csv", as_attachment=True, mimetype="str") # not sure if mimetype is necessary, can try removing
+
+    # return "nothing burger"
+     
 
 
 if __name__=='__main__': 

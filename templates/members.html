@@ -2,163 +2,206 @@
 
 
 {% block heading_1 %}
-Members
+    Members
 {% endblock %}
 
 {% block form %}
 
 
-<br>
+    <br>
 
-<table id="member_details" class="w-full table-auto">
-    <tr>
-	<th>
-	    <div class="flex justify-between p-3">
-		<a href="{{ prev_url }}"><div class="w-7">{% include 'backArrow.j2' %}</div>
-		</a>
-		<p>Page {{ page }} of {{ totalPages }}</p>
-		<a href="{{ next_url }}"><div class="w-7">{% include 'forwardArrow.j2' %}</div>
-		</a>
-	    </div>
-	</th>
-</table>
-
-
-
-<table id="member_details" class="table-auto border border-yellow-400 border-2 justify-items-center">
-    <caption class="caption-top text-red-600 italic p-2">
-	{{ whatHappened }}
-    </caption>
-    <thead>
-	<tr class="bg-yellow-400">
-	    <th class="w-30 p-1">MCF ID</th>
-	    <th class="w-60 p-1">MCF Name</th>
-	    <th class="w-10 p-1">Gender</th>
-	    <th class="w-20 p-1">Year of Birth</th>
-	    <th class="w-20 p-1">State</th>
-	    <th class="w-20 p-1">National Rating</th>
-	    <th class="w-30 p-1">Events</th>		    
-	    <th class="w-30 p-1">FIDE ID</th>		    
-	    <th class="w-30 p-1">FIDE Name</th>
-	    <th class="w-20 p-1">FIDE Rating</th>
-	    <th colspan="2">
-
-	    </th>		    
-
-	</tr>
-    </thead>
-    <tbody class="text-center">
-	{% for m in ms %}
-	<tr class="border border-yellow-400 border-2">
-	    <td id = "mcfId">{{ m.mcfId }}</td>
-	    <td id = "mdfName">{{ m.mcfName }}</td>
-	    <td id = "gender">{{ m.gender }}</td>
-	    <td id = "yearOfBirth">{{ m.yearOfBirth }}</td>
-	    <td id = "state">{{ m.state }}</td>
-	    <td id = "nationalRating">{{ m.nationalRating }}</td>
-	    <td id = "events">
-		there should be events here
-	    </td>
-	    <td id = "fide">
-		{{ m.fideId }}
-	    </td>
-	    <td id = "fideName">
-		{{ m.fideName }}
-	    </td>
-	    <td id = "fideRating">
-		{{ m.fideRating }}
-	    </td>
-	    <td>
-		<div class="m-2">
-		    <button type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none">
-			<a href={{ url_for('member_update_page', mcfId=m.mcfId )}}>Update Member</a>						    
-		    </button>
-		</div>
-	    </td>			  
-	    <td>
-		<div class="m-2">
-		    <button type="submit" >
-			
-			<a href={{ url_for('kill_member', mcfId=m.mcfId )}}>{% include 'trash.j2' %}</a>			
-		    </button>
-		</div>
-	    </td>			  
-	</tr>
-	{% endfor %}
+    <table id="member_details" class="w-full table-auto">
 	<tr>
-	    <td></td>
-	    <td></td>
-	    <td></td>
-	    <td></td>
-	    <td></td>
-	    <td></td>
-	    <td></td>
-	    <td></td>
-	    <td></td>
-	    <td></td>
-	    <td>
-		<div class="m-3">
-		    <button type="submit" 
-			    class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">
-
-			<a href={{ url_for('kill_members')}}>Remove All</a>      
-		    </button>
-		</div>			
-	    </td>
-	    <td>
-		<div class="m-3">
-		    <button type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none">
-
-			<a href={{ url_for('create_member')}}>Add Member</a>      
-		    </button>
-		</div>			
-	    </td>
-	</tr>
-    </tbody>
-</table>
-
-<br>
+	    <th>
+		<div class="flex justify-between p-3">
+		    <a href="{{ prev_url }}"><div class="w-7">{% include 'backArrow.j2' %}</div>
+		    </a>
+		    <p>Page {{ page }} of {{ totalPages }}</p>
+		    <a href="{{ next_url }}"><div class="w-7">{% include 'forwardArrow.j2' %}</div>
+		    </a>
+		</div>
+	    </th>
+    </table>
 
 
 
+    <table id="member_details" class="table-auto border border-yellow-400 border-2 justify-items-center">
+	<caption class="caption-top text-red-600 italic p-2">
+	    {{ whatHappened }}
+	</caption>
+	<thead>
+	    <tr class="bg-yellow-400">
+		<th class="w-30 p-1">MCF ID</th>
+		<th class="w-60 p-1">MCF Name</th>
+		<th class="w-10 p-1">Gender</th>
+		<th class="w-20 p-1">Year of Birth</th>
+		<th class="w-20 p-1">State</th>
+		<th class="w-20 p-1">National Rating</th>
+		<th class="w-30 p-1">Events</th>		    
+		<th class="w-30 p-1">FIDE ID</th>		    
+		<th class="w-30 p-1">FIDE Name</th>
+		<th class="w-20 p-1">FIDE Rating</th>
+		<th colspan="2">
 
-<table id="member_details" class="table-auto">
-    <tr>
-	<th>
-	    <div class="m-2">
-		<button id="showAll" type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4  border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none" >
+		</th>		    
+
+	    </tr>
+	</thead>
+	<tbody class="text-center">
+	    {% for m in ms %}
+		<tr class="border border-yellow-400 border-2">
+		    <td id = "mcfId">{{ m.mcfId }}</td>
+		    <td id = "mdfName">{{ m.mcfName }}</td>
+		    <td id = "gender">{{ m.gender }}</td>
+		    <td id = "yearOfBirth">{{ m.yearOfBirth }}</td>
+		    <td id = "state">{{ m.state }}</td>
+		    <td id = "nationalRating">{{ m.nationalRating }}</td>
+		    <td id = "events">
+			there should be events here
+		    </td>
+		    <td id = "fide">
+			{{ m.fideId }}
+		    </td>
+		    <td id = "fideName">
+			{{ m.fideName }}
+		    </td>
+		    <td id = "fideRating">
+			{{ m.fideRating }}
+		    </td>
+		    <td>
+			<div class="m-2">
+			    <button type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none">
+				<a href={{ url_for('member_update_page', mcfId=m.mcfId )}}>Update Member</a>						    
+			    </button>
+			</div>
+		    </td>			  
+		    <td>
+			<div class="m-2">
+			    <button type="submit" >
+				
+				<a href={{ url_for('kill_member', mcfId=m.mcfId )}}>{% include 'trash.j2' %}</a>			
+			    </button>
+			</div>
+		    </td>			  
+		</tr>
+	    {% endfor %}
+	    <tr>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td>
+		    <div class="m-3">
+			<button type="submit" 
+				class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">
+
+			    <a href={{ url_for('kill_members')}}>Remove All</a>      
+			</button>
+		    </div>			
+		</td>
+		<td>
+		    <div class="m-3">
+			<button type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none">
+
+			    <a href={{ url_for('create_member')}}>Add Member</a>      
+			</button>
+		    </div>			
+		</td>
+	    </tr>
+	</tbody>
+    </table>
+
+    <br>
+
+
+    <div class="grid grid-flow-col p-3">
+	
+	<div class="flex justify-start">		    
+	    <div class="w-20 m-2">
+		<button id="showAll" type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4  border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none">
 		    Show All
 		</button>
+
 	    </div>
-	</th>
-	<th>
-	    <div class="m-2">
+	    <div class="w-20 m-2">
 		
-		<button id="Simple" type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4  border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none " >
+		<button id="Simple" type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4  border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none ">
 		    Simple
 		</button>
 	    </div>
-	</th>
-	{% if prev_url %}
-	<th>
-	    <div class="m-3 w-10">
-		<a href="{{ prev_url }}" >{% include 'backArrow.j2' %}
-		</a>
-	    </div>
-	</th>
-	{% endif %}
-	<th>Page {{ page }} of {{ totalPages }}</th>
-	{% if next_url %}
-	<th>
-	    <div class="m-3 w-10">
-		<a href="{{ next_url }}" >{% include 'forwardArrow.j2' %}
-		</a>
-	    </div>
-	</th>
-	{% endif %}
-	
+	    {% if prev_url %}
 
-</table>
+		<div class="m-3 w-10">
+		    <a href="{{ prev_url }}">{% include 'backArrow.j2' %}
+		    </a>
+		</div>
+
+	    {% endif %}
+
+	    <div class="font-bold m-4 w-25">
+		
+
+		Page {{ page }} of {{ totalPages }}
+
+	    </div>
+
+	    {% if next_url %}
+		
+		<div class="m-3 w-10">
+		    <a href="{{ next_url }}">{% include 'forwardArrow.j2' %}
+		    </a>
+		</div>
+
+	    {% endif %}
+	</div>
+	<div class="flex justify-end items-center pl-10">
+	    <div  class="font-bold w-35 text-right p-3">
+		Download
+	    </div>
+	    <div class="font-bold w-25">
+		{% if totalCount %}
+		    <form action="{{ url_for('partial_download')  }}">
+			<button id="dropdownDefaultButton" data-dropdown-toggle="bulkDownload"  type="button" class="border border-gray  py-2 px-2 ">
+			    partial csv
+			</button>
+
+			<!-- Dropdown menu -->
+			<div id="bulkDownload" class="z-10 hidden">
+			    <select name="downloadOffset" id="downloadOffset" onchange="this.form.submit()" >
+				<option value="-1">--</option>
+				{% set steps = totalCount / 20 %}
+				{% set steps = steps|round(method='ceil')|int + 1 %}
+				{% for i in range(1,steps) %}
+				    <option value={{ i }}>
+
+					{{ i }}
+					
+
+					
+				    </option>
+				{% endfor %}
+			    </select>
+
+			</div>
+		    </form>
+		{% endif %}
+	    </div>
+	    <div  class="font-bold p-4">
+		from total 
+	    </div>
+	    <div class="border border-gray  py-2 px-2 font-bold">		    
+		{{ totalCount }}
+	    </div>
+	</div>
+    </div>
+
+
 
 
 
