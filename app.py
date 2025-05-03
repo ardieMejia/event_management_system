@@ -59,6 +59,7 @@ with app.app_context():
     db.engine.dispose()    
     db.drop_all()
     db.create_all()
+    db.commit()
 # =======
     
 start=0
