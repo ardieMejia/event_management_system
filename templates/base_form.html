@@ -8,8 +8,8 @@
 	<link rel="manifest" href="%PUBLIC_URL%/manifest.json">
 	<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 	<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-	<link href="custom.css" rel="stylesheet">
-	<link href="{{ url_for('static', filename='custom.css') }}" rel="stylesheet">
+	<!-- <link href="custom.css" rel="stylesheet"> -->
+	<link href="{{ url_for('static', filename='custom.css') }}" rel="stylesheet"/>
 
 	<link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
 	<title>MCF: Event Registration Page</title>
@@ -36,12 +36,7 @@
 	 /* bulk_upload_all_files_1 */
 
 
-	 function bulk_download_dropdown{	     
-	     /* $('div#bulkDownload').on('click', function(e) {
-		$(this).hide().prev('select:disabled').removeAttr('disabled').focus();		
-		}); */
-	     var button = document.getElementById("bulkDownload");	    
-	 }
+
 
 	 /* function initialise() {
 	    myFunction();
@@ -53,15 +48,25 @@
 	 // NOTE-TO-SELF: from a syntax POV, jquery onready consuses, where function has no ()
 	 /* $(document).ready(initialise); */
 
+
+	     function submitForm(){
+		 var selValue = document.getElementById("downloadOffset").value;
+		 console.log(selValue)
+		 if (selValue != -1){
+		     document.partialDownload.submit();
+		 }
+	     }
+
 	 
 	 /** @description My first ever jquery */
-	 $(document).ready({
-	     bulk_download_dropdown();
+	 $(document).ready(function(){
+
 	 });
 
 
 
-	 
+
+
 
 	</script>
 

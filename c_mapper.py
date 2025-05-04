@@ -36,6 +36,7 @@ class C_mapper:
                             "yearOfBirth":"birthday", 
                             "state":"Clubnumber", 
                             "nationalRating":"rtg_nat", 
+                            "events":"Custom_events", 
                             "fideId":"fide_no"
                         },
                         # ========== sample FRL

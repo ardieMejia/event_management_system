@@ -1,5 +1,5 @@
 import logging
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, send_file
 # from jinja2 import Template
 from jinja2 import Environment, FileSystemLoader
 # environment = Environment(loader=FileSystemLoader("templates/"))
@@ -17,6 +17,8 @@ from sqlalchemy.orm import close_all_sessions
 import os
 import time
 import pandas as pd
+from io import StringIO, BytesIO
+import datetime
 
 import json
 
@@ -91,6 +93,13 @@ def tryRemoveMcfFile(filename):
     else:
         pass
 
+def isFileOversized(filename):
+    df = pd.read_csv(r'./storage/'+filename)
+    if df.size > 500:
+        return True
+    return False
+    
+    
 @app.route('/single-member/<int:mcfId>', methods = ['GET']) 
 def single_member(mcfId):
 
@@ -695,6 +704,7 @@ def processMcfList():
                     "yearOfBirth": row[mapFrom['yearOfBirth']],
                     "state": row[mapFrom['state']],
                     "nationalRating": row[mapFrom['nationalRating']],
+                    "events": "",
                     "fideId": Member.empty_string_to_zero(num = str(row[mapFrom['fideId']])),
                     "password": bcrypt.generate_password_hash(row[mapFrom['mcfId']].strip() \
                                                               + row[mapFrom['yearOfBirth']].strip() \
@@ -793,8 +803,7 @@ def updateMcfList():
 
 
 
-    if df.size > 500:
-        return "Filesize should not be more than 500", []
+
 
     
     updatesList = []
@@ -866,7 +875,12 @@ def updateFrlList():
 
 @app.route('/bulk-process-all-mcf')
 def bulk_process_all_mcf():
-    whatHappened, skippedList, newList = processMcfList()
+
+    fileOversized = isFileOversized("mcf.csv")
+    if fileOversized:
+        whatHappened, skippedList, newList= "File is too large (> 500)", [], []
+    else:
+        whatHappened, skippedList, newList = processMcfList()
 
     return render_template("main-page.html", whatHappened=whatHappened, skippedList=skippedList, newList=newList)
 
@@ -880,10 +894,14 @@ def bulk_process_all_frl():
 
 @app.route('/bulk-update-all-mcf')
 def bulk_update_all_mcf():
-    if not os.path.isfile("./storage/mcf.csv"):
-        return C_templater.custom_render_template(errorTopic="Invalid Upload Name", errorsList=["files must be a csv and contain \"mcf\" in its filename"], isTemplate=True)
+    # if not os.path.isfile("./storage/mcf.csv"):
+    #     return C_templater.custom_render_template(errorTopic="Invalid Upload Name", errorsList=["files must be a csv and contain \"mcf\" in its filename"], isTemplate=True)
     # ===== failedUpdatesList: for now only the length of the list is used in the template
-    whatHappened, updatesList, failedUpdatesList, skippedList = updateMcfList()
+    fileOversized = isFileOversized("mcf.csv")
+    if fileOversized:
+        whatHappened, updatesList, failedUpdatesList, skippedList = "File is too large (> 500)", [], [], []
+    else:        
+        whatHappened, updatesList, failedUpdatesList, skippedList = updateMcfList()
 
     return render_template("main-page.html", whatHappened=whatHappened, updatesList=updatesList, failedUpdatesList=failedUpdatesList, skippedList=skippedList)
 
@@ -1009,7 +1027,7 @@ def test_bulk_download():
     
     return send_file(output, download_name="haha.csv", as_attachment=True, mimetype="str") # not sure if mimetype is necessary, can try removing when free
 
-@app.route('/true-download') 
+@app.route('/partial-download') 
 def partial_download():
 
 
@@ -1017,7 +1035,11 @@ def partial_download():
     downloadOffset = request.args.get("downloadOffset", type=int)
 
     query = sa.select(Member).order_by(Member.mcfName)
-    ms_paginate=db.paginate(query, page=downloadOffset, per_page=20, error_out=False)
+    ms_paginate=db.paginate(query, page=downloadOffset, per_page=500, error_out=False)
+
+
+    var1 = ms_paginate.items[0]
+    app.logger.info(var1.events)
     
     df = pd.DataFrame()
     rec = []
@@ -1031,7 +1053,7 @@ def partial_download():
     df.to_csv(output, index=False)
     output.seek(0)
     
-    return send_file(output, download_name="haha.csv", as_attachment=True, mimetype="str") # not sure if mimetype is necessary, can try removing
+    return send_file(output, download_name="Download" + str(datetime.date.today()) + "_Partial" + str(downloadOffset) + ".csv", as_attachment=True, mimetype="str") # not sure if mimetype is necessary, can try removing
 
     # return "nothing burger"
      
