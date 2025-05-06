@@ -194,52 +194,7 @@ def member_update_page(mcfId):
 
 
 
-@app.route('/update-member', methods = ['POST']) 
-def update_member():                
 
-    # app.logger.info('========== event ==========')
-    # app.logger.info(request.form.keys())
-    # app.logger.info('========== event ==========')
-    # return "what"
-
-    app.logger.info("==========")
-    app.logger.info(request.form.get("mcfId"))
-    app.logger.info(request.form)
-    app.logger.info(request.form.get("button"))
-    app.logger.info("==========")
-    m = db.session.query(Member).get(request.form['mcfId'])
-    # e = db.session.query(Event).get(request.form['events'])
-
-    m_events = m.getEvents().split(",")
-    if request.form.get("button") == "save":
-        # overwrite only if event non existing in m.events
-        if request.form['mcfId'] not in m_events:        
-            m.events = m.getEvents() + "," + request.form.get("discipline") # WARNING: this is slightly unreadable            
-    elif request.form.get("button") == "delete":
-        try: m_events.remove(request.form.get("discipline"))
-        except: pass # becoz .remove can produce errors
-        m.events = ",".join(m_events)
-
-        
-    
-    # m.events.append(e)
-    # e.members.append(m)
-
-    # if re                       # 
-        
-        
-
-    # if 1 == 0:
-    try:
-        db.session.commit()
-    except IntegrityError as i:
-        db.session.rollback()
-        return C_templater.custom_render_template(errorTopic="DB-API IntegrityError", errorsList=[i._message], isTemplate=True)
-    
-    # app.logger.info('========== event ==========')
-    # app.logger.info('========== event ==========')
-
-    return "update successfully"
 
 
 
@@ -491,8 +446,8 @@ def login():
             query = sa.select(Event)
             es = db.session.scalars(query).all()
             tr = []
-            if m.getEvents():
-                for e in m.getEvents().split(","):            
+            if m.getEvents() != "":
+                for e in m.getEvents():            
                     statement = db.select(Event).where(Event.id == e)
                     e = db.session.scalars(statement).first()
                     tr.append(e.tournamentName)
@@ -506,33 +461,105 @@ def login():
 
     
     
-@app.route('/member-front')
+@app.route('/member-front', methods=['GET', 'POST'])
 def member_front():
-
     if current_user.is_authenticated:
-        m = Member.query.filter_by(mcfId=current_user.mcfId).first()
-        query = sa.select(Event)
-        es = db.session.scalars(query).all()
+        if request.method == 'GET':
+            m = Member.query.filter_by(mcfId=current_user.mcfId).first()
+            query = sa.select(Event)
+            es = db.session.scalars(query).all()
 
-
-        tr = []
-        for e in m.getEvents().split(","):
-            if e:
-                # app.logger.info(e)
-                statement = db.select(Event).where(Event.id == e)
+            updatedTournamentId = request.args.get("updatedTournamentId")
+            whatHappened = request.args.get("whatHappened")
+            if updatedTournamentId:
+                statement = db.select(Event).where(Event.id == updatedTournamentId)
                 e = db.session.scalars(statement).first()
-                tr.append(e.tournamentName)
+                whatHappened = whatHappened + e.tournamentName
+
+            tr = []
+            for e in m.getEvents():
+                if e:                
+                    statement = db.select(Event).where(Event.id == e)
+                    e = db.session.scalars(statement).first()
+                    tr.append(e.tournamentName)
             
-        app.logger.info("+++++")
-        app.logger.info(tr)
-        app.logger.info("+++++")
+            app.logger.info("+++++")
+            app.logger.info(tr)
+            app.logger.info("+++++")
 
 
 
-        return render_template("member-front.html", m=m, tournamentRegistered=tr, tournamentOptions=es)
-    else:
+
+            if not whatHappened:
+                whatHappened = ""
+                
+
+            return render_template("member-front.html", m=m, tournamentRegistered=tr, tournamentOptions=es, whatHappened=whatHappened)
+        # ========== 'POST'
+        else:
+            app.logger.info("==========")
+            app.logger.info(request.form.get("mcfId"))
+            app.logger.info(request.form)
+            app.logger.info(request.form.get("button"))
+            app.logger.info("==========")
+            m = db.session.query(Member).get(request.form['mcfId'])
+            # e = db.session.query(Event).get(request.form['events'])
+
+            m_events = m.getEvents()
+
+            
+
+            app.logger.info("=====before updates")
+            app.logger.info(m_events)
+            app.logger.info(request.form['tournament_name'])
+            app.logger.info("=====ss")
+
+            whatHappened=""
+            if request.form.get("button") == "save":
+                # overwrite only if event non existing in m.events
+                if request.form['tournament_name'] not in m_events:
+                    m_events.append(request.form["tournament_name"]) 
+                    m.events = ",".join(m_events)
+                    whatHappened="Saved: "
+
+                    
+            elif request.form.get("button") == "delete":
+                try:
+                    # without = signs, things like this are slightly unreadable
+                    m_events.remove(request.form["tournament_name"]) 
+                    # m.events = ",".join(m_events)
+                    # common way to deal with None values, slightly unreadable
+
+            
+                    m.events = ",".join(m_events) if m_events else ""
+                    whatHappened="Deleted: "
+                except: pass # becoz .remove can produce errors if its empty
+
+
+
+        
+
+            # if 1 == 0:
+            try:
+                db.session.commit()
+            except IntegrityError as i:
+                db.session.rollback()
+                return C_templater.custom_render_template(errorTopic="DB-API IntegrityError", errorsList=[i._message], isTemplate=True)
+    
+            # app.logger.info('========== event ==========')
+            # app.logger.info('========== event ==========')
+            app.logger.info("=====AFTER updates")
+            app.logger.info(m_events)
+            app.logger.info("=====ss")
+
+            db.session.close()
+
+            # return "update successfully"
+            return redirect(url_for('member_front', whatHappened=whatHappened, updatedTournamentId=request.form.get("tournament_name")))
+
+    else: 
         return render_template("login.html")
-
+        
 
 
 
@@ -878,7 +905,7 @@ def bulk_process_all_mcf():
 
     fileOversized = isFileOversized("mcf.csv")
     if fileOversized:
-        whatHappened, skippedList, newList= "File is too large (> 500)", [], []
+        whatHappened, skippedList, newList= "Error: File is too large (> 500)", [], []
     else:
         whatHappened, skippedList, newList = processMcfList()
 

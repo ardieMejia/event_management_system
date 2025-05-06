@@ -125,7 +125,8 @@ class Member(UserMixin, db.Model):
         return int(num) if num and num.isdigit() else 0
         
     def getEvents(self):
-        return self.events or ""
+        return self.events.split(",") if self.events != "" else []
+
 
     
     @classmethod

@@ -17,230 +17,230 @@
 
     <!-- ==================== -->
 
-    <form action="{{ url_for('update_member')  }}" method="post">
+    <form action="{{ url_for('member_front')  }}" method="post">
 
 	<table class="w-full">
-	<caption class="caption-top {{ 'text-purple-600' if whyHappened else 'text-green-600' }} italic p-2">
-	    {{ whatHappened }}
-	</caption>
-	<tbody>
-	    <tr>
-		<th>
-		    <div class="m-3 text-right">
-			<label class="block text-gray-900 text-sm">
-			    MCF ID
-			</label>
-			
-			<!-- <input type="email" id="email" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required /> -->
-		    </div>
-		</th>
-		<td class="bg-yellow-400">
-		    <div class="m-2">
-			{{ m.mcfId }}
-			<input  name="mcfId" value="{{ m.mcfId }}" hidden>
-		    </div>
-		</td>
-	    </tr>
+	    <!-- <caption class="caption-top {{ 'text-purple-600' if whyHappened else 'text-green-600' }} italic p-2"> -->
+	    <caption class="caption-top text-green-600 italic p-2">
+		{{ whatHappened }}
+	    </caption>
+	    <tbody>
+		<tr>
+		    <th>
+			<div class="m-3 text-right">
+			    <label class="block text-gray-900 text-sm">
+				MCF ID
+			    </label>
+			    
+			    <!-- <input type="email" id="email" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required /> -->
+			</div>
+		    </th>
+		    <td class="bg-yellow-400">
+			<div class="m-2">
+			    {{ m.mcfId }}
+			    <input  name="mcfId" value="{{ m.mcfId }}" hidden>
+			</div>
+		    </td>
+		</tr>
 
-	    <tr>
-		<th >
-		    <div class="m-3 text-right">
-			<label class="block text-gray-900 text-sm">
-			    MCF Name
-			</label>
-			
-			<!-- <input type="email" id="email" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required /> -->
-		    </div>
-		</th>
-		<td class="bg-yellow-400">
-		    <div class="m-2">
-			
-
-			{{ m.mcfName }}
-		    </div>
-		</td>
-	    </tr>
-
-	    <tr>
-		<th >
-		    <div class="m-3 text-right">
-			<label class="block text-gray-900 text-sm">
-			    Gender
-			</label>
-			
-			<!-- <input type="email" id="email" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required /> -->
-		    </div>
-		</th>
-		<td class="bg-yellow-400">
-		    <div class="m-2">
-			{{ m.gender }}
-		    </div>
-		</td>
-	    </tr>
-
-	    <tr>
-		<th >
-		    <div class="m-3 text-right">
-			<label class="block text-gray-900 text-sm">
-			    Year of Birth
-			</label>
-			
-			<!-- <input type="email" id="email" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required /> -->
-		    </div>
-		</th>
-		<td class="bg-yellow-400">
-		    <div class="m-2">
-			{{ m.yearOfBirth }}
-		    </div>
-		</td>
-	    </tr>
-
-	    <tr>
-		<th >
-		    <div class="m-3 text-right">
-			<label class="block text-gray-900 text-sm">
-			    State
-			</label>
-			
-			<!-- <input type="email" id="email" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required /> -->
-		    </div>
-		</th>
-		<td class="bg-yellow-400">
-		    <div class="m-2">
-			{{ m.state }}
-		    </div>
-		</td>
-	    </tr>
-
-	    <tr>
-		<th >
-		    <div class="m-3 text-right">
-			<label class="block text-gray-900 text-sm">
-			    National Rating
-			</label>
-			
-			<!-- <input type="email" id="email" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required /> -->
-		    </div>
-		</th>
-		<td class="bg-yellow-400">
-		    <div class="m-2">
-			{{ m.nationalRating }}
-		    </div>
-		</td>
-	    </tr>
-	    <tr>
-		<th>
-		    <div class="m-3 text-right">
-			<label class="block text-gray-900 text-sm">
-			    Events Registered
-			</label>		    
-			<!-- <input type="email" id="email" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required /> -->
-		    </div>
-		</th>
-		<td class="bg-yellow-400">
-			
-		    <div class="m-2">
-			<ul class="max-w-md space-y-1 list-disc list-inside ">
-			    <li>
-			    {% for l in tournamentRegistered %}
-				{{ l }}
-			    {% endfor %}				
-			    </li>
-			</ul>
+		<tr>
+		    <th >
+			<div class="m-3 text-right">
+			    <label class="block text-gray-900 text-sm">
+				MCF Name
+			    </label>
+			    
+			    <!-- <input type="email" id="email" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required /> -->
+			</div>
+		    </th>
+		    <td class="bg-yellow-400">
+			<div class="m-2">
 			    
 
-			<!-- <button type="submit" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Save event</button> -->
-		    </div>
+			    {{ m.mcfName }}
+			</div>
+		    </td>
+		</tr>
+
+		<tr>
+		    <th >
+			<div class="m-3 text-right">
+			    <label class="block text-gray-900 text-sm">
+				Gender
+			    </label>
+			    
+			    <!-- <input type="email" id="email" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required /> -->
+			</div>
+		    </th>
+		    <td class="bg-yellow-400">
+			<div class="m-2">
+			    {{ m.gender }}
+			</div>
+		    </td>
+		</tr>
+
+		<tr>
+		    <th >
+			<div class="m-3 text-right">
+			    <label class="block text-gray-900 text-sm">
+				Year of Birth
+			    </label>
+			    
+			    <!-- <input type="email" id="email" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required /> -->
+			</div>
+		    </th>
+		    <td class="bg-yellow-400">
+			<div class="m-2">
+			    {{ m.yearOfBirth }}
+			</div>
+		    </td>
+		</tr>
+
+		<tr>
+		    <th >
+			<div class="m-3 text-right">
+			    <label class="block text-gray-900 text-sm">
+				State
+			    </label>
+			    
+			    <!-- <input type="email" id="email" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required /> -->
+			</div>
+		    </th>
+		    <td class="bg-yellow-400">
+			<div class="m-2">
+			    {{ m.state }}
+			</div>
+		    </td>
+		</tr>
+
+		<tr>
+		    <th >
+			<div class="m-3 text-right">
+			    <label class="block text-gray-900 text-sm">
+				National Rating
+			    </label>
+			    
+			    <!-- <input type="email" id="email" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required /> -->
+			</div>
+		    </th>
+		    <td class="bg-yellow-400">
+			<div class="m-2">
+			    {{ m.nationalRating }}
+			</div>
+		    </td>
+		</tr>
+		<tr>
+		    <th>
+			<div class="m-3 text-right">
+			    <label class="block text-gray-900 text-sm">
+				Events Registered
+			    </label>		    
+			    <!-- <input type="email" id="email" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required /> -->
+			</div>
+		    </th>
+		    <td class="bg-yellow-400">
+			
+			<div class="m-2">
+			    <ul class="max-w-md space-y-1 list-disc list-inside ">
+				<li>
+				    {% for l in tournamentRegistered %}
+					{{ l }}
+				    {% endfor %}				
+				</li>
+			    </ul>
+			    
+
+			    <!-- <button type="submit" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Save event</button> -->
+			</div>
     </form>
-		</td>
-	    </tr>
+		    </td>
+		</tr>
 
-	    <tr>
-		<td colspan="2">
-		    <table class="w-full text-sm text-left">
-			<thead class="text-xs text-gray-700 uppercase">
+		<tr>
+		    <td colspan="2">
+			<table class="w-full text-sm text-left">
+			    <thead class="text-xs text-gray-700 uppercase">
 
-			    <div class="m-5"></div>
-			</thead>
-		    </table>
-		</td>
-	    </tr>
+				<div class="m-5"></div>
+			    </thead>
+			</table>
+		    </td>
+		</tr>
 
 
-					
-	    <tr>
-		<th>
-		    <div class="m-3 text-right">
-			<label class="block text-gray-900 text-sm">
+		
+		<tr>
+		    <th>
+			<div class="m-3 text-right">
+			    <label class="block text-gray-900 text-sm">
 				Change Events?
-			</label>		    
-			<!-- <input type="email" id="email" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required /> -->
-		    </div>
-		</th>
-		<td class="bg-yellow-400">
+			    </label>		    
+			    <!-- <input type="email" id="email" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required /> -->
+			</div>
+		    </th>
+		    <td class="bg-yellow-400">
 			
-		    <div class="m-2">
-			<select name="discipline" id="discipline">
-			    {% for l in tournamentOptions %}
-				<option value={{ l.id }}>{{ l.tournamentName }}</option>
-			    {% endfor %}
-			</select>
+			<div class="m-2">
+			    <select name="tournament_name" id="tournament_name">
+				{% for l in tournamentOptions %}
+				    <option value={{ l.id }}>{{ l.tournamentName }}</option>
+				{% endfor %}
+			    </select>
 
-			<!-- <button type="submit" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Save event</button> -->
-		    </div>
-    </form>
-		</td>
-	    </tr>
-	    <tr>
-		<th></th>
-		<td class="bg-yellow-400">
-		    
+			    <!-- <button type="submit" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Save event</button> -->
+			</div>
+		    </td>
+		</tr>
+		<tr>
+		    <th></th>
+		    <td class="bg-yellow-400">
 			
-		    <div class="m-2">
+			
+			<div class="m-2">
 			    
-			<button type="submit" name="button" value="save" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Save event</button>
-		    </div>
-		</td>
-	    </tr>
-	    <tr>
-		<th></th>
-		<td class="bg-yellow-400">
+			    <button type="submit" name="button" value="save" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Save event</button>
+			</div>
+		    </td>
+		</tr>
+		<tr>
+		    <th></th>
+		    <td class="bg-yellow-400">
 
 			
-		    <div class="m-2">
-			<button type="submit" name="button" value="delete" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Delete event</button>
-		    </div>
-		</td>
-	    </tr>
+			<div class="m-2">
+			    <button type="submit" name="button" value="delete" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Delete event</button>
+			</div>
+		    </td>
+		</tr>
 		
 
-	    <tr>
+		<tr>
 
-		<td  colspan="2">
-		    <div class="p-5">
+		    <td  colspan="2">
+			<div class="p-5">
 
-			{% if m.fideId %}
+			    {% if m.fideId %}
 
-			    <label for="fideId">FIDE ID</label>
-			    <input type="text" id="fideId" name="fideId" value="{{ m.fideId }}" readonly><br>
-			    <label for="fideName">FIDE Name</label>
-			    <input type="text" id="fideName" name="fideName" value="{{ m.fideName }}" readonly><br>
-			    <label for="fideRating">FIDE Rating</label>
-			    <input type="text" id="fideRating" name="fideRating" value="{{ m.fideRating }}" readonly><br>
-			{% else %}
-			    <a href="{{ url_for('single_member_fide', mcfId=m.mcfId) }}" class="block p-6 bg-white border border-gray-200 rounded-lg shadow-md hover:bg-gray-200">
-				{% include 'fideSvg.j2' %}
-				<h5 class="m-3 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Do you have FIDE details? </h5><span class="m-3 italic">Help us fill it</span>
-			    </a>
-			{% endif %}
-		    </div>
-		</td>
-	    </tr>
+				<label for="fideId">FIDE ID</label>
+				<input type="text" id="fideId" name="fideId" value="{{ m.fideId }}" readonly><br>
+				<label for="fideName">FIDE Name</label>
+				<input type="text" id="fideName" name="fideName" value="{{ m.fideName }}" readonly><br>
+				<label for="fideRating">FIDE Rating</label>
+				<input type="text" id="fideRating" name="fideRating" value="{{ m.fideRating }}" readonly><br>
+			    {% else %}
+				<a href="{{ url_for('single_member_fide', mcfId=m.mcfId) }}" class="block p-6 bg-white border border-gray-200 rounded-lg shadow-md hover:bg-gray-200">
+				    {% include 'fideSvg.j2' %}
+				    <h5 class="m-3 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Do you have FIDE details? </h5><span class="m-3 italic">Help us fill it</span>
+				</a>
+			    {% endif %}
+			</div>
+		    </td>
+		</tr>
 
-	    
-	</tbody>
-    </table>
-	    </form>
+		
+	    </tbody>
+	</table>
+    </form>
 
 
 
