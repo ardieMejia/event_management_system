@@ -146,7 +146,7 @@ class Member(UserMixin, db.Model):
     def isDataInvalid(self, p_fideId, p_fideRating):
         errorsList = []
         if p_fideId.isnumeric() and p_fideRating.isnumeric():
-            return True
+            return []
         if not p_fideId.isnumeric():
             errorsList.append("FIDE ID should be a number")
         if not p_fideRating.isnumeric():

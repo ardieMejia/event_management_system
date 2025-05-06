@@ -20,7 +20,7 @@
     <form action="{{ url_for('member_front')  }}" method="post">
 
 	<table class="w-full">
-	    <!-- <caption class="caption-top {{ 'text-purple-600' if whyHappened else 'text-green-600' }} italic p-2"> -->
+
 	    <caption class="caption-top text-green-600 italic p-2">
 		{{ whatHappened }}
 	    </caption>
@@ -142,11 +142,11 @@
 			
 			<div class="m-2">
 			    <ul class="max-w-md space-y-1 list-disc list-inside ">
-				<li>
 				    {% for l in tournamentRegistered %}
+				<li>
 					{{ l }}
-				    {% endfor %}				
 				</li>
+				    {% endfor %}				
 			    </ul>
 			    
 

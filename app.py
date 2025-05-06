@@ -19,6 +19,7 @@ import time
 import pandas as pd
 from io import StringIO, BytesIO
 import datetime
+from c_validation_funcs import convert_nan_to_string
 
 import json
 
@@ -111,10 +112,12 @@ def single_member(mcfId):
 @app.route('/single-member-fide/<int:mcfId>', methods = ['GET']) 
 def single_member_fide(mcfId):
 
-    
+    whatHappened = request.args.get("whatHappened")
+    if not whatHappened:
+        whatHappened=""
     query = sa.select(Member).where(Member.mcfId == mcfId)
     m = db.session.scalar(query)
-    return render_template("single-member-fide.html", m=m)
+    return render_template("single-member-fide.html", m=m, whatHappened=whatHappened)
 # return m
 
 
@@ -123,36 +126,51 @@ def update_fide():
     mcfId = request.args.get("mcfId")
     # query = sa.select(Member).where(Member.mcfId == mcfId)
     # m = db.session.scalar(query)
-    m = db.session(Member).where(Member.mcfId == mcfId )
+    # m = db.session(Member).where(Member.mcfId == mcfId )
+
+
+    statement = db.select(Member).where(Member.mcfId == mcfId)
+    m = db.session.scalars(statement).first()
     m.fideId = request.form['fideId']
     m.fideName = request.form['fideName']
     m.fideRating = request.form['fideRating']
     app.logger.info(m.fideId)
     # TODO: do something about this one
-    if m.isDataValid(p_fideId=m.fideId, p_fideRating=m.fideRating):
-        errorsList = m.isDataValid(p_fideId=m.fideId, p_fideRating=m.fideRating)
-        return C_templater.custom_render_template(errorTopic="Invalid Input Error", errorsList=errorsList, isTemplate=True)
+
+    errorsList = m.isDataInvalid(p_fideId=m.fideId, p_fideRating=m.fideRating)
+    if errorsList:            
+        return redirect(url_for('single_member_fide', mcfId=mcfId, whatHappened=",".join(errorsList)
+                                # updatedTournamentId=request.form.get("tournament_name")
+                                ))
+        # return C_templater.custom_render_template(errorTopic="Invalid Input Error", errorsList=errorsList, isTemplate=True)
     
 
     db.session.add(m)
     try:
         db.session.commit()
+        whatHappened = "new FIDE saved"
     except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
         db.session.rollback()
-        return C_templater.custom_render_template(errorTopic="DB-API IntegrityError", errorsList=[i._message], isTemplate=True)
+        # return C_templater.custom_render_template(errorTopic="DB-API IntegrityError", errorsList=[i._message], isTemplate=True)
+        whatHappened = "something went wrong"
+        
     except DataError as d:
         db.session.rollback()
-        return C_templater.custom_render_template(errorTopic="DB API DataError", errorsList=[d._message], isTemplate=True)
+        # return C_templater.custom_render_template(errorTopic="DB API DataError", errorsList=[d._message], isTemplate=True)
+        whatHappened = "something went wrong"
 
 
+    # db.session.close() # we are eager to close session after last times error in production
     
-    # return "new FIDE saved"
-    return render_template("single-member.html", m=m, whatHappened="new FIDE saved")
+
+    return redirect(url_for('member_front', whatHappened=whatHappened))
+    # return render_template("member-front.html", m=m, tournamentRegistered=tr, tournamentOptions=es, whatHappened=whatHappened)
+
+
 
 @app.route('/event-create')
 def event_create():
-    app.logger.info('========== event ==========')
-    app.logger.info('========== event ==========')
+
     
     return render_template("event-create.html", el=Event.disciplinesList)
 
@@ -249,11 +267,11 @@ def create_member():
         return C_templater.custom_render_template(errorTopic="DB-API IntegrityError", errorsList=[i._message], isTemplate=True)
     # example of final form ===== return c_templater("Data entry error", "tournament name duplicate", "error.html")
         
-    app.logger.info('========== event ==========')
+    # app.logger.info('========== event ==========')
     # app.logger.info(request.form['EVENT ID'])
     # app.logger.info(type(old_event.data.values.tolist()))
-    app.logger.info(m)
-    app.logger.info('========== event ==========')
+    # app.logger.info(m)
+    # app.logger.info('========== event ==========')
 
 
     # return C_templater.custom_render_template("Successfully saved", i._message())
@@ -441,9 +459,9 @@ def login():
         if not m.check_password(password):    
             return C_templater.custom_render_template("Login Problem", ["Wrong password"], True)
         else:
-            es = []
             login_user(m)
             query = sa.select(Event)
+            es = []
             es = db.session.scalars(query).all()
             tr = []
             if m.getEvents() != "":
@@ -483,9 +501,9 @@ def member_front():
                     e = db.session.scalars(statement).first()
                     tr.append(e.tournamentName)
             
-            app.logger.info("+++++")
-            app.logger.info(tr)
-            app.logger.info("+++++")
+            # app.logger.info("+++++")
+            # app.logger.info(tr)
+            # app.logger.info("+++++")
 
 
 
@@ -509,10 +527,7 @@ def member_front():
 
             
 
-            app.logger.info("=====before updates")
-            app.logger.info(m_events)
-            app.logger.info(request.form['tournament_name'])
-            app.logger.info("=====ss")
+
 
             whatHappened=""
             if request.form.get("button") == "save":
@@ -546,11 +561,7 @@ def member_front():
                 db.session.rollback()
                 return C_templater.custom_render_template(errorTopic="DB-API IntegrityError", errorsList=[i._message], isTemplate=True)
     
-            # app.logger.info('========== event ==========')
-            # app.logger.info('========== event ==========')
-            app.logger.info("=====AFTER updates")
-            app.logger.info(m_events)
-            app.logger.info("=====ss")
+
 
             db.session.close()
 
@@ -723,18 +734,33 @@ def processMcfList():
                 skippedList.append({"mcfId": row[mapFrom['mcfId']]})
                 continue
 
+
+            app.logger.info("%%%%%")
+            
+            app.logger.info(                
+            row[mapFrom['yearOfBirth']]
+            )
+            app.logger.info(
+                convert_nan_to_string(
+                    row[mapFrom['yearOfBirth']]
+                )
+            )
+            app.logger.info("%%%%%")
+
+            yearOfBirth = convert_nan_to_string(row[mapFrom['yearOfBirth']])
+
             values.append(
                 {
                     "mcfId": row[mapFrom['mcfId']],
                     "mcfName": row[mapFrom['mcfName']],
                     "gender": row[mapFrom['gender']],
-                    "yearOfBirth": row[mapFrom['yearOfBirth']],
+                    "yearOfBirth": yearOfBirth,
                     "state": row[mapFrom['state']],
                     "nationalRating": row[mapFrom['nationalRating']],
                     "events": "",
                     "fideId": Member.empty_string_to_zero(num = str(row[mapFrom['fideId']])),
                     "password": bcrypt.generate_password_hash(row[mapFrom['mcfId']].strip() \
-                                                              + row[mapFrom['yearOfBirth']].strip() \
+                                                              + yearOfBirth.strip() \
                                                               ).decode('utf-8')
                 }
             )
