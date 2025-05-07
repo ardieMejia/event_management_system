@@ -37,7 +37,6 @@
 		<th class="w-20 p-1">Year of Birth</th>
 		<th class="w-20 p-1">State</th>
 		<th class="w-20 p-1">National Rating</th>
-		<th class="w-30 p-1">Events</th>		    
 		<th class="w-30 p-1">FIDE ID</th>		    
 		<th class="w-30 p-1">FIDE Name</th>
 		<th class="w-20 p-1">FIDE Rating</th>
@@ -56,9 +55,6 @@
 		    <td id = "yearOfBirth">{{ m.yearOfBirth }}</td>
 		    <td id = "state">{{ m.state }}</td>
 		    <td id = "nationalRating">{{ m.nationalRating }}</td>
-		    <td id = "events">
-			there should be events here
-		    </td>
 		    <td id = "fide">
 			{{ m.fideId }}
 		    </td>
@@ -86,16 +82,9 @@
 		</tr>
 	    {% endfor %}
 	    <tr>
-		<td></td>
-		<td></td>
-		<td></td>
-		<td></td>
-		<td></td>
-		<td></td>
-		<td></td>
-		<td></td>
-		<td></td>
-		<td></td>
+		<td colspan="9"></td>
+
+
 		<td>
 		    <div class="m-3">
 			<button type="submit" 

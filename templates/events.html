@@ -14,11 +14,14 @@ Events
 
 
 <table id="member_details" class="table-auto border border-yellow-400 border-2">
-    <caption class="caption-top text-red-600 italic p-2" >
+    <caption class="caption-top text-green-600 italic p-2" >
 	{{ whatHappened }}
     </caption>
     <thead>
 	<tr class="bg-yellow-400">
+	    <th class="w-100">
+		<div class="m-3">ID</div>
+	    </th>
 	    <th class="w-100">
 		<div class="m-3">Tourname Name</div>
 	    </th>
@@ -55,6 +58,9 @@ Events
 	<tr class="border border-yellow-400 border-2">
 	    
 	    
+	    <td>
+		<div class="m-3">{{ e.id }}</div>
+	    </td>
 	    <td>
 		<div class="m-3">{{ e.tournamentName }}</div>
 	    </td>

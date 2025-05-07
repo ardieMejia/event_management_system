@@ -187,13 +187,17 @@ def event_create():
 
 @app.route('/test2') 
 def test2():
-    query = db.select(Member).where(Member.fideId != None)
+    # query = db.select(Member).where(Member.fideId != None)
     # ms_paginate=db.paginate(query, page=page, per_page=20, error_out=False)
-    ms = db.session.execute(query).all()
+    # ms = db.session.execute(query).all()
 
-    app.logger.info(ms)
+    # app.logger.info(ms)
 
-    return "something"
+    # 1746603668
+
+
+
+    return "wait"
 
 
 @app.route('/member-update-page/<int:mcfId>')
@@ -297,8 +301,33 @@ def kill_event(id):
 
     query = sa.select(Event)
     es = db.session.scalars(query).all()
+    db.session.close()
 
-    # return "event successfully removed"
+
+
+    
+    # ============================================================
+    ms = db.session.query(Member).filter(Member.events.like("%" + str(id) + "%")).all()
+
+    for m in ms:
+        app.logger.info(m)
+        tempEvents = m.events.split(",")
+        tempEvents.remove(str(id))
+        newEventsStr = ",".join(tempEvents)
+        m.events = newEventsStr
+
+    
+    try:
+        db.session.commit()
+        whatHappened = "events deleted across all members"
+    except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
+        db.session.rollback()
+        whatHappened = "something went wrong"
+    db.session.close()
+        
+    # ============================================================
+
+
     return render_template("events.html", es=es, whatHappened="Event successfully killed")
 
 
@@ -313,6 +342,35 @@ def kill_events():
 
     query = sa.select(Event)
     es = db.session.scalars(query).all()
+
+    db.session.close()
+
+    # ==================================================
+
+    statement = sa.update(Member).values(events="")
+    db.session.execute(statement)
+    # db.session.commit()
+                    
+
+
+    # for m in ms:
+    #     app.logger.info(m)
+    #     tempEvents = m.events.split(",")
+    #     tempEvents.remove(str(id))
+    #     newEventsStr = ",".join(tempEvents)
+    #     m.events = newEventsStr
+
+    
+    try:
+        db.session.commit()
+        whatHappened = "all events (and member-events) deleted"
+    except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
+        db.session.rollback()
+        whatHappened = "something went wrong"
+        
+    db.session.close()
+
+    # ==================================================
 
     # return "member successfully removed"
     return render_template("events.html", es=es, whatHappened="All killed")
@@ -392,7 +450,14 @@ def find_events():
     
     db.session.close()
 
-    return render_template("events.html", es=es)
+
+
+    whatHappened = request.args.get("whatHappened")
+    if not whatHappened:
+        whatHappened = ""
+
+    return render_template("events.html", es=es, whatHappened=whatHappened)
+
 
 
 @app.route('/members') 
@@ -752,7 +817,8 @@ def processMcfList():
             # yearOfBirth = convert_nan_to_string(row[mapFrom['yearOfBirth']])
             dictMemberBeforeSaving = validate_before_saving(
                 mcfName = row[mapFrom['mcfName']],
-                yearOfBirth = row[mapFrom['yearOfBirth']]
+                yearOfBirth = row[mapFrom['yearOfBirth']],
+                state = row[mapFrom['state']]
             )
 
             if not dictMemberBeforeSaving:
