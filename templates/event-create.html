@@ -28,13 +28,47 @@
     <input type="date" id="endDate" name="endDate" value=""><br>
     
     <label for="discipline">Discipline</label>
-    <!-- <input type="text" id="discipline" name="discipline" value=""><br> -->
     <select name="discipline" id="discipline">
-	{% for l in el %}
+	{% for d in dl %}
+	    <option value={{ d }}>{{ d }}</option>
+	{% endfor %}
+    </select>
+    <br>
+    <label for="type">Type</label>
+    <select name="type" id="type">
+	{% for t in tl %}
+	    <option value={{ t }}>{{ t }}</option>
+	{% endfor %}
+    </select>
+    <br>
+    <label for="eligibility">Eligibility</label>
+    <select name="eligibility" id="eligibility">
+	{% for e in el %}
+	    <option value={{ e }}>{{ e }}</option>
+	{% endfor %}
+    </select>
+    <br>
+    <label for="limitation">Limitation</label>
+    <select name="limitation" id="limitation">
+	{% for l in ll %}
 	    <option value={{ l }}>{{ l }}</option>
 	{% endfor %}
     </select>
-				
+    <br>
+    <label for="rounds">Rounds</label>
+    <select name="rounds" id="rounds">
+	{% for r in rl %}
+	    <option value={{ r }}>{{ r }}</option>
+	{% endfor %}
+    </select>
+    <br>
+    <label for="timeControl">Time Control</label>
+    <select name="timeControl" id="timeControl">
+	{% for tc in tcl %}
+	    <option value={{ tc }}>{{ tc }}</option>
+	{% endfor %}
+    </select>
+    <br>
     
     
     

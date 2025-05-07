@@ -126,29 +126,6 @@
 	    <tr class="borders border-yellow-400  border-2">
 		<td colspan="2">
 		    <div class="m-3">
-			{% if skippedList %}
-
-			    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-				<table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-				    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-					<tr>
-					    <th scope="col" class="px-6 py-3">
-						Total records skipped
-					    </th>
-					</tr>
-				    </thead>
-				    <tbody>
-					<tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700 border-gray-200">
-					    
-					    <td class="px-6 py-4">
-						{{ skippedList|length }}
-					    </td>
-					</tr>
-				    </tbody>
-				</table>
-			    </div>
-
-			{% endif %}
 			{% if newList %}
 
 			    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
@@ -225,7 +202,7 @@
 				    <thead class="text-xs text-orange-600 uppercase bg-gray-50">
 					<tr>
 					    <th scope="col" class="px-6 py-3">
-						Total Skipped Rows
+						Total Skipped Records
 					    </th>
 					</tr>
 				    </thead>

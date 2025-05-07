@@ -47,12 +47,26 @@ def load_user(id):
 class Event(db.Model):
     __tablename__ = "events"
     disciplinesList = ["Standard", "Rapid", "Blitz"]
+    typeList = ["Individual", "Team"]
+    eligibilityList = ["Open"]
+    limitationList = ["Above 1400", "Below 1800", "Below 2000", "Below 2400", "No Rating Limit"]
+                  
+    roundsList = ["6 Rounds", "7 Rounds", "9 Rounds", "6/8 Rounds"]
+    timeControlList = ["3 mins + 2 secs", "15 mins + 10 secs", "10 mins + 30 secs", "90 mins + 30 secs"]
+
+                  
 
     id = db.Column(db.Integer, primary_key=True)
     tournamentName = db.Column(db.String(128), index=True)
     startDate = db.Column(db.String(64), index=True)
     endDate = db.Column(db.String(64), index=True)
     discipline = db.Column(db.String(64), index=True)
+    type = db.Column(db.String(64), index=True)
+    eligibility = db.Column(db.String(64), index=True)
+    limitation = db.Column(db.String(64), index=True)
+    rounds = db.Column(db.String(64), index=True)
+    timeControl = db.Column(db.String(64), index=True)
+    
     # members = db.relationship('Member', back_ref='event')
 
     def set_id(self):
@@ -87,7 +101,7 @@ class Event(db.Model):
 class Member(UserMixin, db.Model):
     __tablename__ = "members"
 
-    mcfId = db.Column(db.Integer, primary_key=True)
+    mcfId = db.Column(db.BigInteger, primary_key=True)
     password = db.Column(db.String(80))
     mcfName = db.Column(db.String(128), index=True)
     gender = db.Column(db.String(64), index=True)

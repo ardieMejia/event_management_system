@@ -32,10 +32,22 @@ Events
 		<div class="m-3">Discipline</div>
 	    </th>
 	    <th>
-		<div class="m-3"></div>
+		<div class="m-3">Type</div>
 	    </th>
 	    <th>
+		<div class="m-3">Eligibility</div>
 	    </th>
+	    <th>
+		<div class="m-3">Limitation</div>
+	    </th>
+	    <th>
+		<div class="m-3">Rounds</div>
+	    </th>
+	    <th>
+		<div class="m-3">Time Control</div>
+	    </th>
+	    <th></th>
+	    <th></th>
 	</tr>
     </thead>
     <tbody>
@@ -43,18 +55,34 @@ Events
 	<tr class="border border-yellow-400 border-2">
 	    
 	    
-	    <td >
+	    <td>
 		<div class="m-3">{{ e.tournamentName }}</div>
 	    </td>
-	    <td >
+	    <td>
 		<div class="m-3">{{ e.startDate }}</div>
 	    </td>
-	    <td >
+	    <td>
 		<div class="m-3">{{ e.endDate }}</div>
 	    </td>
-	    <td >
+	    <td>
 		<div class="m-3">{{ e.discipline }}</div>
 	    </td>
+	    <td>
+		<div class="m-3">{{ e.type }}</div>
+	    </td>
+	    <td>
+		<div class="m-3">{{ e.eligibility }}</div>
+	    </td>
+	    <td>
+		<div class="m-3">{{ e.limitation }}</div>
+	    </td>
+	    <td>
+		<div class="m-3">{{ e.rounds }}</div>
+	    </td>
+	    <td>
+		<div class="m-3">{{ e.timeControl }}</div>
+	    </td>
+	    <td></td>
 	    <td>
 		<div class="m-2">
 		    <button type="submit" >
@@ -67,7 +95,7 @@ Events
 	</tr>
 	{% endfor %}
 	<tr>
-	    <td colspan="3"></td>
+	    <td colspan="9"></td>
 	    <td>
 		<div class="m-3">
 		    <button type="submit" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">

@@ -19,7 +19,8 @@ import time
 import pandas as pd
 from io import StringIO, BytesIO
 import datetime
-from c_validation_funcs import convert_nan_to_string
+# from c_validation_funcs import convert_nan_to_string
+from c_validation_funcs import validate_before_saving
 
 import json
 
@@ -139,9 +140,9 @@ def update_fide():
 
     errorsList = m.isDataInvalid(p_fideId=m.fideId, p_fideRating=m.fideRating)
     if errorsList:            
-        return redirect(url_for('single_member_fide', mcfId=mcfId, whatHappened=",".join(errorsList)
-                                # updatedTournamentId=request.form.get("tournament_name")
-                                ))
+        return redirect(url_for('single_member_fide', mcfId=mcfId, whatHappened=",".join(errorsList)))
+
+        # return redirect(url_for('member_front', whatHappened=whatHappened))
         # return C_templater.custom_render_template(errorTopic="Invalid Input Error", errorsList=errorsList, isTemplate=True)
     
 
@@ -172,7 +173,7 @@ def update_fide():
 def event_create():
 
     
-    return render_template("event-create.html", el=Event.disciplinesList)
+    return render_template("event-create.html", dl=Event.disciplinesList, tl=Event.typeList, el=Event.eligibilityList, ll=Event.limitationList, rl=Event.roundsList, tcl=Event.timeControlList)
 
 # @app.route('/member-create')
 # def member_create():
@@ -220,7 +221,7 @@ def member_update_page(mcfId):
 def create_event():
     
     with session_scope() as session:
-        e = Event(tournamentName=request.form['tournamentName'], startDate=request.form['startDate'], endDate=request.form['endDate'], discipline=request.form['discipline'])
+        e = Event(tournamentName=request.form['tournamentName'], startDate=request.form['startDate'], endDate=request.form['endDate'], discipline=request.form['discipline'], type=request.form['type'], eligibility=request.form['eligibility'], limitation=request.form['limitation'], rounds=request.form['rounds'], timeControl=request.form['timeControl'])
 
     
         if e.isDataInvalid(p_tournameName=e.tournamentName, p_startDate=e.startDate, p_endDate=e.endDate, p_discipline=e.discipline):
@@ -242,8 +243,9 @@ def create_event():
         # this ones good ===== return c_templater("Data entry error", "tournament name duplicate", "error.html")
         
 
+        return redirect(url_for('find_events'))
 
-        return render_template("confirmed-event-created.html", e=e)
+        # return render_template("confirmed-event-created.html", e=e)
 
 
 @app.route('/create-member', methods = ['POST'])
@@ -452,12 +454,12 @@ def login():
 
         m = Member.query.filter_by(mcfId=mcfId).first()
         if m is None:
-            # return "member ID does NOT exist"
-            return C_templater.custom_render_template("Login Problem", ["Member does not exist"], True)        
-        # isPasswordVerified = bcrypt.check_password_hash(bcrypt.generate_password_hash(password).decode('utf-8'), m.password)
+            return render_template("login.html", whatHappened = "Member does not exist")
+
         
         if not m.check_password(password):    
-            return C_templater.custom_render_template("Login Problem", ["Wrong password"], True)
+            # return C_templater.custom_render_template("Login Problem", ["Wrong password"], True)
+            return render_template("login.html", whatHappened = "Ooops, wrong password")
         else:
             login_user(m)
             query = sa.select(Event)
@@ -740,27 +742,36 @@ def processMcfList():
             app.logger.info(                
             row[mapFrom['yearOfBirth']]
             )
-            app.logger.info(
-                convert_nan_to_string(
-                    row[mapFrom['yearOfBirth']]
-                )
-            )
+            # app.logger.info(
+            #     convert_nan_to_string(
+            #         row[mapFrom['yearOfBirth']]
+            #     )
+            # )
             app.logger.info("%%%%%")
 
-            yearOfBirth = convert_nan_to_string(row[mapFrom['yearOfBirth']])
+            # yearOfBirth = convert_nan_to_string(row[mapFrom['yearOfBirth']])
+            dictMemberBeforeSaving = validate_before_saving(
+                mcfName = row[mapFrom['mcfName']],
+                yearOfBirth = row[mapFrom['yearOfBirth']]
+            )
 
+            if not dictMemberBeforeSaving:
+                skippedList.append({"mcfId": row[mapFrom['mcfId']]})
+                continue
+                
+                
             values.append(
                 {
                     "mcfId": row[mapFrom['mcfId']],
                     "mcfName": row[mapFrom['mcfName']],
                     "gender": row[mapFrom['gender']],
-                    "yearOfBirth": yearOfBirth,
+                    "yearOfBirth": dictMemberBeforeSaving["yearOfBirth"],
                     "state": row[mapFrom['state']],
                     "nationalRating": row[mapFrom['nationalRating']],
                     "events": "",
                     "fideId": Member.empty_string_to_zero(num = str(row[mapFrom['fideId']])),
                     "password": bcrypt.generate_password_hash(row[mapFrom['mcfId']].strip() \
-                                                              + yearOfBirth.strip() \
+                                                              + dictMemberBeforeSaving["yearOfBirth"].strip() \
                                                               ).decode('utf-8')
                 }
             )
@@ -861,6 +872,7 @@ def updateMcfList():
     
     updatesList = []
     failedUpdatesList = []
+    # ========== right now skippedList stores ID, which means we can be flexible on how to use it later for more feedback
     skippedList = []
     for index,row in df.iterrows():
         app.logger.info("==========")
