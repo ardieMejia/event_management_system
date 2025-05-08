@@ -164,7 +164,7 @@
 			<div id="bulkDownload" class="z-10 hidden">
 			    <select name="downloadOffset" id="downloadOffset" onchange="submitForm()" >
 				<option value="-1">--</option>
-				{% set steps = totalCount / 20 %}
+				{% set steps = totalCount / 500 %}
 				{% set steps = steps|round(method='ceil')|int + 1 %}
 				{% for i in range(1,steps) %}
 				    <option value={{ i }}>

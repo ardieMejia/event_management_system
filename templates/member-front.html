@@ -220,13 +220,62 @@
 			<div class="p-5">
 
 			    {% if m.fideId %}
+				<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++
+				     ++++++++++++++++++++++++++++++++++++++++++++++++++ -->
 
-				<label for="fideId">FIDE ID</label>
-				<input type="text" id="fideId" name="fideId" value="{{ m.fideId }}" readonly><br>
-				<label for="fideName">FIDE Name</label>
-				<input type="text" id="fideName" name="fideName" value="{{ m.fideName }}" readonly><br>
-				<label for="fideRating">FIDE Rating</label>
-				<input type="text" id="fideRating" name="fideRating" value="{{ m.fideRating }}" readonly><br>
+				<table  class="border border-2 w-100">
+				    <tbody>
+					<tr class="bg-yellow-200">
+					    <th  class="border border-b-0 border-t-2" colspan="2">
+						<div  class="pt-2 pl-4 pr-4 text-left">
+						    <label for="fideId" class="block text-gray-900 text-sm">FIDE ID</label>
+						</div>
+					    </th>
+					</tr>
+					<tr class="bg-yellow-200">
+					    
+					    <td colspan="2">
+						<div class="pb-2 pl-4 pr-4">			
+						    <input type="text" id="fideId" name="fideId" value="{{ m.fideId }}" readonly><br>
+						</div>
+					    </td>
+					</tr>
+					<tr class="bg-yellow-200 border-yellow-400">
+					    <th class="border border-b-0 border-t-2" colspan="2">
+						<div  class="pt-2 pl-4 pr-4 text-left">
+						    <label for="fideName" class="block text-gray-900 text-sm">FIDE Name</label>
+						</div>
+					    </th>
+					</tr>
+					<tr class="bg-yellow-200">
+					    
+					    <td colspan="2">
+						<div class="pb-2 pl-4 pr-4">			
+						    <input type="text" id="fideName" name="fideName" value="{{ m.fideName }}" readonly><br>
+						</div>
+					    </td>
+					</tr>
+					<tr class="bg-yellow-200">
+					    <th  class="border border-b-0 border-t-2" colspan="2">
+						<div  class="pt-2 pl-4 pr-4 text-left">
+						    <label for="fideRating" class="block text-gray-900 text-sm">FIDE Rating</label>
+						</div>
+					    </th>
+					</tr>
+					<tr class="bg-yellow-200">
+					    
+					    <td colspan="2">
+						<div class="pb-2 pl-4 pr-4">			
+						    <input type="text" id="fideRating" name="fideRating" value="{{ m.fideRating }}" readonly><br>
+						</div>
+					    </td>
+					</tr>
+				    </tbody>
+				</table>
+
+
+					<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++
+					     ++++++++++++++++++++++++++++++++++++++++++++++++++ -->
 			    {% else %}
 				<a href="{{ url_for('single_member_fide', mcfId=m.mcfId) }}" class="block p-6 bg-white border border-gray-200 rounded-lg shadow-md hover:bg-gray-200">
 				    {% include 'fideSvg.j2' %}

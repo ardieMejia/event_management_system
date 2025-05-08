@@ -107,7 +107,7 @@ def isFileOversized(filename):
 
     df = pd.read_csv(r'./storage/'+filename)
 
-    if df.size > 500:
+    if len(df) > 502:
         return True
     return False
     
@@ -887,9 +887,11 @@ def processMcfList():
 
    
 
-def processFideList():
+def processFrlList():
     filename = "frl.csv"
-    whyHappened = []
+    skippedList = []
+    whatHappened = ""
+    updatesList = []
 
     mapFrom = C_mapper.excelToDatabase[filename]
     with open(r'./storage/'+filename, newline='') as csvfile:
@@ -902,13 +904,15 @@ def processFideList():
             if m:                          
                 m.fideId=row[mapFrom['fideId']]
                 m.fideName=row[mapFrom['fideName']]                       
-                m.fideRating=row[mapFrom['fideRating']]                           
+                m.fideRating=row[mapFrom['fideRating']]
+                updatesList.append(row[mapFrom["fideId"]])
             else:
-                whyHappened.append({
-                    "fideId": row[mapFrom['fideId']],
-                    "fideName": row[mapFrom['fideName']],
-                    "fideRating": row[mapFrom['fideRating']]
-                                    })
+                # whyHappened.append({
+                #     "fideId": row[mapFrom['fideId']],
+                #     "fideName": row[mapFrom['fideName']],
+                #     "fideRating": row[mapFrom['fideRating']]
+                #                     })
+                skippedList.append(row[mapFrom["fideId"]])
 
         # ===== try uploading bulk    
     try:
@@ -917,20 +921,20 @@ def processFideList():
     except IntegrityError as i:
         db.session.rollback()
         app.logger.info(i._message())
+        whatHappened = "Something went wrong"
         # return C_templater.custom_render_template("Data entry error", i._message(), False)
-        return C_templater.custom_render_template("DB-API IntegrityError", [i._message()], True)
+        # return C_templater.custom_render_template("DB-API IntegrityError", [i._message()], True)
 
-    if not whyHappened:            
-        whatHappened = "Upload successful with no inconsistencies"
-    else:
-        whatHappened = "Upload successful BUT with the FIDE ID listed with no matching MCF ID"
-
-        
-
-    app.logger.info(whyHappened)
+    if not whatHappened and not skippedList:
+        whatHappened = "PERFECT upload"
+    elif not whatHappened and skippedList:
+        whatHappened = "Successful upload with details below"
 
 
-    return whatHappened, whyHappened
+    tryRemoveMcfFile("./storage/frl.csv")                
+
+
+    return whatHappened, skippedList, updatesList
 
 
 
@@ -981,9 +985,14 @@ def updateMcfList():
             m.password = bcrypt.generate_password_hash(row[mapFrom['mcfId']].strip() \
                                                        + row[mapFrom['yearOfBirth']].strip() \
                                                        ).decode('utf-8')
-            updatesList.append({"mcfId": row[mapFrom['mcfId']]})
+            updatesList.append(row[mapFrom['mcfId']])
+
+
         else:
-            skippedList.append({"mcfId": row[mapFrom['mcfId']]})
+            skippedList.append(row[mapFrom['mcfId']])
+                                
+
+                               
 
             
         
@@ -1049,9 +1058,20 @@ def bulk_process_all_mcf():
 
 @app.route('/bulk-process-all-frl')
 def bulk_process_all_frl():
-    whatHappened, whyHappened = processFideList()
+    if isFileUploaded("frl.csv"):
+        if isFileOversized("frl.csv"):
+            # whatHappened, updatesList, failed
+            return render_template("main-page.html", whatHappened="Error: File is too large (> 500)")
+        else:        
+            # whatHappened, updatesList, failedUpdatesList, skippedList = updateMcfList()
+            whatHappened, skippedList, updatesList = processFrlList()
+    else:
+        return render_template("main-page.html",
+	whatHappened="Error: File Not Found, Upload again")
+    
 
-    return render_template("main-page.html", whatHappened=whatHappened, whyHappened=whyHappened)
+
+    return render_template("main-page.html", whatHappened=whatHappened, skippedList=skippedList, updatesList=updatesList)
 
 
 @app.route('/bulk-update-all-mcf')
@@ -1100,12 +1120,7 @@ def allowed_bulk_frl_upload(filename):
 @app.route('/bulk-upload-all-files_1', methods=['POST'])
 def bulk_upload_all_files_1():
 
-    
-    # app.logger.info("==========")
-    # app.logger.info(request.files)
-    
-    # if 'file' not in request.files:
-        # return redirect(request.url)
+
         
     file1 = request.files['file1']
 
@@ -1120,28 +1135,16 @@ def bulk_upload_all_files_1():
        and allowed_bulk_mcf_upload(file1.filename):
         filename1 = secure_filename(file1.filename)
         file1.save(os.path.join('./storage/mcf.csv'))
-        # filename2 = secure_filename(file2.filename)
-        # file2.save(os.path.join('./storage/', filename2.lower()))
-        # return 'File successfully uploaded'
         return render_template("main-page.html", whatHappened="MCF file successfully uploaded")
     else:
-        # return C_templater.custom_render_template("Invalid Upload Name", [format(app.config['ALLOWED_EXTENSIONS']), "files must be named either mcf.csv"], True)
         whatHappened = "CSV filename must contain mcf.   Eg: mcf-Q1.csv"
         return redirect(url_for('main_page', whatHappened=whatHappened))
-        # return 'Invalid file type'
-    # return "wait"
+
 
 
     
 @app.route('/bulk-upload-all-files_2', methods=['POST'])
 def bulk_upload_all_files_2():
-
-    
-    # app.logger.info("==========")
-    # app.logger.info(request.files)
-    
-    # if 'file' not in request.files:
-        # return redirect(request.url)
         
     file2 = request.files['file2']
 
@@ -1156,13 +1159,11 @@ def bulk_upload_all_files_2():
         filename2 = secure_filename(file2.filename)
         file2.save(os.path.join('./storage/frl.csv'))
         # return 'File successfully uploaded'
-        return render_template("main-page.html", whatHappened="Both files successfully uploaded")
+        return render_template("main-page.html", whatHappened="FRL file successfully uploaded")
     else:
-        # return C_templater.custom_render_template("Invalid Upload Name", [format(app.config['ALLOWED_EXTENSIONS']), "files must be named either frl.csv"], True)
         whatHappened = "CSV filename must contain frl.   Eg: my-frl-Q4.csv"
         return redirect(url_for('main_page', whatHappened=whatHappened))
-        # return 'Invalid file type'
-    # return "wait"
+
 
     
 
@@ -1208,6 +1209,7 @@ def test_bulk_download():
 
 @app.route('/partial-download') 
 def partial_download():
+
 
 
     
