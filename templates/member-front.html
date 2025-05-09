@@ -17,7 +17,7 @@
 
     <!-- ==================== -->
 
-    <form action="{{ url_for('member_front')  }}" method="post">
+    <form action="{{ url_for('member_front')  }}" method="post" name="memberEventForm" id="memberEventForm">
 
 	<table class="w-full">
 
@@ -142,11 +142,11 @@
 			
 			<div class="m-2">
 			    <ul class="max-w-md space-y-1 list-disc list-inside ">
-				    {% for l in tournamentRegistered %}
-				<li>
+				{% for l in tournamentRegistered %}
+				    <li>
 					{{ l }}
-				</li>
-				    {% endfor %}				
+				    </li>
+				{% endfor %}				
 			    </ul>
 			    
 
@@ -274,8 +274,8 @@
 				</table>
 
 
-					<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++
-					     ++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+				<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++
+				     ++++++++++++++++++++++++++++++++++++++++++++++++++ -->
 			    {% else %}
 				<a href="{{ url_for('single_member_fide', mcfId=m.mcfId) }}" class="block p-6 bg-white border border-gray-200 rounded-lg shadow-md hover:bg-gray-200">
 				    {% include 'fideSvg.j2' %}

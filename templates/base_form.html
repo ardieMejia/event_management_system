@@ -48,18 +48,26 @@
 	 // NOTE-TO-SELF: from a syntax POV, jquery onready consuses, where function has no ()
 	 /* $(document).ready(initialise); */
 
+	 
 
-	     function submitForm(){
-		 var selValue = document.getElementById("downloadOffset").value;
-		 console.log(selValue)
-		 if (selValue != -1){
-		     document.partialDownload.submit();
-		 }
+
+	 function submitForm(){
+	     var selValue = document.getElementById("downloadOffset").value;
+	     console.log(selValue)
+	     if (selValue != -1){
+		 document.partialDownload.submit();
 	     }
+	 }
 
 	 
 	 /** @description My first ever jquery */
 	 $(document).ready(function(){
+
+
+	     var choiceCount = $( "#memberEventForm #tournament_name option" ).length
+	     if (choiceCount == 0){
+		 $('#memberEventForm button').hide()		 
+	     }
 
 	 });
 
