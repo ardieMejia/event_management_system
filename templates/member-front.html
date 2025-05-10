@@ -17,11 +17,11 @@
 
     <!-- ==================== -->
 
-    <form action="{{ url_for('member_front')  }}" method="post" name="memberEventForm" id="memberEventForm">
+
 
 	<table class="w-full">
 
-	    <caption class="caption-top text-green-600 italic p-2">
+	    <caption class="caption-top {{ 'text-orange-600' if "Error" in whatHappened else 'text-green-600'}} italic p-2">
 		{{ whatHappened }}
 	    </caption>
 	    <tbody>
@@ -35,10 +35,10 @@
 			    <!-- <input type="email" id="email" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required /> -->
 			</div>
 		    </th>
-		    <td class="bg-yellow-400">
-			<div class="m-2">
+		    <td class="bg-yellow-200">
+			<div class="m-2 font-light">
 			    {{ m.mcfId }}
-			    <input  name="mcfId" value="{{ m.mcfId }}" hidden>
+			    <input   name="mcfId" value="{{ m.mcfId }}" hidden>
 			</div>
 		    </td>
 		</tr>
@@ -53,8 +53,8 @@
 			    <!-- <input type="email" id="email" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required /> -->
 			</div>
 		    </th>
-		    <td class="bg-yellow-400">
-			<div class="m-2">
+		    <td class="bg-yellow-200">
+			<div class="m-2 font-light">
 			    
 
 			    {{ m.mcfName }}
@@ -72,7 +72,7 @@
 			    <!-- <input type="email" id="email" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required /> -->
 			</div>
 		    </th>
-		    <td class="bg-yellow-400">
+		    <td class="bg-yellow-200 font-light">
 			<div class="m-2">
 			    {{ m.gender }}
 			</div>
@@ -89,7 +89,7 @@
 			    <!-- <input type="email" id="email" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required /> -->
 			</div>
 		    </th>
-		    <td class="bg-yellow-400">
+		    <td class="bg-yellow-200 font-light">
 			<div class="m-2">
 			    {{ m.yearOfBirth }}
 			</div>
@@ -106,7 +106,7 @@
 			    <!-- <input type="email" id="email" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required /> -->
 			</div>
 		    </th>
-		    <td class="bg-yellow-400">
+		    <td class="bg-yellow-200 font-light">
 			<div class="m-2">
 			    {{ m.state }}
 			</div>
@@ -123,7 +123,7 @@
 			    <!-- <input type="email" id="email" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required /> -->
 			</div>
 		    </th>
-		    <td class="bg-yellow-400">
+		    <td class="bg-yellow-200 font-light">
 			<div class="m-2">
 			    {{ m.nationalRating }}
 			</div>
@@ -138,9 +138,9 @@
 			    <!-- <input type="email" id="email" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required /> -->
 			</div>
 		    </th>
-		    <td class="bg-yellow-400">
+		    <td class="bg-yellow-200">
 			
-			<div class="m-2">
+			<div class="m-2 font-light">
 			    <ul class="max-w-md space-y-1 list-disc list-inside ">
 				{% for l in tournamentRegistered %}
 				    <li>
@@ -152,10 +152,49 @@
 
 			    <!-- <button type="submit" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Save event</button> -->
 			</div>
-    </form>
+
 		    </td>
 		</tr>
+		<tr>
+		    <th>
+			<div class="flex m-3 text-right content-end justify-end">
+			    <label class="inline-flex text-gray-900 text-sm">
 
+
+				    <span >Proof of payment</span>
+
+				    <div class="ml-2">					
+				{% include 'proofOfPayment.j2' %}
+				    </div>
+
+
+
+			    </label>		    
+			    <!-- <input type="email" id="email" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required /> -->
+			</div>
+		    </th>
+		    <td class="bg-yellow-200">
+			
+			<div class="m-2 font-light">
+			    {% if paymentProofs %}
+				<ul class="max-w-md space-y-1 list-disc list-inside ">
+				    
+				    somepayment proofs
+				</ul>
+			    {% else %}
+				<ul class="text-red-700 font-normal">
+				    
+				    no payment uploaded
+				</ul>
+			    {% endif %}
+			    
+
+			    <!-- <button type="submit" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Save event</button> -->
+			</div>
+
+		    </td>
+		</tr>
+				
 		<tr>
 		    <td colspan="2">
 			<table class="w-full text-sm text-left">
@@ -168,8 +207,9 @@
 		</tr>
 
 
-		
-		<tr>
+		<!-- ================================================== -->
+		<form action="{{ url_for('member_front')  }}" method="post" name="memberEventForm" id="memberEventForm">
+		    <tr>
 		    <th>
 			<div class="m-3 text-right">
 			    <label class="block text-gray-900 text-sm">
@@ -212,8 +252,66 @@
 			</div>
 		    </td>
 		</tr>
-		
+		</form>
 
+		<!-- ================================================== -->
+		<tr>
+		    <td colspan="2">
+			<table class="w-full text-sm text-left">
+			    <thead class="text-xs text-gray-700 uppercase">
+
+				<div class="m-5"></div>
+			    </thead>
+			</table>
+		    </td>
+		</tr>
+		<!-- ================================================== -->
+		<form action="{{ url_for('upload_payment_proof')  }}" method="post" name="uploadEventForm" id="uploadEventForm" enctype="multipart/form-data">
+		    <tr>
+			<th>
+			    <div class="m-3 text-right">
+
+				<label class="inline-flex text-gray-900 text-sm">
+
+
+				    <span >Upload payment</span>
+
+				    <div class="ml-2">					
+					{% include 'proofOfPayment.j2' %}
+				    </div>
+
+
+
+				</label>		    
+				<!-- <input type="email" id="email" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required /> -->
+			    </div>
+			</th>
+			<td class="bg-yellow-400">
+			    
+			    <div class="m-2">
+
+
+
+				
+				<input type="file" name="paymentFile" class="bg-yellow-400 file:bg-white file:text-black">
+
+			    </div>
+			</td>
+		    </tr>
+		    <tr>
+			<th></th>
+			<td  class="bg-yellow-400">
+			    
+			    
+			    <div class="m-2">
+				
+				<button type="submit" name="uploadPaymentProof" value="uploadPaymentProof" class="w-25 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700">Upload</button>
+			    </div>
+			</td>
+		    </tr>
+		</form>
+
+		
 		<tr>
 
 		    <td  colspan="2">
@@ -289,7 +387,7 @@
 		
 	    </tbody>
 	</table>
-    </form>
+
 
 
 
