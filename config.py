@@ -9,7 +9,7 @@ class Config:
     
     SECRET_KEY = os.environ.get('SECRET_KEY')
     UPLOAD_FOLDER = './storage'
-    ALLOWED_EXTENSIONS = {'txt', 'png', 'pdf', 'jpg', 'jpeg'}
+    ALLOWED_EXTENSIONS = {'png', 'pdf', 'jpg', 'jpeg'}
 
     SQLALCHEMY_ENGINE_OPTIONS = {
         # 'pool': QueuePool(creator),
