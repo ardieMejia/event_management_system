@@ -1,5 +1,5 @@
 import logging
-from flask import Flask, render_template, request, redirect, url_for, send_file
+from flask import Flask, render_template, request, redirect, url_for, send_file, jsonify
 # from jinja2 import Template
 from jinja2 import Environment, FileSystemLoader
 # environment = Environment(loader=FileSystemLoader("templates/"))
@@ -39,7 +39,7 @@ login = LoginManager(app)
 from Models.declarative import EventListing # ===== remove this
 import sqlalchemy as sa
 app.app_context().push()
-from model import Event, Member
+from model import Event, Member, File
 Session = sessionmaker(bind=db.engine)
 
 
@@ -447,7 +447,7 @@ def find_events():
         # m = sa.select(Event)
         # es = db.session.scalars(query).all()
     except Exception as e:
-        session.rollback()
+        db.session.rollback()
         return f"An error occurred: {str(e)}", 500    
 
     # if not es:
@@ -563,6 +563,8 @@ def login():
 def member_front():
     if current_user.is_authenticated:
         if request.method == 'GET':
+            tr = []
+            paymentProofs = []
             m = Member.query.filter_by(mcfId=current_user.mcfId).first()
             query = sa.select(Event)
             es = db.session.scalars(query).all()
@@ -574,7 +576,6 @@ def member_front():
                 e = db.session.scalars(statement).first()
                 whatHappened = whatHappened + e.tournamentName
 
-            tr = []
             for e in m.getEvents():
                 if e:                
                     statement = db.select(Event).where(Event.id == e)
@@ -592,15 +593,19 @@ def member_front():
                 whatHappened = ""
                 
 
-            return render_template("member-front.html", m=m, tournamentRegistered=tr, tournamentOptions=es, whatHappened=whatHappened)
+            return render_template("member-front.html", m=m, tournamentRegistered=tr, tournamentOptions=es, whatHappened=whatHappened, paymentProofs=paymentProofs)
         # ========== 'POST'
         else:
+            paymentProofs = []
             app.logger.info("==========")
             app.logger.info(request.form.get("mcfId"))
             app.logger.info(request.form)
             app.logger.info(request.form.get("button"))
             app.logger.info("==========")
-            m = db.session.query(Member).get(request.form['mcfId'])
+            m = db.session.query(Member).get(
+                # request.form['mcfId']
+                current_user.mcfId
+                                             )
             # e = db.session.query(Event).get(request.form['events'])
 
             m_events = m.getEvents()
@@ -622,13 +627,19 @@ def member_front():
                 try:
                     # without = signs, things like this are slightly unreadable
                     m_events.remove(request.form["tournament_name"]) 
-                    # m.events = ",".join(m_events)
                     # common way to deal with None values, slightly unreadable
 
+                    # m.events = ",".join(m_events)
             
                     m.events = ",".join(m_events) if m_events else ""
                     whatHappened="Deleted: "
                 except: pass # becoz .remove can produce errors if its empty
+                
+
+
+
+
+    
 
 
 
@@ -646,13 +657,62 @@ def member_front():
             db.session.close()
 
             # return "update successfully"
-            return redirect(url_for('member_front', whatHappened=whatHappened, updatedTournamentId=request.form.get("tournament_name")))
+            return redirect(url_for('member_front', whatHappened=whatHappened, updatedTournamentId=request.form.get("tournament_name"), paymentProofs=paymentProofs))
 
     else: 
         return render_template("login.html")
         
 
 
+
+@app.route('/upload-payment-proof', methods = ['GET', 'POST'])
+def upload_payment_proof():
+    if current_user.is_authenticated:
+        paymentProofs = []
+        paymentFile = request.files['paymentFile']
+        if paymentFile.filename == '':
+            return redirect(url_for('member_front', whatHappened="Error: There is no file uploaded", updatedTournamentId="", paymentProofs=paymentProofs))
+
+
+        if paymentFile and allowed_payment_file(paymentFile.filename):
+            filename = secure_filename(paymentFile.filename)
+            fname, ext = os.path.splitext(paymentFile.filename)
+            # disk_path = ""  # Path to the persistent disk
+            # folder_name = "my_folder"
+            # folder_path = os.path.join(disk_path, folder_name)
+            folder_path = os.path.join(f"storage", str(datetime.date.today()))
+        
+            try:
+                os.makedirs(folder_path, exist_ok=True)
+                # print(f"Folder '{folder_name}' created successfully at '{folder_path}'.")
+            except Exception as e:            
+                return redirect(url_for('member_front', whatHappened="Error: Something went wrong. Please contact web admin", paymentProofs=paymentProofs))
+
+                
+                
+            # ===== use os.path.join with care, it interprets slashes, and inserts its own, and can hide errors
+            filename = str(current_user.mcfId) + ext
+            paymentFile.save(os.path.join(folder_path, filename))
+            
+            f = File(filename=filename, filepath=folder_path)
+            try:
+                db.session.add(f)
+                db.session.commit()
+            except IntegrityError as i:
+                db.session.rollback()
+                return redirect(url_for('member_front', whatHappened="Something went wrong: " + i._message()))
+                             
+
+                
+            return redirect(url_for('member_front', whatHappened="Proof of payment successfully uploaded", paymentProofs=paymentProofs))
+        else:
+            whatHappened = "Error: File must either be pdf, png or jpeg"
+            return redirect(url_for('member_front', whatHappened=whatHappened))
+        
+
+
+
+    
 
     
 
@@ -1097,7 +1157,7 @@ def bulk_update_all_mcf():
 
 
 
-def allowed_file(filename):
+def allowed_payment_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
@@ -1164,10 +1224,28 @@ def bulk_upload_all_files_2():
         whatHappened = "CSV filename must contain frl.   Eg: my-frl-Q4.csv"
         return redirect(url_for('main_page', whatHappened=whatHappened))
 
+@app.route('/display-files-uploaded', methods = ["GET"]) 
+def display_files_uploaded():
+    # ========== IMPORTANT FOR LATER
+    # datetime.date.today().strftime("%d/%m/%Y")
+    # ========== IMPORTANT FOR LATER
+    fs = db.session.query(File).all()
+    # return jsonify(fs)
+    app.logger.info(type(fs[0]))
+    a_dict = []
+    for f in fs:
+        a_dict.append({
+            "filename": f.filename,
+            "filepath": f.filepath,
+            "created_at": f.created_at.strftime("%d/%m/%Y")            
+        })
+    return jsonify(a_dict
+        # [i.serialize for i in ]
+                   )
 
     
 
-@app.route('/test_bulk_download') 
+@app.route('/test-bulk-download') 
 def test_bulk_download():
     """Dont Delete This Function. this is to self-document
 

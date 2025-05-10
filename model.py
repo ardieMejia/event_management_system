@@ -203,6 +203,19 @@ class Member(UserMixin, db.Model):
             # "fideRating" : self.fideRating
         }
 
+
+
+
+
+class File(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    filename = db.Column(db.String(200), nullable=False)
+    filepath = db.Column(db.String(300), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"File('{self.filename}', '{self.filepath}')"
+         
     # @classmethod
     # def doesFideExist(cls, id):
     #     # isPasswordVerified = bcrypt.check_password_hash(self.password, password)
