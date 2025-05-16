@@ -109,7 +109,7 @@ class Member(UserMixin, db.Model):
     state = db.Column(db.String(64), index=True)
     nationalRating = db.Column(db.String(64), index=True)
     # events = db.relationship('Event', secondary=event_member, back_populates='members')
-    events = db.Column(db.String(300), index=True)
+    # events = db.Column(db.String(300), index=True)
     fideId = db.Column(db.Integer)
     fideName = db.Column(db.String(80))
     fideRating = db.Column(db.Integer(), index=True)
@@ -138,8 +138,7 @@ class Member(UserMixin, db.Model):
         # <statement-to-try> if <return-if-true> else <return-if-else>
         return int(num) if num and num.isdigit() else 0
         
-    def getEvents(self):
-        return self.events.split(",") if self.events != "" else []
+
 
 
     
@@ -182,7 +181,7 @@ class Member(UserMixin, db.Model):
             mapFrom["state"] : self.state,
             mapFrom["nationalRating"] : self.nationalRating,
             mapFrom["fideId"] : self.fideId,
-            mapFrom["events"] : self.events
+            # mapFrom["events"] : self.events
             # "fideId" : self.fideId,
             # "fideName" : self.fideName,
             # "fideRating" : self.fideRating
@@ -205,9 +204,21 @@ class Member(UserMixin, db.Model):
 
 
 
+class EventMember(db.Model):
+    __tablename__ = "events_members"
 
+    id = db.Column(db.Integer, primary_key=True)
+    eventId = db.Column(db.Integer, nullable=False)
+    mcfId = db.Column(db.BigInteger, nullable=False)
+
+    
+    def __repr__(self):
+        return '<eventId: {eid}, mcfId: {mid}>'.format(eid=self.eventId, mid=self.mcfId)
+
+    
 
 class File(db.Model):
+    __tablename__ = "files"
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(200), nullable=False)
     filepath = db.Column(db.String(300), nullable=False)
@@ -215,7 +226,27 @@ class File(db.Model):
 
     def __repr__(self):
         return f"File('{self.filename}', '{self.filepath}')"
-         
+
+
+class FormQuestion(db.Model):
+    __tablename__ = "form_questions"
+    id = db.Column(db.Integer, primary_key=True)
+    formname = db.Column(db.String(200), nullable=False)
+    field = db.Column(db.String(300), nullable=False)
+    questionstring = db.Column(db.String(1000), nullable=False)
+    # value = db.Column(db.DateTime, default=datetime.utcnow)
+    value = db.Column(db.String(100), nullable=False)
+    type = db.Column(db.String(30), nullable=False)
+
+    def __repr__(self):
+        # return f"Form('{self.formname}', '{self.field}')"
+        return '<field: {f} questionstring {q}>'.format(f=self.field, q=self.questionstring[0:40])
+
+    
+    def to_dict(self):
+        return {"id": self.id, "formname": self.formname, "field": self.field, "value": self.value, "questionstring": self.questionstring, "type": self.type}
+
+    
     # @classmethod
     # def doesFideExist(cls, id):
     #     # isPasswordVerified = bcrypt.check_password_hash(self.password, password)

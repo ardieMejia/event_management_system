@@ -98,4 +98,46 @@ National Interstate Chess Championship
 ** Showing dropdown download
 ** 
 ** Searching members of a single event is doable but not implemented
+* Form creation test:
+| form     | field       | value                           | type     |
+|----------+-------------+---------------------------------+----------|
+| Q1 event | date        | M                               | datetime |
+| Q1 event | gender      | M                               | dropdown |
+| Q1 event | gender      | F                               | dropdown |
+| Q1 event | gender      | Open                            | dropdown |
+| Q1 event | description | "a KL based event for under 18" | text     |
+* Form questions:
+** National Youth Chess Championship 2024
+** Is it a Hold Harmless Agreement
+*** THIS IS TO CONFIRM THAT I HAVE READ, UNDERSTOOD, AND HEREBY AGREE TO ABIDE BY THE RULES AND REGULATIONS *
+** Please provide MCFID (Not required, becoz system login requires MCFid)
+** Please provide full name?
+** Please provide full IC number
+** ===== for now its, simple all questions in 1 page =====
+** Are you a PARA/OKU player:
+*** Disabled **
+**** Please provide your disability ID card no *
+**** Physical, Visual, Hearing, etc ***
+**** Do you require a wheel chair **
+**** Do you requre assistance to play the game **
+*** I hereby confirm that Im allowing my child to participat in the Malaysian Chess * Chamionship 2024
+*** Guardian Full Name *
+*** Guardian NRIC *
+*** Guardian Email Address *
+*** THIS IS TO CONFIRM THAT I AM AWARE OF MY CHILD/CHILDREN/FAMILY PARTICIPATION AT THE NATIONAL YOUTH CHESS CHAMPIONSHIP 2024 *
+*** Entry fee is RM60 fixed (for all ages, status, rating)
+*** Please choose your event ** (Open/Boys, Girls)
+*** Please choose your section *** 
+**** Under-08: Born on or after 1 January 2016
+**** Under-10: Born on or after 1 January 2014
+**** Under-12: Born on or after 1 January 2012
+**** Under-14: Born on or after 1 January 2010
+**** Under-16: Born on or after 1 January 2008
+**** Under-18: Born on or after 1 January 2006
+*** Please upload your proof of payment ( <input type="file">)
+*** I HEREBY CONFIRMED THAT THE INFORMATION PROVIDED ABOVE ARE CORRECT AND ACCURATE *
+*** 
+* Things to present:
+** All negative checks passed so far, such as pressing upload when no file is chosen (both for member_front & admin page)
+** right now form is not atthced a single event. Mostly testing dynamic question creation
 ** 
