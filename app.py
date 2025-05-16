@@ -39,7 +39,7 @@ login = LoginManager(app)
 from Models.declarative import EventListing # ===== remove this
 import sqlalchemy as sa
 app.app_context().push()
-from model import Event, Member, File
+from model import Event, Member, File, FormQuestion, EventMember
 Session = sessionmaker(bind=db.engine)
 
 
@@ -85,6 +85,14 @@ def session_scope():
 # A decorator used to tell the application 
 # which URL is associated function 
 
+
+
+
+
+@app.before_request
+def make_session_permanent():
+    db.session.permanent = True
+    app.permanent_session_lifetime = datetime.timedelta(minutes=30)
 
 
 def tryRemoveMcfFile(filename):
@@ -303,29 +311,6 @@ def kill_event(id):
     stmt = sa.delete(Event).where(Event.id == id)
     db.session.execute(stmt)
     db.session.commit()
-    app.logger.info('========== event ==========')
-    # app.logger.info(request.form['EVENT ID'])
-    # app.logger.info(type(old_event.data.values.tolist()))
-    app.logger.info(id)
-    app.logger.info('========== event ==========')
-
-    query = sa.select(Event)
-    es = db.session.scalars(query).all()
-    db.session.close()
-
-
-
-    
-    # ============================================================
-    ms = db.session.query(Member).filter(Member.events.like("%" + str(id) + "%")).all()
-
-    for m in ms:
-        app.logger.info(m)
-        tempEvents = m.events.split(",")
-        tempEvents.remove(str(id))
-        newEventsStr = ",".join(tempEvents)
-        m.events = newEventsStr
-
     
     try:
         db.session.commit()
@@ -334,56 +319,65 @@ def kill_event(id):
         db.session.rollback()
         whatHappened = "something went wrong"
     db.session.close()
-        
-    # ============================================================
 
 
+
+
+    stmt = sa.delete(EventMember).where(EventMember.eventId == id)
+    db.session.execute(stmt)
+    db.session.commit()
+
+    try:
+        db.session.commit()
+        whatHappened = "events deleted across all members"
+    except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
+        db.session.rollback()
+        whatHappened = "something went wrong"
+    db.session.close()
+
+    
+    query = sa.select(Event)
+    es = db.session.scalars(query).all()
+    db.session.close()
+    
     return render_template("events.html", es=es, whatHappened="Event successfully killed")
 
 
 @app.route('/kill-events') 
 def kill_events():
-    
-    
+
+    whatHappened = ""    
+
     stmt = sa.delete(Event)
     db.session.execute(stmt)
-    db.session.commit()
 
+    
+    try:
+        db.session.commit()
+        whatHappened = "all events deleted, "
+    except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
+        db.session.rollback()
+        whatHappened = "something went wrong, contact the web app dev"
 
+        
+    stmt = sa.delete(EventMember)
+    db.session.execute(stmt)
+
+    try:
+        db.session.commit()
+        whatHappened = "all member-events relations deleted"
+    except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
+        db.session.rollback()
+        whatHappened = "something went wrong, contact the web app dev"
+
+    
     query = sa.select(Event)
     es = db.session.scalars(query).all()
 
     db.session.close()
 
-    # ==================================================
 
-    statement = sa.update(Member).values(events="")
-    db.session.execute(statement)
-    # db.session.commit()
-                    
-
-
-    # for m in ms:
-    #     app.logger.info(m)
-    #     tempEvents = m.events.split(",")
-    #     tempEvents.remove(str(id))
-    #     newEventsStr = ",".join(tempEvents)
-    #     m.events = newEventsStr
-
-    
-    try:
-        db.session.commit()
-        whatHappened = "all events (and member-events) deleted"
-    except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
-        db.session.rollback()
-        whatHappened = "something went wrong"
-        
-    db.session.close()
-
-    # ==================================================
-
-    # return "member successfully removed"
-    return render_template("events.html", es=es, whatHappened="All killed")
+    return render_template("events.html", es=es, whatHappened=whatHappened)
 
 
 @app.route('/kill-member/<int:mcfId>') 
@@ -543,19 +537,188 @@ def login():
             query = sa.select(Event)
             es = []
             es = db.session.scalars(query).all()
+
+            
+            
             tr = []
-            if m.getEvents() != "":
-                for e in m.getEvents():            
-                    statement = db.select(Event).where(Event.id == e)
-                    e = db.session.scalars(statement).first()
-                    tr.append(e.tournamentName)
+
+            statement = db.select(EventMember).where(EventMember.mcfId == current_user.mcfId)
+            ems = db.session.execute(statement).all()
+
+            tr = []
+
+            # if m.getEvents() != "":
+            #     for e in m.getEvents():            
+            #         statement = db.select(Event).where(Event.id == e)
+            #         e = db.session.scalars(statement).first()
+            #         tr.append(e.tournamentName)
                         
             return render_template("member-front.html", m=m, tournamentRegistered=tr, tournamentOptions=es)
+            
 
     else:
         return render_template("login.html")
 
 
+@app.route('/test-form-submission', methods = ['POST'])
+def test_form_submission():
+    app.logger.info("==========")    
+    app.logger.info(dir(request.args) )    
+    app.logger.info(request.form.keys() )
+    app.logger.info(request.form.listvalues())
+    # app.logger.info(dir(request.form ))
+
+    data = {}
+    for q,a in request.form.items():
+        print("question {q}".format(q=q))
+        print("answer {a}".format(a=a))
+        data["question"] = q
+        data["answer"] = a
+
+    return "nothing here"
+    
+@app.route('/form-template', methods = ['GET'])
+def form_template():
+
+
+    formname = request.args.get("formname")
+
+    
+
+    statement = db.select(FormQuestion).where(FormQuestion.formname == formname)
+    frs = db.session.scalars(statement).all()
+    if not frs:
+        return "nothing here"
+
+    # app.logger.info("==========")
+    # app.logger.info(type(frs))
+    # app.logger.info(type(frs[0]))
+    # app.logger.info(frs)
+    # app.logger.info(frs[0].to_dict())
+    # app.logger.info("==========")
+
+    frs_list = []
+    # _elements = {}
+    for fr in frs:
+        frs_list.append(fr.to_dict())
+
+
+    # the problem is our data is not unique
+    # - hence we need to create a key from field+type
+    # - so it becomes eg: nametext, genderdropdown, agetext
+    a_dict = {}
+    for fr_dict in frs_list:
+        fieldtype_key = fr_dict["field"]+fr_dict["type"]
+        
+        # ===== becoz append is non-destructive, append logic always goes first
+        if fr_dict["type"] == "dropdown" or fr_dict["type"] == "checkbox":
+            try:
+                a_dict[fieldtype_key]["value"].append(fr_dict["value"])
+            except:
+                a_dict[fieldtype_key] = {}
+                a_dict[fieldtype_key]["value"] = [fr_dict["value"]]
+                a_dict[fieldtype_key]["field"] = fr_dict["field"]
+                a_dict[fieldtype_key]["type"] = fr_dict["type"]
+                a_dict[fieldtype_key]["questionstring"] = fr_dict["questionstring"]
+                # enddropdownorcheckbox   
+        else:
+            a_dict[fieldtype_key] = {"field": fr_dict["field"], "type": fr_dict["type"], "questionstring": fr_dict["questionstring"]}
+            # endtext
+
+
+    elements = list(a_dict.values())
+
+        
+    # ===== dont delete this, improve this documentation
+    # elements = [        
+    #         {
+    #             "value": "", "field": "name", "type" : "text"
+    #         },
+    #         {
+    #             "value": ["M", "F", "Open"], "field": "gender", "type" : "dropdown"
+    #         }
+    # ]
+    
+    return render_template("form-template.html", elements=elements)
+
+
+@app.route('/create-form-part', methods = ['POST', 'GET'])
+def create_form_part():
+    if request.method == 'GET':
+        whatHappened = request.args.get("whatHappened")
+        if not whatHappened:
+            whatHappened = ""
+        # endget
+        return render_template("form-creator.html", whatHappened=whatHappened)
+    
+    else:
+        if request.form.get("button") == "add":
+            if request.form.get("type") == "dropdown" or request.form.get("type") == "checkbox":
+                values = request.form.get("value").split("::")
+                app.logger.info(request.form.get("_______"))
+                app.logger.info(request.form.get("questionstring"))
+                for value in values:
+                    fr = FormQuestion(formname="Q1 event",
+                                      field=request.form.get("field"),
+                                      value=value,
+                                      questionstring=request.form.get("questionstring"),
+                                      type=request.form.get("type")
+                                      )
+                    try:
+                        db.session.add(fr)
+                        db.session.commit()
+                    except IntegrityError as i:
+                        app.logger.info("enderror")
+                        db.session.rollback()
+                        return redirect(url_for('create_form_part', whatHappened="something went wrong when committing dropdowns"))
+                #enddropdownorcheckbox
+                return redirect(url_for('create_form_part', whatHappened="dropdown created"))
+            else: 
+                fr = FormQuestion(formname="Q1 event",
+                                   field=request.form.get("field"),
+                                   value="",
+                                   questionstring=request.form.get("questionstring"),
+                                   type=request.form.get("type")
+                                   )
+                try:
+                    db.session.add(fr)
+                    db.session.commit()
+                except IntegrityError as i:
+                    app.logger.info("enderror")
+                    app.logger.info(fr)
+                    db.session.rollback()
+                    #endnotdropdown
+                    return redirect(url_for('create_form_part', whatHappened="something went wrong"))
+                #endadd
+                return render_template("form-creator.html", whatHappened="text field created")
+        else:
+            # form_elements = [
+            #     {
+            #         "dropdown" : ["M", "F", "Open"]
+            #     }
+            # ]
+            form_vars = ""
+            app.logger.info("endNotDropdown")
+            # enddone
+            return render_template("main-page.html",whatHappened="form creation loop finished")
+        # endpost
+        
+
+
+
+    
+@app.route('/kill-forms')
+def kill_forms():
+
+
+    statement=sa.delete(FormQuestion)
+    db.session.execute(statement)
+    db.session.commit()
+    return redirect(url_for('main_page', whatHappened="All forms killed"))
+
+    
+    
+    
 
     
     
@@ -563,7 +726,7 @@ def login():
 def member_front():
     if current_user.is_authenticated:
         if request.method == 'GET':
-            tr = []
+            trnames = []
             paymentProofs = []
             m = Member.query.filter_by(mcfId=current_user.mcfId).first()
             query = sa.select(Event)
@@ -576,90 +739,95 @@ def member_front():
                 e = db.session.scalars(statement).first()
                 whatHappened = whatHappened + e.tournamentName
 
-            for e in m.getEvents():
-                if e:                
-                    statement = db.select(Event).where(Event.id == e)
+            statement = db.select(EventMember).where(EventMember.mcfId == current_user.mcfId)
+            ems = db.session.scalars(statement).all()
+
+
+            if ems:
+                for em in ems:
+                    statement = db.select(Event).where(Event.id == em.eventId)
                     e = db.session.scalars(statement).first()
-                    tr.append(e.tournamentName)
+                    trnames.append(e.tournamentName)
             
-            # app.logger.info("+++++")
-            # app.logger.info(tr)
-            # app.logger.info("+++++")
 
+                    # trnames.append(e.tournamentName)
+            app.logger.info("%%%%%%%")
+            app.logger.info(trnames)
 
-
-
+                
             if not whatHappened:
                 whatHappened = ""
                 
 
-            return render_template("member-front.html", m=m, tournamentRegistered=tr, tournamentOptions=es, whatHappened=whatHappened, paymentProofs=paymentProofs)
-        # ========== 'POST'
+            # endget
+            return render_template("member-front.html", m=m, tournamentRegistered=trnames, tournamentOptions=es, whatHappened=whatHappened, paymentProofs=paymentProofs)
         else:
             paymentProofs = []
-            app.logger.info("==========")
-            app.logger.info(request.form.get("mcfId"))
-            app.logger.info(request.form)
-            app.logger.info(request.form.get("button"))
-            app.logger.info("==========")
-            m = db.session.query(Member).get(
-                # request.form['mcfId']
-                current_user.mcfId
-                                             )
-            # e = db.session.query(Event).get(request.form['events'])
-
-            m_events = m.getEvents()
+            # app.logger.info("==========")
+            # app.logger.info(request.form.get("mcfId"))
+            # app.logger.info(request.form)
+            # app.logger.info(request.form.get("button"))
+            # app.logger.info("==========")
 
             
-
-
-
             whatHappened=""
             if request.form.get("button") == "save":
                 # overwrite only if event non existing in m.events
-                if request.form['tournament_name'] not in m_events:
-                    m_events.append(request.form["tournament_name"]) 
-                    m.events = ",".join(m_events)
+
+                statement = db.select(EventMember).where(EventMember.mcfId == current_user.mcfId, EventMember.eventId == request.form["tournament_name"])
+                res = db.session.execute(statement).first()
+                # app.logger.info("eeeeeeee")
+                # app.logger.info(request.form["tournament_name"])
+                if not res:
+                    em = EventMember(mcfId=current_user.mcfId, eventId=request.form["tournament_name"])
+                    db.session.add(em)
+                try:
+                    db.session.commit()
                     whatHappened="Saved: "
+                except IntegrityError as i: 
+                    db.session.rollback()
+                    whatHappened = "something went wrong, contact your web dev"                
 
                     
+                    # endsavebutton
             elif request.form.get("button") == "delete":
-                try:
-                    # without = signs, things like this are slightly unreadable
-                    m_events.remove(request.form["tournament_name"]) 
-                    # common way to deal with None values, slightly unreadable
 
-                    # m.events = ",".join(m_events)
-            
-                    m.events = ",".join(m_events) if m_events else ""
-                    whatHappened="Deleted: "
-                except: pass # becoz .remove can produce errors if its empty
+
+                em = EventMember(mcfId=current_user.mcfId, eventId=request.form["tournament_name"])
+                statement = sa.delete(EventMember).where(EventMember.mcfId == current_user.mcfId, EventMember.eventId == request.form["tournament_name"])
+                db.session.execute(statement)
+
+                try:
+                    db.session.commit()
+                except IntegrityError as i:
+                    db.session.rollback()
+                    whatHappened = "something went wrong"
+
+                
+                # enddeletebutton
+            elif request.form.get("button") == "fillForm":
+                formid = request.form["tournament_name"]
+                formid = "Q1 event"
+
+                
+                # endfillformsample
+                return redirect(url_for('form_template', formname="Q1 event"))
+
+
                 
 
 
 
-
-    
-
-
-
-        
-
-            # if 1 == 0:
-            try:
-                db.session.commit()
-            except IntegrityError as i:
-                db.session.rollback()
-                return C_templater.custom_render_template(errorTopic="DB-API IntegrityError", errorsList=[i._message], isTemplate=True)
     
 
 
             db.session.close()
 
-            # return "update successfully"
+            # endpost
             return redirect(url_for('member_front', whatHappened=whatHappened, updatedTournamentId=request.form.get("tournament_name"), paymentProofs=paymentProofs))
 
-    else: 
+    else:
+        # endnotauthenticated
         return render_template("login.html")
         
 
@@ -671,6 +839,7 @@ def upload_payment_proof():
         paymentProofs = []
         paymentFile = request.files['paymentFile']
         if paymentFile.filename == '':
+            # endemptycheck
             return redirect(url_for('member_front', whatHappened="Error: There is no file uploaded", updatedTournamentId="", paymentProofs=paymentProofs))
 
 
@@ -703,12 +872,15 @@ def upload_payment_proof():
                 return redirect(url_for('member_front', whatHappened="Something went wrong: " + i._message()))
                              
 
-                
+            # endfilenamecheck
             return redirect(url_for('member_front', whatHappened="Proof of payment successfully uploaded", paymentProofs=paymentProofs))
         else:
             whatHappened = "Error: File must either be pdf, png or jpeg"
+            # endfilenamecheckfail
             return redirect(url_for('member_front', whatHappened=whatHappened))
-        
+    else:
+        return render_template("login.html", whatHappened = "Session ended")
+        # return redirect(url_for('login', whatHappened="Something went wrong: " + i._message()))
 
 
 
@@ -939,6 +1111,8 @@ def processMcfList():
         whatHappened = "No records skipped"
     else:
         whatHappened = "Some skipped records"
+
+    tryRemoveMcfFile("./storage/mcf.csv")                
 
 
     return whatHappened, skippedList, newList
@@ -1298,7 +1472,7 @@ def partial_download():
 
 
     var1 = ms_paginate.items[0]
-    app.logger.info(var1.events)
+    # app.logger.info(var1.events)
     
     df = pd.DataFrame()
     rec = []

@@ -142,9 +142,9 @@
 			
 			<div class="m-2 font-light">
 			    <ul class="max-w-md space-y-1 list-disc list-inside ">
-				{% for l in tournamentRegistered %}
+				{% for tr in tournamentRegistered %}
 				    <li>
-					{{ l }}
+					{{ tr }}
 				    </li>
 				{% endfor %}				
 			    </ul>
@@ -210,50 +210,58 @@
 		<!-- ================================================== -->
 		<form action="{{ url_for('member_front')  }}" method="post" name="memberEventForm" id="memberEventForm">
 		    <tr>
-		    <th>
-			<div class="m-3 text-right">
-			    <label class="block text-gray-900 text-sm">
-				Change Events?
-			    </label>		    
-			    <!-- <input type="email" id="email" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required /> -->
-			</div>
-		    </th>
-		    <td class="bg-yellow-400">
-			
-			<div class="m-2">
-			    <select name="tournament_name" id="tournament_name">
-				{% for l in tournamentOptions %}
-				    <option value={{ l.id }}>{{ l.tournamentName }}</option>
-				{% endfor %}
-			    </select>
-
-			    <!-- <button type="submit" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Save event</button> -->
-			</div>
-		    </td>
-		</tr>
-		<tr>
-		    <th></th>
-		    <td class="bg-yellow-400">
-			
-			
-			<div class="m-2">
+			<th>
+			    <div class="m-3 text-right">
+				<label class="block text-gray-900 text-sm">
+				    Change Events?
+				</label>		    
+				<!-- <input type="email" id="email" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required /> -->
+			    </div>
+			</th>
+			<td class="bg-yellow-400 w-100">
+			    <div class="flex">
 			    
-			    <button type="submit" name="button" value="save" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Save event</button>
-			</div>
-		    </td>
-		</tr>
-		<tr>
-		    <th></th>
-		    <td class="bg-yellow-400">
+				<div class="m-2">
+				    <select name="tournament_name" id="tournament_name">
+					{% for to in tournamentOptions %}
+					    <option value={{ to.id }}>
+						{{ to.tournamentName }}
+					    </option>
+					{% endfor %}
+				    </select>
+				</div>
 
+				<!-- <button type="submit" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Save event</button> -->
+
+			    </div> 
 			
-			<div class="m-2">
-			    <button type="submit" name="button" value="delete" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Delete event</button>
-			</div>
-		    </td>
-		</tr>
-		</form>
+			</td>
+		    </tr>
+		    <tr>
+			<th></th>
+			<td class="bg-yellow-400">			   			    
+			    <div class="m-2">			    
+				<button type="submit" name="button" id="eventSaveButton" value="save" class="w-30 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Save event</button>
+			    </div>
+			</td>
+		    </tr>
+		    <tr>
+			<th></th>
+			<td class="bg-yellow-400">
+			    <div class="flex ">
+				
+				<div class="m-2">
+				    <button type="submit" name="button" id="eventDeleteButton" value="delete" class="w-30 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Delete event</button>
+				    <!-- </div>
+					 <div class="m-2"> -->
 
+				    <button type="submit" name="button" value="fillForm" class="w-30 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Fill Form</button>
+				</div>
+			    </div>
+			</td>
+		    </tr>
+		</form>
+		
 		<!-- ================================================== -->
 		<tr>
 		    <td colspan="2">
