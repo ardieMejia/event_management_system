@@ -140,4 +140,4 @@ National Interstate Chess Championship
 * Things to present:
 ** All negative checks passed so far, such as pressing upload when no file is chosen (both for member_front & admin page)
 ** right now form is not atthced a single event. Mostly testing dynamic question creation
-** 
+** show download CSV feature

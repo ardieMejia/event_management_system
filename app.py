@@ -39,7 +39,7 @@ login = LoginManager(app)
 from Models.declarative import EventListing # ===== remove this
 import sqlalchemy as sa
 app.app_context().push()
-from model import Event, Member, File, FormQuestion, EventMember
+from model import Event, Member, File, FormQuestion, EventMember, FormQuestionAnswers
 Session = sessionmaker(bind=db.engine)
 
 
@@ -562,21 +562,87 @@ def login():
 
 @app.route('/test-form-submission', methods = ['POST'])
 def test_form_submission():
-    app.logger.info("==========")    
-    app.logger.info(dir(request.args) )    
-    app.logger.info(request.form.keys() )
-    app.logger.info(request.form.listvalues())
-    # app.logger.info(dir(request.form ))
+    if current_user.is_authenticated:
+        whatHappened = ""
+        app.logger.info("==========")    
+        app.logger.info(dir(request.args) )    
+        app.logger.info(request.form.keys() )
+        app.logger.info(request.form.listvalues())
 
-    data = {}
-    for q,a in request.form.items():
-        print("question {q}".format(q=q))
-        print("answer {a}".format(a=a))
-        data["question"] = q
-        data["answer"] = a
 
-    return "nothing here"
+
+        for fieldname,answer in request.form.items():
+            # app.logger.info(ressquest.form[answer])
+            fqa = FormQuestionAnswers(
+                mcfId=current_user.mcfId,
+                fieldname=fieldname,
+                formname="Q1 event",
+                answers=answer            
+            )
+            db.session.add(fqa)
     
+            try:
+                db.session.commit()
+            except IntegrityError as i:
+                db.session.rollback()
+                whatHappened = "something went wrong"
+            # endforloopanswers
+
+        return redirect(url_for('member_front', whatHappened=whatHappened))
+        # return "nothing here"
+
+
+        
+@app.route('/test-answers-view')
+def test_answers_view():
+    whatHappened = ""
+
+
+    statement = db.select(FormQuestionAnswers).where(FormQuestionAnswers.formname == "Q1 event")
+    fqas = db.session.scalars(statement).all()
+
+    
+
+    membersAnswers = {}
+
+    for fqa in fqas:
+        unique_key = str(fqa.mcfId) + str("Q1 event")
+        try:
+            membersAnswers[unique_key]["mcfId"] = fqa.mcfId
+            membersAnswers[unique_key][fqa.fieldname] = fqa.answers
+        except:
+            membersAnswers[unique_key] = {}
+            membersAnswers[unique_key]["mcfId"] = fqa.mcfId
+            membersAnswers[unique_key][fqa.fieldname] = fqa.answers
+
+
+    # ===== Example of sample return expected
+    # membersAnswers = {
+    #     # the key is meaningless and unique, like a primary key in DB, stupid useless to humans but important
+    #     "1234Q1 event": {
+    #         "mcfId": "1233",
+    #         "name": "Ardie",
+    #         "gender": "M"
+    #     },
+    #     "5678Q1 event": {
+    #         "mcfId": "1233",
+    #         "name": "Hanifa",
+    #         "gender": "F"
+    #     }
+    # }
+        
+    # try:
+    #     db.session.commit()
+    # except IntegrityError as i:
+    #     db.session.rollback()
+    #     whatHappened = "something went wrong"
+    #     # endforloopanswers
+    
+    return render_template('form-question-answers.html', membersAnswers=membersAnswers, whatHappened=whatHappened)
+
+
+
+        
 @app.route('/form-template', methods = ['GET'])
 def form_template():
 
@@ -738,6 +804,8 @@ def member_front():
                 statement = db.select(Event).where(Event.id == updatedTournamentId)
                 e = db.session.scalars(statement).first()
                 whatHappened = whatHappened + e.tournamentName
+            else:
+                whatHappened = ""
 
             statement = db.select(EventMember).where(EventMember.mcfId == current_user.mcfId)
             ems = db.session.scalars(statement).all()

@@ -231,8 +231,8 @@ class File(db.Model):
 class FormQuestion(db.Model):
     __tablename__ = "form_questions"
     id = db.Column(db.Integer, primary_key=True)
-    formname = db.Column(db.String(200), nullable=False)
-    field = db.Column(db.String(300), nullable=False)
+    formname = db.Column(db.String(200), nullable=False) # change later to eventId
+    field = db.Column(db.String(300), nullable=False) # change later to fieldName
     questionstring = db.Column(db.String(1000), nullable=False)
     # value = db.Column(db.DateTime, default=datetime.utcnow)
     value = db.Column(db.String(100), nullable=False)
@@ -245,6 +245,32 @@ class FormQuestion(db.Model):
     
     def to_dict(self):
         return {"id": self.id, "formname": self.formname, "field": self.field, "value": self.value, "questionstring": self.questionstring, "type": self.type}
+
+
+class FormQuestionAnswers(db.Model):
+    """
+    Answers for questions
+     Answers have no meaning to the code.
+     So, the only important fields for backend logic
+     is the user ID, fieldname & the eventId
+     Becoz our client only needs to glance through answers
+    
+    """
+    __tablename__ = "form_question_answers"
+    id = db.Column(db.Integer, primary_key=True)
+    mcfId = db.Column(db.Integer)
+    fieldname = db.Column(db.String(300), nullable=False) # fieldName?
+    formname = db.Column(db.String(200), nullable=False) # later change to EventId
+    answers = db.Column(db.String(100), nullable=False)
+
+    def __repr__(self):
+        # return f"Form('{self.formname}', '{self.field}')"
+        return '<fieldname: {f} answers {a}>'.format(f=self.fieldname, q=self.answers)
+
+    
+    def to_dict(self):
+        return {"mcfId": self.mcfId, "fieldname": self.fieldname, "formname": self.formname, "fieldname": self.fieldname, "answers": self.answers}
+
 
     
     # @classmethod
