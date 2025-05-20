@@ -8,6 +8,7 @@
 	<link rel="manifest" href="%PUBLIC_URL%/manifest.json">
 	<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 	<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+	<script src="https://code.jquery.com/ui/1.14.1/jquery-ui.js"></script>
 	<!-- <link href="custom.css" rel="stylesheet"> -->
 	<link href="{{ url_for('static', filename='custom.css') }}" rel="stylesheet"/>
 
@@ -51,7 +52,7 @@
 	 
 
 
-	 function submitForm(){
+	 function submitPartDownloadForm(){
 	     var selValue = document.getElementById("downloadOffset").value;
 	     console.log(selValue)
 	     if (selValue != -1){
@@ -59,7 +60,22 @@
 	     }
 	 }
 
-	 
+
+	 function submitFormCreator(){
+	     const text = `
+Creating a new form will remove
+all form derived data of specific event:
+ - all members answers of that event
+ - all form questions of that event
+	     Continue?`;
+	     
+	     if (confirm(text) == true){
+		 return true;
+	     }else{
+		 return false;
+	     }
+	 }
+
 
 
 	 $(window).on('load', function() {
@@ -69,8 +85,16 @@
 		 /* $('#memberEventForm button').hide()		  */
 		 $('#eventDeleteButton').hide()
 		 $('#eventSaveButton').hide()
+		 $('#fillFormButton').hide()
 
 	     }
+
+
+	     
+
+
+
+
 	 }); 
 
 	 

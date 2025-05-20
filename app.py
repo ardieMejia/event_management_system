@@ -39,7 +39,7 @@ login = LoginManager(app)
 from Models.declarative import EventListing # ===== remove this
 import sqlalchemy as sa
 app.app_context().push()
-from model import Event, Member, File, FormQuestion, EventMember
+from model import Event, Member, File, FormQuestion, EventMember, FormQuestionAnswers
 Session = sessionmaker(bind=db.engine)
 
 
@@ -560,35 +560,139 @@ def login():
         return render_template("login.html")
 
 
-@app.route('/test-form-submission', methods = ['POST'])
-def test_form_submission():
-    app.logger.info("==========")    
-    app.logger.info(dir(request.args) )    
-    app.logger.info(request.form.keys() )
-    app.logger.info(request.form.listvalues())
-    # app.logger.info(dir(request.form ))
 
-    data = {}
-    for q,a in request.form.items():
-        print("question {q}".format(q=q))
-        print("answer {a}".format(a=a))
-        data["question"] = q
-        data["answer"] = a
 
-    return "nothing here"
+
+@app.route('/form-submission', methods = ['POST'])
+def form_submission():
+    if current_user.is_authenticated:
+        whatHappened = ""
+        # app.logger.info("==========")    
+        # app.logger.info(dir(request.args) )    
+        app.logger.info(request.form.keys() )
+        app.logger.info(request.form.get("fullname") )
+        app.logger.info(request.form.listvalues())
+
+        eventId = request.form['eventId']
+
+
+        answers = []
+        for fieldname,answer in request.form.items():
+            if fieldname == "eventId":
+                continue
+            app.logger.info("********")
+            app.logger.info(answer)
+            fqa = FormQuestionAnswers(
+                mcfId=current_user.mcfId,
+                fieldName=fieldname,
+                eventId=eventId,
+                answerString=answer
+            )
+            answers.append(fqa)
+            
+        db.session.add_all(answers)
     
+        try:
+            db.session.commit()
+            whatHappened = "answers successfully recorded"
+        except IntegrityError as i:
+            db.session.rollback()
+            whatHappened = "something went wrong, answers failed to save, please re-fill form"
+            # endforloopanswers
+
+        return redirect(url_for('member_front', whatHappened=whatHappened))
+        # return "nothing here"
+
+        
+        
+
+
+    # ===== Example of sample return expected
+    # membersAnswers = {
+    #     # the key is meaningless and unique, like a primary key in DB, stupid useless to humans but important
+    #     "1234Q1 event": {
+    #         "mcfId": "1233",
+    #         "name": "Ardie",
+    #         "gender": "M"
+    #     },
+    #     "5678Q1 event": {
+    #         "mcfId": "1233",
+    #         "name": "Hanifa",
+    #         "gender": "F"
+    #     }
+    # }    
+    
+    return render_template('form-question-answers.html', membersAnswers=membersAnswers, whatHappened=whatHappened)
+
+
+
+@app.route('/event-answers-page', methods = ['POST'])
+def event_answers_page():
+    whatHappened = ""
+
+    eventId = request.form.get('eventId')
+
+    statement = db.select(FormQuestionAnswers).where(FormQuestionAnswers.eventId == eventId)
+    fqas = db.session.scalars(statement).all()
+
+
+    app.logger.info(eventId)
+    app.logger.info(eventId)
+    app.logger.info(eventId)
+
+
+    app.logger.info(fqas)
+    app.logger.info(eventId)
+    membersAnswers = {}
+
+    for fqa in fqas:
+        unique_key = str(fqa.mcfId) + str(eventId)
+        try:
+            membersAnswers[unique_key]["mcfId"] = fqa.mcfId
+            membersAnswers[unique_key][fqa.fieldName] = fqa.answerString
+        except:
+            membersAnswers[unique_key] = {}
+            membersAnswers[unique_key]["mcfId"] = fqa.mcfId
+            membersAnswers[unique_key][fqa.fieldName] = fqa.answerString
+
+    app.logger.info(
+        
+    membersAnswers
+    )
+    # ===== Example of sample return expected
+    # membersAnswers = {
+    #     # the key is meaningless and unique, like a primary key in DB, stupid useless to humans but important
+    #     "some_mcfIdSome_eventId": {
+    #         "mcfId": "1233",
+    #         "name": "Ardie",
+    #         "gender": "M",
+    #          ...
+    #     },
+    #     "some_mcfIdSome_eventId": {
+    #         "mcfId": "1233",
+    #         "name": "Hanifa",
+    #         "gender": "F",
+    #          ...
+    #     }
+    # }    
+    
+    return render_template('event-answers-page.html', membersAnswers=membersAnswers, whatHappened=whatHappened)
+
+
+        
 @app.route('/form-template', methods = ['GET'])
 def form_template():
 
 
-    formname = request.args.get("formname")
+    eventId = request.args.get("eventId")
 
     
 
-    statement = db.select(FormQuestion).where(FormQuestion.formname == formname)
+    statement = db.select(FormQuestion).where(FormQuestion.eventId == eventId)
     frs = db.session.scalars(statement).all()
     if not frs:
-        return "nothing here"
+        return redirect(url_for("member_front", whatHappened="No form for this event yet"))
+
 
     # app.logger.info("==========")
     # app.logger.info(type(frs))
@@ -608,58 +712,76 @@ def form_template():
     # - so it becomes eg: nametext, genderdropdown, agetext
     a_dict = {}
     for fr_dict in frs_list:
-        fieldtype_key = fr_dict["field"]+fr_dict["type"]
+        fieldtype_key = fr_dict["fieldName"]+fr_dict["type"]
         
-        # ===== becoz append is non-destructive, append logic always goes first
         if fr_dict["type"] == "dropdown" or fr_dict["type"] == "checkbox":
+            # ===== becoz append is non-destructive, append logic always goes first
             try:
                 a_dict[fieldtype_key]["value"].append(fr_dict["value"])
             except:
                 a_dict[fieldtype_key] = {}
                 a_dict[fieldtype_key]["value"] = [fr_dict["value"]]
-                a_dict[fieldtype_key]["field"] = fr_dict["field"]
+                a_dict[fieldtype_key]["fieldName"] = fr_dict["fieldName"]
                 a_dict[fieldtype_key]["type"] = fr_dict["type"]
                 a_dict[fieldtype_key]["questionstring"] = fr_dict["questionstring"]
                 # enddropdownorcheckbox   
         else:
-            a_dict[fieldtype_key] = {"field": fr_dict["field"], "type": fr_dict["type"], "questionstring": fr_dict["questionstring"]}
+            a_dict[fieldtype_key] = {
+                "fieldName": fr_dict["fieldName"],
+                "type": fr_dict["type"],
+                "questionstring": fr_dict["questionstring"]}
             # endtext
 
 
     elements = list(a_dict.values())
 
         
-    # ===== dont delete this, improve this documentation
-    # elements = [        
-    #         {
-    #             "value": "", "field": "name", "type" : "text"
-    #         },
-    #         {
-    #             "value": ["M", "F", "Open"], "field": "gender", "type" : "dropdown"
-    #         }
-    # ]
+    # ===== Example of return data expected, unique ID is useless in template, only serves as organization
+    # elements = {
+    #     "genderdropdown" : {
+    #         "value": ["M", "F", "Open"], "field": "gender", "type" : "text"
+    #     },
+    #     "fullicnametext" : {
+    #         "value": "", "field": "fullname", "type" : "dropdown"
+    #     }
+    # }
     
-    return render_template("form-template.html", elements=elements)
+    return render_template("form-template.html", elements=elements, eventId=eventId)
 
 
-@app.route('/create-form-part', methods = ['POST', 'GET'])
-def create_form_part():
-    if request.method == 'GET':
+
+
+
+
+@app.route('/event-form-creator', methods = ['POST', 'GET'])
+def event_form_creator():
+    if request.method == 'GET': # ========== we need delete, or modify this, we never the GET for this API
+
+        eventId = request.args.get('eventId')
+        if not eventId:
+            return render_template("main_page", whatHappened="something went wrong")
+                
         whatHappened = request.args.get("whatHappened")
         if not whatHappened:
             whatHappened = ""
+
         # endget
-        return render_template("form-creator.html", whatHappened=whatHappened)
+        return render_template("event-form-creator.html", whatHappened=whatHappened, eventId=eventId)
     
     else:
+        eventId = request.form.get("eventId")
+        if request.form.get("button") == "start_create":
+            tournamentName, whatHappened = kill_form_descendents_by_id(eventId)
+            # endstartcreate
+            return redirect(url_for('event_form_creator', whatHappened="Lets get creating1", eventId=eventId))
         if request.form.get("button") == "add":
             if request.form.get("type") == "dropdown" or request.form.get("type") == "checkbox":
                 values = request.form.get("value").split("::")
                 app.logger.info(request.form.get("_______"))
                 app.logger.info(request.form.get("questionstring"))
                 for value in values:
-                    fr = FormQuestion(formname="Q1 event",
-                                      field=request.form.get("field"),
+                    fr = FormQuestion(eventId=eventId,
+                                      fieldName=request.form.get("field"),
                                       value=value,
                                       questionstring=request.form.get("questionstring"),
                                       type=request.form.get("type")
@@ -670,12 +792,12 @@ def create_form_part():
                     except IntegrityError as i:
                         app.logger.info("enderror")
                         db.session.rollback()
-                        return redirect(url_for('create_form_part', whatHappened="something went wrong when committing dropdowns"))
+                        return redirect(url_for('event_form_creator', whatHappened="something went wrong when committing dropdowns", eventId=eventId))
                 #enddropdownorcheckbox
-                return redirect(url_for('create_form_part', whatHappened="dropdown created"))
+                return redirect(url_for('event_form_creator', whatHappened="dropdown created", eventId=eventId))
             else: 
-                fr = FormQuestion(formname="Q1 event",
-                                   field=request.form.get("field"),
+                fr = FormQuestion(eventId=eventId,
+                                   fieldName=request.form.get("field"),
                                    value="",
                                    questionstring=request.form.get("questionstring"),
                                    type=request.form.get("type")
@@ -688,9 +810,9 @@ def create_form_part():
                     app.logger.info(fr)
                     db.session.rollback()
                     #endnotdropdown
-                    return redirect(url_for('create_form_part', whatHappened="something went wrong"))
+                    return redirect(url_for('event_form_creator', whatHappened="something went wrong", eventId=eventId))
                 #endadd
-                return render_template("form-creator.html", whatHappened="text field created")
+                return render_template("event-form-creator.html", whatHappened="text field created", eventId=eventId)
         else:
             # form_elements = [
             #     {
@@ -700,21 +822,53 @@ def create_form_part():
             form_vars = ""
             app.logger.info("endNotDropdown")
             # enddone
-            return render_template("main-page.html",whatHappened="form creation loop finished")
+            return redirect(url_for("main_page",whatHappened="form creation loop finished"))
         # endpost
+
         
+def kill_form_descendents_by_id(eventId):
+
+    whatHappened = ""
+    statement = sa.select(Event).where(Event.id == eventId)
+    e = db.session.scalars(statement).first()
+    tournamentName = e.tournamentName
+
+    statement = sa.delete(FormQuestion).where(FormQuestion.eventId == eventId)
+    db.session.execute(statement)
+    
+    try:
+        db.session.commit()
+    except:
+        db.session.rollback()
+        return None, "something went wrong"
+
+    statement = sa.delete(FormQuestionAnswers).where(FormQuestionAnswers.eventId == eventId)
+    db.session.execute(statement)
+    
+    try:
+        db.session.commit()
+    except:
+        db.session.rollback()
+        return None, "something went wrong"
 
 
+    return tournamentName, whatHappened
 
     
-@app.route('/kill-forms')
-def kill_forms():
+@app.route('/kill-form-descendents', methods = ["POST"])
+def kill_form_descendents():
+    
+    whatHappened = ""
+    eventId = request.form.get('eventId')
+    if not eventId:
+        eventId = request.args.get('eventId')
 
 
-    statement=sa.delete(FormQuestion)
-    db.session.execute(statement)
-    db.session.commit()
-    return redirect(url_for('main_page', whatHappened="All forms killed"))
+    tournamentName, whatHappened = kill_form_descendents_by_id(eventId)
+    if tournamentName:
+        whatHappened="All derived form data of " + tournamentName + " killed"
+
+    return redirect(url_for('main_page', whatHappened=whatHappened))
 
     
     
@@ -739,6 +893,7 @@ def member_front():
                 e = db.session.scalars(statement).first()
                 whatHappened = whatHappened + e.tournamentName
 
+
             statement = db.select(EventMember).where(EventMember.mcfId == current_user.mcfId)
             ems = db.session.scalars(statement).all()
 
@@ -757,7 +912,9 @@ def member_front():
                 
             if not whatHappened:
                 whatHappened = ""
-                
+
+            app.logger.info("********")
+            app.logger.info(whatHappened)
 
             # endget
             return render_template("member-front.html", m=m, tournamentRegistered=trnames, tournamentOptions=es, whatHappened=whatHappened, paymentProofs=paymentProofs)
@@ -806,12 +963,12 @@ def member_front():
                 
                 # enddeletebutton
             elif request.form.get("button") == "fillForm":
-                formid = request.form["tournament_name"]
-                formid = "Q1 event"
+                eventId = request.form["tournament_name"]
+
 
                 
                 # endfillformsample
-                return redirect(url_for('form_template', formname="Q1 event"))
+                return redirect(url_for('form_template', eventId=eventId))
 
 
                 

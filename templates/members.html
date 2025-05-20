@@ -162,7 +162,7 @@
 
 			<!-- Dropdown menu -->
 			<div id="bulkDownload" class="z-10 hidden">
-			    <select name="downloadOffset" id="downloadOffset" onchange="submitForm()" >
+			    <select name="downloadOffset" id="downloadOffset" onchange="submitPartDownloadForm()" >
 				<option value="-1">--</option>
 				{% set steps = totalCount / 500 %}
 				{% set steps = steps|round(method='ceil')|int + 1 %}

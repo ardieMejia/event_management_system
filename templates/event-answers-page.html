@@ -1,0 +1,57 @@
+{% extends "base_form_h.html" %}
+
+
+{% block heading_1 %}
+    Answers for Q1 event
+{% endblock %}
+
+{% block form %}
+
+
+    <br>
+
+
+
+    <table id="member_details" class="table-auto border border-yellow-400 border-2 justify-items-center">
+	<caption class="caption-top text-red-600 italic p-2">
+	    {{ whatHappened }}
+	</caption>
+	<thead>
+
+	    <tr class="bg-yellow-400">
+		{% for membersAnswer in membersAnswers.values() | first %}
+		    <th class="w-20 p-4">{{ membersAnswer }}</th>
+		{% endfor %}
+
+	    </tr>
+
+	</thead>
+	<tbody class="text-center">
+	    <!-- <tr class="border border-yellow-400 border-2">
+		 
+		 </tr>
+		 <tr>
+
+		 </tr> -->
+	    {% for membersAnswer in membersAnswers.values() %}
+		<tr class="border border-yellow-400 border-2">
+
+		    {% for question,answer in membersAnswer.items() %}			
+		    <td class="w-20 p-4 ">
+			{{ answer }}
+		    </td>
+
+		    {% endfor %}
+		</tr>
+	    {% endfor %}
+	</tbody>
+    </table>
+
+    <br>
+
+
+
+
+
+
+{% endblock %}

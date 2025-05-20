@@ -1,0 +1,9 @@
+
+
+<select name = {{ element.fieldName }} id = {{ element.fieldName }} >
+    {%  for value in element.value %}
+	<option value={{ value }}>
+	{{ value }}
+    </option>
+    {% endfor %}
+</select>

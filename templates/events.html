@@ -49,7 +49,24 @@ Events
 	    <th>
 		<div class="m-3">Time Control</div>
 	    </th>
-	    <th></th>
+	    <th>
+		<div class="m-3">Form Creator</div>
+	    </th>
+	    <th>
+		<div class="m-3">Form Answers</div>
+	    </th>
+	    <th>
+		<div class="m-3" data-tooltip-target="tooltip-form-data-kill-button">Kill Form Data</div>
+		<div id="tooltip-form-data-kill-button" role="tooltip" placement="bottom" class="absolute z-10  inline-block border border-1 w-60 px-3 py-2 text-m font-light text-black transition-opacity opacity-0  duration-300 bg-white rounded-lg shadow-xl tooltip">
+		    Kills all form data of a
+		    <span class="italic font-medium">
+			
+		    specific event
+		    </span>
+		    , including all participants answers
+
+		</div>
+	    </th>
 	    <th></th>
 	</tr>
     </thead>
@@ -88,7 +105,41 @@ Events
 	    <td>
 		<div class="m-3">{{ e.timeControl }}</div>
 	    </td>
-	    <td></td>
+	    <td>
+		<form name="formCreator" id="formCreator" action="{{ url_for('event_form_creator')  }}" method="post" onsubmit="return submitFormCreator();">
+		    <div class="m-3">
+			<input type="hidden" name="eventId" value={{ e.id }} />
+			
+			<button name="button" value="start_create" type="submit" class="w-20 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">				
+			    Form Creator
+			</button>
+		</div>
+		</form>
+	    </td>
+	    <td>
+		<form action="{{ url_for('event_answers_page')  }}" method="post">
+		    <div class="m-3">
+			<input type="hidden" name="eventId" value={{ e.id }} />
+			
+			<button name="button" value="start_create" type="submit" class="w-20 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">				
+			    Form Answers
+			</button>
+		    </div>
+		</form>
+	    </td>
+	    <td>
+		<div class="m-3">
+		    <form action="{{ url_for('kill_form_descendents')  }}" method="post">
+			<div class="m-3">
+			    <input type="hidden" name="eventId" value={{ e.id }} />
+			    
+			    <button type="submit" class="w-30 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">				
+				kill form descendents
+			    </button>
+			</div>
+		    </form>
+		</div>
+	    </td>
 	    <td>
 		<div class="m-2">
 		    <button type="submit" >
@@ -101,7 +152,7 @@ Events
 	</tr>
 	{% endfor %}
 	<tr>
-	    <td colspan="9"></td>
+	    <td colspan="12"></td>
 	    <td>
 		<div class="m-3">
 		    <button type="submit" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">
@@ -125,4 +176,5 @@ Events
 
 
 {% endblock %}
+
 
