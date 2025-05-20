@@ -1,0 +1,63 @@
+{% extends "base_form_h.html" %} 
+
+
+
+
+{% block heading_1 %}
+    MCF Event Registration System
+{% endblock %}
+
+
+
+
+{% block form %}
+
+    <br><br>
+    <form action="{{ url_for('form_submission')  }}" method="post">
+	<caption class="caption-top text-orange-600 italic p-2">
+	    {{ whatHappened }}
+	</caption>
+	<table>
+	    <tbody>
+		{% for element in elements %}
+		    <tr>
+			
+
+
+			
+			<!-- <input type="email" id="email" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required /> -->
+			<td class="bg-yellow-200 w-300">
+			    <div class="m-2 font-light">
+				<label class="block text-gray-900">
+				    {{ element.questionstring }}
+				</label>
+				{% if element.type == "dropdown" %}
+				    {% include 'form_elements/dropdown.html' %}
+				{% elif element.type == "checkbox" %}
+				    {% include 'form_elements/checkbox.html' %}
+				{% else %}
+				    <input id={{ element.fieldName }} name={{ element.fieldName }} class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg block w-60 p-2" required/>
+				{% endif %}
+			    </div>
+			</td>
+		    </tr>
+		{% endfor %}
+		<input type="hidden" name="eventId" value={{ eventId }} />
+		<tr>
+		    <td class="bg-yellow-200 w-300">
+			<div class="m-2">
+			    
+			    <button type="submit" class="w-30 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Submit</button>		    
+			</div>
+		    </td>
+		</tr>
+
+		
+
+	    </tbody>
+	</table>
+
+    </form>
+
+{% endblock %}
+

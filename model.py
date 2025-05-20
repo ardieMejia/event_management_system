@@ -231,8 +231,8 @@ class File(db.Model):
 class FormQuestion(db.Model):
     __tablename__ = "form_questions"
     id = db.Column(db.Integer, primary_key=True)
-    formname = db.Column(db.String(200), nullable=False) # change later to eventId
-    field = db.Column(db.String(300), nullable=False) # change later to fieldName
+    eventId = db.Column(db.Integer, nullable=False) 
+    fieldName = db.Column(db.String(300), nullable=False) # change later to fieldName
     questionstring = db.Column(db.String(1000), nullable=False)
     # value = db.Column(db.DateTime, default=datetime.utcnow)
     value = db.Column(db.String(100), nullable=False)
@@ -244,7 +244,7 @@ class FormQuestion(db.Model):
 
     
     def to_dict(self):
-        return {"id": self.id, "formname": self.formname, "field": self.field, "value": self.value, "questionstring": self.questionstring, "type": self.type}
+        return {"id": self.id, "eventId": self.eventId, "fieldName": self.fieldName, "value": self.value, "questionstring": self.questionstring, "type": self.type}
 
 
 class FormQuestionAnswers(db.Model):
@@ -259,13 +259,14 @@ class FormQuestionAnswers(db.Model):
     __tablename__ = "form_question_answers"
     id = db.Column(db.Integer, primary_key=True)
     mcfId = db.Column(db.Integer)
-    fieldname = db.Column(db.String(300), nullable=False) # fieldName?
-    formname = db.Column(db.String(200), nullable=False) # later change to EventId
-    answers = db.Column(db.String(100), nullable=False)
+    fieldName = db.Column(db.String(300), nullable=False) # fieldName?
+    # eventId = db.Column(db.String(200), nullable=False)
+    eventId = db.Column(db.Integer, nullable=False) 
+    answerString = db.Column(db.String(200), nullable=False)
 
     def __repr__(self):
         # return f"Form('{self.formname}', '{self.field}')"
-        return '<fieldname: {f} answers {a}>'.format(f=self.fieldname, q=self.answers)
+        return '<fieldname: {f} answers {a}>'.format(f=self.fieldName, a=self.answerString)
 
     
     def to_dict(self):

@@ -86,6 +86,8 @@ National Interstate Chess Championship
 
 
 #+end_quote
+** What happens if the user to refill an event form again?
+*** Should it delete all previous eventID-specific entries?
 * Video:
 ** All the processes from the video
 ** Show wrongly uploading a video
@@ -141,3 +143,4 @@ National Interstate Chess Championship
 ** All negative checks passed so far, such as pressing upload when no file is chosen (both for member_front & admin page)
 ** right now form is not atthced a single event. Mostly testing dynamic question creation
 ** show download CSV feature
+
