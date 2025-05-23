@@ -591,7 +591,7 @@ def form_submission():
                 app.logger.info("********")
                 # None values are custom, we remove None when users select checkbox values
                 if len(checkboxList) > 1:
-                    checkboxList.remove("None")                
+                    checkboxList.remove("-")
                 fqa = FormQuestionAnswers(
                     mcfId=current_user.mcfId,
                     fieldName=fieldname.split("[]")[0],
@@ -651,6 +651,11 @@ def event_answers_page():
 
     eventId = request.form.get('eventId')
 
+    # tablecolumns
+    statement = db.select(FormQuestion).where(FormQuestion.eventId == eventId)
+    fqs = db.session.scalars(statement).all()
+    # endtablecolumns
+    
     statement = db.select(FormQuestionAnswers).where(FormQuestionAnswers.eventId == eventId)
     fqas = db.session.scalars(statement).all()
 
@@ -662,7 +667,14 @@ def event_answers_page():
 
     app.logger.info(fqas)
     app.logger.info(eventId)
+
+    
     membersAnswers = {}
+    
+    membersAnswers["000000"] = {}
+    for fq in fqs:
+        membersAnswers["000000"]["mcfId"] = ""
+        membersAnswers["000000"][fq.fieldName] = ""
 
     for fqa in fqas:
         unique_key = str(fqa.mcfId) + str(eventId)

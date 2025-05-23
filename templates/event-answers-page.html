@@ -19,8 +19,12 @@
 	<thead>
 
 	    <tr class="bg-yellow-400">
-		{% for membersAnswer in membersAnswers.values() | first %}
-		    <th class="w-20 p-4">{{ membersAnswer }}</th>
+		{% for membersAnswer in membersAnswers.values() %}
+		    {% if loop.first %}			
+			{% for fieldname,answer in membersAnswer.items() %}
+			    <th class="w-20 p-4">{{ fieldname }}</th>
+			{% endfor %}
+		    {% endif %}
 		{% endfor %}
 
 	    </tr>
@@ -36,12 +40,14 @@
 	    {% for membersAnswer in membersAnswers.values() %}
 		<tr class="border border-yellow-400 border-2">
 
-		    {% for question,answer in membersAnswer.items() %}			
-		    <td class="w-20 p-4 ">
-			{{ answer }}
-		    </td>
+		    {% if not loop.first %}			
+			{% for question,answer in membersAnswer.items() %}			
+			    <td class="w-20 p-4 ">
+				{{ answer }}
+			    </td>
 
-		    {% endfor %}
+			{% endfor %}
+		    {% endif %}
 		</tr>
 	    {% endfor %}
 	</tbody>
