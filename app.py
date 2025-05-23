@@ -573,21 +573,40 @@ def form_submission():
         app.logger.info(request.form.get("fullname") )
         app.logger.info(request.form.listvalues())
 
+
         eventId = request.form['eventId']
 
 
+
+
+            
         answers = []
         for fieldname,answer in request.form.items():
             if fieldname == "eventId":
                 continue
-            app.logger.info("********")
-            app.logger.info(answer)
-            fqa = FormQuestionAnswers(
-                mcfId=current_user.mcfId,
-                fieldName=fieldname,
-                eventId=eventId,
-                answerString=answer
-            )
+            if "[]" in fieldname:
+                checkboxList = request.form.getlist(fieldname)
+                app.logger.info("********")
+                app.logger.info(checkboxList)
+                app.logger.info("********")
+                # None values are custom, we remove None when users select checkbox values
+                if len(checkboxList) > 1:
+                    checkboxList.remove("None")                
+                fqa = FormQuestionAnswers(
+                    mcfId=current_user.mcfId,
+                    fieldName=fieldname.split("[]")[0],
+                    eventId=eventId,
+                    answerString= ",".join(checkboxList)
+                )
+                # endcheckboxsubmission
+            else:            
+                fqa = FormQuestionAnswers(
+                    mcfId=current_user.mcfId,
+                    fieldName=fieldname,
+                    eventId=eventId,
+                    answerString=answer
+                )
+                # endnormalsubmission
             answers.append(fqa)
             
         db.session.add_all(answers)
@@ -655,6 +674,8 @@ def event_answers_page():
             membersAnswers[unique_key]["mcfId"] = fqa.mcfId
             membersAnswers[unique_key][fqa.fieldName] = fqa.answerString
 
+
+
     app.logger.info(
         
     membersAnswers
@@ -714,7 +735,7 @@ def form_template():
     for fr_dict in frs_list:
         fieldtype_key = fr_dict["fieldName"]+fr_dict["type"]
         
-        if fr_dict["type"] == "dropdown" or fr_dict["type"] == "checkbox":
+        if fr_dict["type"] == "dropdown" or fr_dict["type"] == "checkbox" or fr_dict["type"] == "radio":
             # ===== becoz append is non-destructive, append logic always goes first
             try:
                 a_dict[fieldtype_key]["value"].append(fr_dict["value"])
@@ -775,7 +796,7 @@ def event_form_creator():
             # endstartcreate
             return redirect(url_for('event_form_creator', whatHappened="Lets get creating1", eventId=eventId))
         if request.form.get("button") == "add":
-            if request.form.get("type") == "dropdown" or request.form.get("type") == "checkbox":
+            if request.form.get("type") == "dropdown" or request.form.get("type") == "checkbox" or request.form.get("type") == "radio":
                 values = request.form.get("value").split("::")
                 app.logger.info(request.form.get("_______"))
                 app.logger.info(request.form.get("questionstring"))
@@ -794,7 +815,7 @@ def event_form_creator():
                         db.session.rollback()
                         return redirect(url_for('event_form_creator', whatHappened="something went wrong when committing dropdowns", eventId=eventId))
                 #enddropdownorcheckbox
-                return redirect(url_for('event_form_creator', whatHappened="dropdown created", eventId=eventId))
+                return redirect(url_for('event_form_creator', whatHappened="dropdown/checkbox/radio created", eventId=eventId))
             else: 
                 fr = FormQuestion(eventId=eventId,
                                    fieldName=request.form.get("field"),

@@ -35,6 +35,8 @@
 				    {% include 'form_elements/dropdown.html' %}
 				{% elif element.type == "checkbox" %}
 				    {% include 'form_elements/checkbox.html' %}
+				{% elif element.type == "radio" %}
+				    {% include 'form_elements/radio.html' %}
 				{% else %}
 				    <input id={{ element.fieldName }} name={{ element.fieldName }} class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg block w-60 p-2" required/>
 				{% endif %}
