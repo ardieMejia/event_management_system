@@ -237,14 +237,66 @@ class FormQuestion(db.Model):
     # value = db.Column(db.DateTime, default=datetime.utcnow)
     value = db.Column(db.String(100), nullable=False)
     type = db.Column(db.String(30), nullable=False)
+    subgroupId = db.Column(db.String(36), unique=True, nullable=True)
+    subgroupName = db.Column(db.String(100), nullable=True)
+
 
     def __repr__(self):
         # return f"Form('{self.formname}', '{self.field}')"
         return '<field: {f} questionstring {q}>'.format(f=self.field, q=self.questionstring[0:40])
 
+
+
+        
     
     def to_dict(self):
-        return {"id": self.id, "eventId": self.eventId, "fieldName": self.fieldName, "value": self.value, "questionstring": self.questionstring, "type": self.type}
+        return {
+            "id": self.id,
+            "eventId": self.eventId,
+            "fieldName": self.fieldName,
+            "value": self.value,
+            "questionstring": self.questionstring,
+            "type": self.type,
+            "subgroupId": self.subgroupId
+        }
+
+
+class FormQuestionSubgroup(db.Model):
+    """
+    Question Subgroup
+     Similar to FormQuestion
+     Only difference is SubgroupId being 
+     compulsary
+    This table also avoids ordering problems in
+    event_answers_page, since we rely on DB entry order_by
+    there
+    
+    """
+
+    __tablename__ = "form_questions_subgroup"
+    id = db.Column(db.Integer, primary_key=True)
+    subgroupId = db.Column(db.String(36), nullable=False)
+    fieldName = db.Column(db.String(300), nullable=False) # fieldName?
+    eventId = db.Column(db.Integer, nullable=False) # we might try considering removing this later on, better remove now.. whatever..
+    questionString = db.Column(db.String(1000), nullable=False)
+    value = db.Column(db.String(100), nullable=False)
+    type = db.Column(db.String(30), nullable=False)
+
+    def __repr__(self):
+        # return f"Form('{self.formname}', '{self.field}')"
+        return '<fieldname: {f}, question: {q}>'.format(f=self.fieldName, q=self.questionString)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "subgroupId": self.subgroupId,
+            "fieldName": self.fieldName,
+            "eventId": self.eventId,
+            "questionString": self.questionString,
+            "value": self.value,
+            "type": self.type
+        }
+
 
 
 class FormQuestionAnswers(db.Model):
@@ -263,6 +315,7 @@ class FormQuestionAnswers(db.Model):
     # eventId = db.Column(db.String(200), nullable=False)
     eventId = db.Column(db.Integer, nullable=False) 
     answerString = db.Column(db.String(200), nullable=False)
+    subgroupId = db.Column(db.String(36), nullable=True)
 
     def __repr__(self):
         # return f"Form('{self.formname}', '{self.field}')"

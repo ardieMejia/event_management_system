@@ -21,6 +21,7 @@ from io import StringIO, BytesIO
 import datetime
 # from c_validation_funcs import convert_nan_to_string
 from c_validation_funcs import validate_before_saving
+import uuid
 
 import json
 
@@ -39,7 +40,7 @@ login = LoginManager(app)
 from Models.declarative import EventListing # ===== remove this
 import sqlalchemy as sa
 app.app_context().push()
-from model import Event, Member, File, FormQuestion, EventMember, FormQuestionAnswers
+from model import Event, Member, File, FormQuestion, EventMember, FormQuestionAnswers, FormQuestionSubgroup
 Session = sessionmaker(bind=db.engine)
 
 
@@ -584,6 +585,11 @@ def form_submission():
         for fieldname,answer in request.form.items():
             if fieldname == "eventId":
                 continue
+
+            if "subgroup" in fieldname:
+                ignore, subgroupId, fieldname = fieldname.split("::")
+            else:
+                subgroupId = None
             if "[]" in fieldname:
                 checkboxList = request.form.getlist(fieldname)
                 app.logger.info("********")
@@ -596,7 +602,8 @@ def form_submission():
                     mcfId=current_user.mcfId,
                     fieldName=fieldname.split("[]")[0],
                     eventId=eventId,
-                    answerString= ",".join(checkboxList)
+                    answerString= ",".join(checkboxList),
+                    subgroupId=subgroupId
                 )
                 # endcheckboxsubmission
             else:            
@@ -604,9 +611,13 @@ def form_submission():
                     mcfId=current_user.mcfId,
                     fieldName=fieldname,
                     eventId=eventId,
-                    answerString=answer
+                    answerString=answer,
+                    subgroupId=subgroupId
                 )
                 # endnormalsubmission
+
+
+            
             answers.append(fqa)
             
         db.session.add_all(answers)
@@ -641,50 +652,59 @@ def form_submission():
     #     }
     # }    
     
-    return render_template('form-question-answers.html', membersAnswers=membersAnswers, whatHappened=whatHappened)
+    # return render_template('form-question-answers.html', membersAnswers=membersAnswers, whatHappened=whatHappened)
 
 
 
 @app.route('/event-answers-page', methods = ['POST'])
 def event_answers_page():
     whatHappened = ""
+    membersAnswers = {}
 
     eventId = request.form.get('eventId')
-
-    # tablecolumns
-    statement = db.select(FormQuestion).where(FormQuestion.eventId == eventId)
-    fqs = db.session.scalars(statement).all()
-    # endtablecolumns
     
+    statement = db.select(FormQuestionAnswers).where(FormQuestionAnswers.eventId == eventId)
+    res_first = db.session.scalars(statement).first()
+    mcfId = res_first.mcfId
+    
+
+    statement = db.select(FormQuestionAnswers).where(FormQuestionAnswers.eventId == eventId, FormQuestionAnswers.mcfId == mcfId)
+    single_mcfId_eventId = db.session.scalars(statement).all()
+    
+
+    # tablecolumns    
+    membersAnswers["000000"] = {}
+
+
+    
+    membersAnswers["000000"]["mcfId"] = {"value": "", "subgroupId": None}
+    for mcfId_eventId in single_mcfId_eventId:
+        membersAnswers["000000"][mcfId_eventId.fieldName] = {"value": "", "subgroupId": mcfId_eventId.subgroupId}
+
+    # endsubtablecolumns
+
+    
+
     statement = db.select(FormQuestionAnswers).where(FormQuestionAnswers.eventId == eventId)
     fqas = db.session.scalars(statement).all()
 
-
-    app.logger.info(eventId)
-    app.logger.info(eventId)
-    app.logger.info(eventId)
-
-
-    app.logger.info(fqas)
-    app.logger.info(eventId)
-
-    
-    membersAnswers = {}
-    
-    membersAnswers["000000"] = {}
-    for fq in fqs:
-        membersAnswers["000000"]["mcfId"] = ""
-        membersAnswers["000000"][fq.fieldName] = ""
-
     for fqa in fqas:
         unique_key = str(fqa.mcfId) + str(eventId)
+        app.logger.info("$$$$$")
+        app.logger.info(fqa.mcfId)
+        app.logger.info("$$$$$")
         try:
-            membersAnswers[unique_key]["mcfId"] = fqa.mcfId
-            membersAnswers[unique_key][fqa.fieldName] = fqa.answerString
+            membersAnswers[unique_key]["mcfId"] = {
+                "value": fqa.mcfId,
+                "subgroupId": None
+            }
+            membersAnswers[unique_key][fqa.fieldName] = {"value": fqa.answerString, "subgroupId": fqa.subgroupId}
+
         except:
             membersAnswers[unique_key] = {}
             membersAnswers[unique_key]["mcfId"] = fqa.mcfId
-            membersAnswers[unique_key][fqa.fieldName] = fqa.answerString
+            membersAnswers[unique_key][fqa.fieldName] = {"value": fqa.answerString, "subgroupId": fqa.subgroupId}
+
 
 
 
@@ -742,12 +762,61 @@ def form_template():
 
     # the problem is our data is not unique
     # - hence we need to create a key from field+type
-    # - so it becomes eg: nametext, genderdropdown, agetext
+    # - so it becomes eg: nametext, genderdropdown, agetext, disabledradio
+    # - for subgroupids, the leading question is saved first, before querying subgroup table
+    # and then assigning it to a deeper dictionary
+    
     a_dict = {}
     for fr_dict in frs_list:
         fieldtype_key = fr_dict["fieldName"]+fr_dict["type"]
         
-        if fr_dict["type"] == "dropdown" or fr_dict["type"] == "checkbox" or fr_dict["type"] == "radio":
+        if fr_dict["subgroupId"]:
+
+
+            a_dict[fieldtype_key] = {}
+            a_dict[fieldtype_key]["value"] = [fr_dict["value"]]
+            a_dict[fieldtype_key]["fieldName"] = fr_dict["fieldName"]
+            a_dict[fieldtype_key]["type"] = fr_dict["type"]
+            a_dict[fieldtype_key]["questionstring"] = fr_dict["questionstring"]
+            a_dict[fieldtype_key]["subgroupId"] = fr_dict["subgroupId"]
+            a_dict[fieldtype_key]["subgroup"] = {}
+            # endsubgroupradio
+            statement = db.select(FormQuestionSubgroup).where(FormQuestionSubgroup.subgroupId == fr_dict["subgroupId"])
+            frsgs = db.session.scalars(statement).all()
+            frsgs_list = []
+            for frsg in frsgs:
+                frsgs_list.append(frsg.to_dict())
+            for frsg_dict in frsgs_list:
+                subFieldtype_key = frsg_dict["fieldName"]+frsg_dict["type"]
+                if frsg_dict["type"] == "dropdown" or frsg_dict["type"] == "checkbox" or frsg_dict["type"] == "radio":
+                    app.logger.info("%%%%%%%")
+                    app.logger.info(frsg_dict["questionString"])
+                    app.logger.info("%%%%%%%")
+                    # ===== becoz append is non-destructive, append logic always goes first
+                    try:
+                        a_dict[fieldtype_key]["subgroup"][subFieldtype_key]["value"].append(frsg_dict["value"])
+                    except:
+                        a_dict[fieldtype_key]["subgroup"][subFieldtype_key] = {}
+                        a_dict[fieldtype_key]["subgroup"][subFieldtype_key]["value"] = [frsg_dict["value"]]
+                        a_dict[fieldtype_key]["subgroup"][subFieldtype_key]["fieldName"] = frsg_dict["fieldName"]
+                        a_dict[fieldtype_key]["subgroup"][subFieldtype_key]["type"] = frsg_dict["type"]
+                        a_dict[fieldtype_key]["subgroup"][subFieldtype_key]["questionstring"] = frsg_dict["questionString"]
+                        a_dict[fieldtype_key]["subgroup"][subFieldtype_key]["subgroupId"] = frsg_dict["subgroupId"]
+                        # enddropdownorcheckbox_sub   
+                else:
+                    a_dict[fieldtype_key]["subgroup"][subFieldtype_key] = {
+                        "fieldName": frsg_dict["fieldName"],
+                        "type": frsg_dict["type"],
+                        "questionstring": frsg_dict["questionString"],
+                        "subgroupId": frsg_dict["subgroupId"]
+                    }
+                    # endtext_sub
+            
+
+            
+
+            #endsubgroup
+        elif fr_dict["type"] == "dropdown" or fr_dict["type"] == "checkbox" or fr_dict["type"] == "radio":
             # ===== becoz append is non-destructive, append logic always goes first
             try:
                 a_dict[fieldtype_key]["value"].append(fr_dict["value"])
@@ -776,6 +845,17 @@ def form_template():
     #     },
     #     "fullicnametext" : {
     #         "value": "", "field": "fullname", "type" : "dropdown"
+    #     },
+    #     "disabledradio" : {
+    #         "value": "Yes", "field": "disabled", "type" : "radio", "subgroupId" : "12345",
+    #         "subgroup": {
+    #             "genderdropdown" : {
+    #                 "value": ["M", "F", "Open"], "field": "gender", "type" : "text"
+    #             },
+    #             "fullicnametext" : {
+    #                 "value": "", "field": "fullname", "type" : "dropdown"
+    #             }                
+    #         }
     #     }
     # }
     
@@ -784,6 +864,81 @@ def form_template():
 
 
 
+
+# return render_template('event-form-subgroup-creator.html', whatHappened=whatHappened, eventId=eventId, subgroupId=subgroupId) 
+
+# ===== there are no other ways get to event-form-subgroup-creator
+@app.route('/event-form-subgroup-creator', methods = ['GET', 'POST'])
+def event_form_subgroup_creator():
+    if request.method == 'GET':
+        whatHappened = request.args.get("whatHappened")
+        if not whatHappened:
+            whatHappened = ""
+        eventId = request.args.get("eventId")
+        subgroupId = request.args.get("subgroupId")
+        #endget
+        return render_template('event-form-subgroup-creator.html', whatHappened=whatHappened, eventId=eventId, subgroupId=subgroupId)
+    else:
+        whatHappened = ""
+        eventId = request.form.get("eventId")
+        subgroupId = request.form.get("subgroupId")
+
+        if request.form.get("button") == "add":
+            if request.form.get("type") == "dropdown" or request.form.get("type") == "checkbox" or request.form.get("type") == "radio":
+                if request.form.get("field") == "" or request.form.get("questionstring") == "" or request.form.get("value") == "":
+                    return redirect(url_for('event_form_subgroup_creator', whatHappened="Error: input fields cannot be empty", eventId=eventId, subgroupId=subgroupId))
+                values = request.form.get("value").split("::")
+                app.logger.info(values)
+                app.logger.info(values)
+                app.logger.info(values)
+                for value in values:
+                    fqs = FormQuestionSubgroup(
+                        subgroupId=subgroupId,
+                        fieldName=request.form.get("field"),
+                        eventId=eventId,
+                        questionString=request.form.get("questionstring"),
+                        value=value,
+                        type=request.form.get("type")
+                    )
+                    try:
+                        db.session.add(fqs)
+                        db.session.commit()
+                        whatHappened = "dropdown/radio/checkbox created"
+                    except IntegrityError as i:
+                        db.session.rollback()
+                        #endfor
+                        return redirect(url_for('event_form_subgroup_creator', whatHappened="Error: something went wrong with subgroup creation", eventId=eventId, subgroupId=subgroupId))
+                #enddropdownorcheckboxorradio
+                return redirect(url_for('event_form_subgroup_creator', whatHappened="dropdown/checkbox/radio created", eventId=eventId, subgroupId=subgroupId))
+            elif request.form.get("type") == "text":
+                if request.form.get("field") == "" or request.form.get("questionstring") == "":
+                    return redirect(url_for('event_form_subgroup_creator', whatHappened="Error: only values field can be empty", eventId=eventId, subgroupId=subgroupId))
+                fqs = FormQuestionSubgroup(
+                    subgroupId=subgroupId,
+                    fieldName=request.form.get("field"),
+                    eventId=eventId,
+                    questionString=request.form.get("questionstring"),
+                    value="",
+                    type="text"
+                )
+                try:
+                    db.session.add(fqs)
+                    db.session.commit()
+                    whatHappened = "textbox created"
+                except IntegrityError as i:
+                    db.session.rollback()
+                    return redirect(url_for('event_form_subgroup_creator', whatHappened="Error: something went wrong with subgroup element creation", eventId=eventId, subgroupId=subgroupId))
+                #endtext                        
+            #endaddbutton
+            return redirect(url_for('event_form_subgroup_creator', whatHappened=whatHappened, eventId=eventId, subgroupId=subgroupId))
+        
+        if request.form.get("button") == "finishgroup":
+            return redirect(url_for('event_form_creator', whatHappened="subgroup done", eventId=eventId))    
+        
+        #endpost
+
+        
+    
 
 
 @app.route('/event-form-creator', methods = ['POST', 'GET'])
@@ -807,11 +962,9 @@ def event_form_creator():
             tournamentName, whatHappened = kill_form_descendents_by_id(eventId)
             # endstartcreate
             return redirect(url_for('event_form_creator', whatHappened="Lets get creating1", eventId=eventId))
-        if request.form.get("button") == "add":
+        elif request.form.get("button") == "add":
             if request.form.get("type") == "dropdown" or request.form.get("type") == "checkbox" or request.form.get("type") == "radio":
                 values = request.form.get("value").split("::")
-                app.logger.info(request.form.get("_______"))
-                app.logger.info(request.form.get("questionstring"))
                 for value in values:
                     fr = FormQuestion(eventId=eventId,
                                       fieldName=request.form.get("field"),
@@ -823,7 +976,6 @@ def event_form_creator():
                         db.session.add(fr)
                         db.session.commit()
                     except IntegrityError as i:
-                        app.logger.info("enderror")
                         db.session.rollback()
                         return redirect(url_for('event_form_creator', whatHappened="something went wrong when committing dropdowns", eventId=eventId))
                 #enddropdownorcheckbox
@@ -839,13 +991,41 @@ def event_form_creator():
                     db.session.add(fr)
                     db.session.commit()
                 except IntegrityError as i:
-                    app.logger.info("enderror")
-                    app.logger.info(fr)
                     db.session.rollback()
                     #endnotdropdown
                     return redirect(url_for('event_form_creator', whatHappened="something went wrong", eventId=eventId))
                 #endadd
                 return render_template("event-form-creator.html", whatHappened="text field created", eventId=eventId)
+        elif request.form.get("button") == "subgroup":
+            whatHappened = ""
+
+            subgroupName = request.form.get("subgroupName")
+            app.logger.info(subgroupName)
+            
+            subgroupId=uuid.uuid4()
+            fq = FormQuestion(eventId=eventId,
+                              fieldName=request.form.get("field"),
+                              value="Yes",
+                              questionstring=request.form.get("questionstring"),
+                              type=request.form.get("type"),
+                              subgroupId=subgroupId,
+                              subgroupName=request.form.get("subgroupName"),
+                              )
+
+            try:
+                db.session.add(fq)
+                db.session.commit()
+            except IntegrityError as i:
+                db.session.rollback()
+                return redirect(url_for('event_form_creator', whatHappened="Error: subgroup creation failed, inform web admin", eventId=eventId))
+
+            
+            #endsubgroup
+            # return render_template('event-form-subgroup-creator.html', whatHappened=whatHappened, eventId=eventId, subgroupId=subgroupId)
+            return redirect(url_for ('event_form_subgroup_creator', whatHappened=whatHappened, eventId=eventId, subgroupId=subgroupId))
+        
+
+            
         else:
             # form_elements = [
             #     {
@@ -864,6 +1044,8 @@ def kill_form_descendents_by_id(eventId):
     whatHappened = ""
     statement = sa.select(Event).where(Event.id == eventId)
     e = db.session.scalars(statement).first()
+    if not e:
+        return None, "there are no form descendents to kill"
     tournamentName = e.tournamentName
 
     statement = sa.delete(FormQuestion).where(FormQuestion.eventId == eventId)
@@ -876,6 +1058,16 @@ def kill_form_descendents_by_id(eventId):
         return None, "something went wrong"
 
     statement = sa.delete(FormQuestionAnswers).where(FormQuestionAnswers.eventId == eventId)
+    db.session.execute(statement)
+    
+    try:
+        db.session.commit()
+    except:
+        db.session.rollback()
+        return None, "something went wrong"
+
+    
+    statement = sa.delete(FormQuestionSubgroup).where(FormQuestionSubgroup.eventId == eventId)
     db.session.execute(statement)
     
     try:
@@ -901,7 +1093,7 @@ def kill_form_descendents():
     if tournamentName:
         whatHappened="All derived form data of " + tournamentName + " killed"
 
-    return redirect(url_for('main_page', whatHappened=whatHappened))
+    return redirect(url_for('find_events', whatHappened=whatHappened))
 
     
     
@@ -1609,45 +1801,8 @@ def display_files_uploaded():
 
     
 
-@app.route('/test-bulk-download') 
-def test_bulk_download():
-    """Dont Delete This Function. this is to self-document
-
-    This function shows difference of converting SQLAlchemy results
-    to dicts"""
-
-    range = 100
-
-    query = sa.select(Member).order_by(Member.mcfName)
-    some_object = db.session.query(Member).order_by(Member.mcfName).offset(100).limit(100)
-
-    ms_paginate=db.paginate(query, page=1, per_page=100, error_out=False)
-    # ms_paginate2=db.paginate(query, page=1, per_page=100, error_out=False)
-    # results = session.query(Member).all()
-
-    df = pd.DataFrame()
-
-    rec = []
-    for m in ms_paginate.items:
-        rec.append(m.as_dict_for_file("mcf.csv"))
-        
-    df = df.from_dict(rec)
-
-    # df = pd.DataFrame(
-    #     {
-    #         "Name": ["Tesla", "Tesla", "Toyota", "Ford", "Ford", "Ford"],
-    #         "Type": ["Model X", "Model Y", "Corolla", "Bronco", "Fiesta", "Mustang"],
-    #     }
-    # )
-
-
-    output = BytesIO()
-    df.to_csv(output, index=False)
-    output.seek(0)
-
-    # return render_template("members.html", ms=ms_paginate.items, prev_url=prev_url, next_url=next_url, page=page, totalPages=ms_paginate.pages)
     
-    return send_file(output, download_name="haha.csv", as_attachment=True, mimetype="str") # not sure if mimetype is necessary, can try removing when free
+
 
 @app.route('/partial-download') 
 def partial_download():

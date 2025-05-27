@@ -13,36 +13,58 @@
 {% block form %}
 
     <br><br>
-    <form action="{{ url_for('form_submission')  }}" method="post">
+    <form id="formTemplate" action="{{ url_for('form_submission')  }}" method="post">
 	<caption class="caption-top text-orange-600 italic p-2">
 	    {{ whatHappened }}
 	</caption>
 	<table>
 	    <tbody>
 		{% for element in elements %}
-		    <tr>
-			
+		    {% if element.subgroupId is defined %}
+			<tr>
+			    <td class="bg-yellow-200 w-300">
+				<div class="m-2 font-light">
+				    <label class="block text-gray-900">
+					{{ element.questionstring }}
+				    </label>
+				    <input type="radio" value="Yes" name={{  element.fieldName }} data-action-subgroup-id='{{ element.subgroupId }}' class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+				</div>
+			    </td>
+			</tr>
+			<tr id={{ element.subgroupId }} data-action-subgroup-id='{{ element.subgroupId }}' style="display:none">
+			    {% include 'form_elements/subgroup.html' %}
 
 
+			</tr>
+
+
+
+		    {% else %}
+
+		    	<!-- ============================== -->
 			
-			<!-- <input type="email" id="email" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required /> -->
-			<td class="bg-yellow-200 w-300">
-			    <div class="m-2 font-light">
-				<label class="block text-gray-900">
-				    {{ element.questionstring }}
-				</label>
-				{% if element.type == "dropdown" %}
-				    {% include 'form_elements/dropdown.html' %}
-				{% elif element.type == "checkbox" %}
-				    {% include 'form_elements/checkbox.html' %}
-				{% elif element.type == "radio" %}
-				    {% include 'form_elements/radio.html' %}
-				{% else %}
-				    <input id={{ element.fieldName }} name={{ element.fieldName }} class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg block w-60 p-2" required/>
-				{% endif %}
-			    </div>
-			</td>
-		    </tr>
+			<tr>
+			    <!-- <tr id="12345" data-subgroup-id="12345" style="display:none"> -->
+			    <td  class="bg-yellow-200 w-300">
+				<div class="m-2 font-light">
+				    <label class="block text-gray-900">
+					{{ element.questionstring }}
+				    </label>
+				    {% if element.type == "dropdown" %}
+					{% include 'form_elements/dropdown.html' %}
+				    {% elif element.type == "checkbox" %}
+					{% include 'form_elements/checkbox.html' %}
+				    {% elif element.type == "radio" %}
+					{% include 'form_elements/radio.html' %}
+				    {% else %}
+					<input id={{ element.fieldName }} name={{ element.fieldName }} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-60 p-2" required/>
+				    {% endif %}
+				</div>
+			    </td>
+			</tr>
+
+		    <!-- ============================== -->
+		    {% endif %}
 		{% endfor %}
 		<input type="hidden" name="eventId" value={{ eventId }} />
 		<tr>

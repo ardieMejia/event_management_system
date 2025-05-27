@@ -1,0 +1,9 @@
+
+
+<select name = {{ 'subgroup::' + element.subgroupId + '::' + sg_element.fieldName }} id = {{ sg_element.fieldName }}>
+    {%  for value in sg_element.value %}
+	<option value={{ value }}>
+	{{ value }}
+    </option>
+    {% endfor %}
+</select>

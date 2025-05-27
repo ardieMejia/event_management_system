@@ -18,12 +18,24 @@
 	</caption>
 	<thead>
 
-	    <tr class="bg-yellow-400">
+	    <tr>
 		{% for membersAnswer in membersAnswers.values() %}
-		    {% if loop.first %}			
+		    {% if loop.first %}
+
 			{% for fieldname,answer in membersAnswer.items() %}
-			    <th class="w-20 p-4">{{ fieldname }}</th>
+			    {% if answer.subgroupId is none %}
+				<th class="w-20 p-4 bg-yellow-400">
+				    {{ fieldname }}
+				</th>
+			    {% else %}
+				<th class="w-20 p-4 border-x-2 border-yellow-600 bg-yellow-200 font-light">
+				    {{ fieldname }}
+				</th>
+			    {% endif %}
 			{% endfor %}
+
+
+
 		    {% endif %}
 		{% endfor %}
 
@@ -31,22 +43,29 @@
 
 	</thead>
 	<tbody class="text-center">
-	    <!-- <tr class="border border-yellow-400 border-2">
-		 
-		 </tr>
-		 <tr>
 
-		 </tr> -->
 	    {% for membersAnswer in membersAnswers.values() %}
 		<tr class="border border-yellow-400 border-2">
 
 		    {% if not loop.first %}			
-			{% for question,answer in membersAnswer.items() %}			
-			    <td class="w-20 p-4 ">
-				{{ answer }}
-			    </td>
+			{% for question,answer in membersAnswer.items() %}
+			    {% if answer.subgroupId is none %}
+				<td class="w-20 p-4">
+				    {{ answer["value"] }}
+				</td>
+			    {% else %}
+				<td class="w-20 p-4 border-x-2 border-yellow-600 bg-yellow-200 font-light">
+				    {{ answer["value"] }}
+				</td>
+			    {% endif %}
+			    
+			    
 
 			{% endfor %}
+			<!-- <td class="font-light border-l-2 border-yellow-600"></td>
+			     <td class="w-20 p-4 font-light bg-yellow-200">
+			     whait
+			     </td> -->
 		    {% endif %}
 		</tr>
 	    {% endfor %}
