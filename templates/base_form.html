@@ -78,9 +78,12 @@ all form derived data of specific event:
 
 
 
-	 $(window).on('load', function() {
-	     var choiceCount = $( "#tournament_name option" ).length
-	     console.log(choiceCount)
+
+
+
+	     $(window).on('load', function() {
+		 var choiceCount = $( "#tournament_name option" ).length
+		 console.log(choiceCount)
 	     if (choiceCount == 0){
 		 /* $('#memberEventForm button').hide()		  */
 		 $('#eventDeleteButton').hide()
@@ -91,6 +94,14 @@ all form derived data of specific event:
 
 
 	     
+	     $('input[type=radio]').click(function() {
+		 console.log("asdasd");
+		 var subgroupId = $(this).data('action-subgroup-id');
+		 console.log('Subgroup ID:', subgroupId);
+		 $("#" + subgroupId).show()
+		 // Use the itemId as needed, e.g., in an AJAX request
+	     });
+	    
 
 
 

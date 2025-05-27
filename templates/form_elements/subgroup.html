@@ -1,0 +1,29 @@
+
+
+
+
+
+
+
+<td class="bg-yello w-200 w-300">
+    <div  class="m-2 p-2 font-light border-2 bg-yellow-100 border-yellow-600">
+	<!-- ============================== -->
+	{% for key,sg_element in element.subgroup.items() %}
+	    <div class="p-2">
+		<label class="block text-gray-900">
+		    {{ sg_element.questionstring }}
+		</label>
+		{% if sg_element.type == "dropdown" %}
+		    {% include 'subform_elements/dropdown.html' %}
+		{% elif sg_element.type == "checkbox" %}
+		    {% include 'subform_elements/checkbox.html' %}
+		{% elif sg_element.type == "radio" %}
+		    {% include 'subform_elements/radio.html' %}
+		{% else %}
+		    <input id={{ sg_element.fieldName }} name={{ 'subgroup::' + element.subgroupId + '::' + sg_element.fieldName }} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-60 p-2" required/>
+	    {% endif %}
+	</div>
+	{% endfor %}
+	<!-- ============================== -->
+    </div>
+</td>

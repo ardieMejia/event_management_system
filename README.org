@@ -143,4 +143,29 @@ National Interstate Chess Championship
 ** All negative checks passed so far, such as pressing upload when no file is chosen (both for member_front & admin page)
 ** right now form is not atthced a single event. Mostly testing dynamic question creation
 ** show download CSV feature
+* Convince payment:
+** each testing now literally takes 2wice as long, becoz I have to test everything form, form subgroups, and answers
+** from your end, the form looks like stakcking elements. But from my end, its getting more abstract. Coz its "elements creating elements". And on top of that, theres subgroups requiring more logic behind the scenes
+** basically, my brain has to work overtime.
+* Some limitations:
+** subgroupsof questions cannot be tied to each answer, the logic is now to be complicated. It can only be tied to a question
+** this means Questions like:
+#+begin_quote
 
+PLEASE SELECT YOUR ENTRY STATUS *
+I have a chess title - IM / WIM / NM / WNM
+I am representing my state
+I am an Open Entry
+
+#+end_quote
+** will have to be dividede to 3:
+**
+#+begin_quote
+
+Your entry status, I have a chess title - IM / WIM / NM / WNM
+Your entry status, I am representing my state
+Your entry status, I am an Open Entry
+
+
+#+end_quote
+** and it will only be limited to a single radio button (and values: selected or on-selectd)
