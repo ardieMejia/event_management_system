@@ -40,7 +40,7 @@ login = LoginManager(app)
 from Models.declarative import EventListing # ===== remove this
 import sqlalchemy as sa
 app.app_context().push()
-from model import Event, Member, File, FormQuestion, EventMember, FormQuestionAnswers, FormQuestionSubgroup
+from model import Event, Member, File, FormQuestion, EventMember, FormQuestionAnswers, FormQuestionSubgroup, FormQuestionAnswersDeleted
 Session = sessionmaker(bind=db.engine)
 
 
@@ -578,7 +578,33 @@ def form_submission():
         eventId = request.form['eventId']
 
 
+        # deleteandbackupsubmission
+        statement = db.select(FormQuestionAnswers).where(FormQuestionAnswers.mcfId == current_user.mcfId, FormQuestionAnswers.eventId == eventId)
+        old_fqas = db.session.scalars(statement).all()
 
+        old_answers = []
+        for old_fqa in old_fqas:
+            fqad = FormQuestionAnswersDeleted(
+                mcfId=old_fqa.mcfId,
+                fieldName=old_fqa.fieldName,
+                eventId=old_fqa.eventId,
+                answerString=old_fqa.answerString,
+                subgroupId=old_fqa.subgroupId
+            )
+
+            old_answers.append(fqad)
+
+        db.session.add_all(old_answers)
+
+        statement = sa.delete(FormQuestionAnswers).where(FormQuestionAnswers.mcfId == current_user.mcfId, FormQuestionAnswers.eventId == eventId)
+        db.session.execute(statement)
+        try:
+            db.session.commit()
+            whatHappened = "answers successfully recorded"
+        except IntegrityError as i:
+            db.session.rollback()
+            return redirect(url_for('member_front', whatHappened="something went wrong with the backup of old submissions"))
+        # enddeleteandbackupsubmission
 
             
         answers = []
@@ -628,7 +654,7 @@ def form_submission():
         except IntegrityError as i:
             db.session.rollback()
             whatHappened = "something went wrong, answers failed to save, please re-fill form"
-            # endforloopanswers
+        # endforloopanswers
 
         return redirect(url_for('member_front', whatHappened=whatHappened))
         # return "nothing here"
@@ -662,9 +688,14 @@ def event_answers_page():
     membersAnswers = {}
 
     eventId = request.form.get('eventId')
+
     
+    # tablecolumns    
     statement = db.select(FormQuestionAnswers).where(FormQuestionAnswers.eventId == eventId)
     res_first = db.session.scalars(statement).first()
+    if not res_first:
+        return render_template('event-answers-page.html', membersAnswers={}, whatHappened="no entries yet")
+        
     mcfId = res_first.mcfId
     
 
@@ -672,7 +703,6 @@ def event_answers_page():
     single_mcfId_eventId = db.session.scalars(statement).all()
     
 
-    # tablecolumns    
     membersAnswers["000000"] = {}
 
 
@@ -730,6 +760,86 @@ def event_answers_page():
     # }    
     
     return render_template('event-answers-page.html', membersAnswers=membersAnswers, whatHappened=whatHappened)
+
+
+@app.route('/event-answers-page-overwritten', methods = ['POST'])
+def event_answers_page_overwritten():
+    whatHappened = ""
+    membersAnswers = {}
+
+    eventId = request.form.get('eventId')
+
+    
+    # tablecolumns    
+    statement = db.select(FormQuestionAnswersDeleted).where(FormQuestionAnswersDeleted.eventId == eventId)
+    res_first = db.session.scalars(statement).first()
+    if not res_first:
+        return render_template('event-answers-page-overwritten.html', membersAnswers={}, whatHappened="no entries yet")
+        
+    mcfId = res_first.mcfId
+    
+
+    statement = db.select(FormQuestionAnswersDeleted).where(FormQuestionAnswersDeleted.eventId == eventId, FormQuestionAnswersDeleted.mcfId == mcfId)
+    single_mcfId_eventId = db.session.scalars(statement).all()
+    
+
+    membersAnswers["000000"] = {}
+
+
+    
+    membersAnswers["000000"]["mcfId"] = {"value": "", "subgroupId": None}
+    for mcfId_eventId in single_mcfId_eventId:
+        membersAnswers["000000"][mcfId_eventId.fieldName] = {"value": "", "subgroupId": mcfId_eventId.subgroupId}
+
+    # endsubtablecolumns
+
+    
+
+    statement = db.select(FormQuestionAnswersDeleted).where(FormQuestionAnswersDeleted.eventId == eventId)
+    fqas = db.session.scalars(statement).all()
+
+    for fqa in fqas:
+        unique_key = str(fqa.mcfId) + str(eventId)
+        app.logger.info("$$$$$")
+        app.logger.info(fqa.mcfId)
+        app.logger.info("$$$$$")
+        try:
+            membersAnswers[unique_key]["mcfId"] = {
+                "value": fqa.mcfId,
+                "subgroupId": None
+            }
+            membersAnswers[unique_key][fqa.fieldName] = {"value": fqa.answerString, "subgroupId": fqa.subgroupId}
+
+        except:
+            membersAnswers[unique_key] = {}
+            membersAnswers[unique_key]["mcfId"] = fqa.mcfId
+            membersAnswers[unique_key][fqa.fieldName] = {"value": fqa.answerString, "subgroupId": fqa.subgroupId}
+
+
+
+
+    app.logger.info(
+        
+    membersAnswers
+    )
+    # ===== Example of sample return expected
+    # membersAnswers = {
+    #     # the key is meaningless and unique, like a primary key in DB, stupid useless to humans but important
+    #     "some_mcfIdSome_eventId": {
+    #         "mcfId": "1233",
+    #         "name": "Ardie",
+    #         "gender": "M",
+    #          ...
+    #     },
+    #     "some_mcfIdSome_eventId": {
+    #         "mcfId": "1233",
+    #         "name": "Hanifa",
+    #         "gender": "F",
+    #          ...
+    #     }
+    # }    
+    
+    return render_template('event-answers-page-overwritten.html', membersAnswers=membersAnswers, whatHappened=whatHappened)
 
 
         

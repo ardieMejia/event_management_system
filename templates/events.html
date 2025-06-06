@@ -56,16 +56,12 @@ Events
 		<div class="m-3">Form Answers</div>
 	    </th>
 	    <th>
-		<div class="m-3" data-tooltip-target="tooltip-form-data-kill-button">Kill Form Data</div>
-		<div id="tooltip-form-data-kill-button" role="tooltip" placement="bottom" class="absolute z-10  inline-block border border-1 w-60 px-3 py-2 text-m font-light text-black transition-opacity opacity-0  duration-300 bg-white rounded-lg shadow-xl tooltip">
-		    Kills all form data of a
-		    <span class="italic font-medium">
-			
-		    specific event
-		    </span>
-		    , including all participants answers
+		<div class="m-3">Kill Form Data</div>
 
-		</div>
+	    </th>
+	    <th>
+		<div class="m-3">Overwritten Submissions</div>
+
 	    </th>
 	    <th></th>
 	</tr>
@@ -128,7 +124,7 @@ Events
 		</form>
 	    </td>
 	    <td>
-		<div class="m-3">
+		<div class="m-3" data-tooltip-target="tooltip-form-data-kill-button{{ e.id }}">
 		    <form action="{{ url_for('kill_form_descendents')  }}" method="post">
 			<div class="m-3">
 			    <input type="hidden" name="eventId" value={{ e.id }} />
@@ -139,8 +135,29 @@ Events
 			</div>
 		    </form>
 		</div>
+		<div id="tooltip-form-data-kill-button{{ e.id }}" role="tooltip" placement="bottom" class="absolute z-10  inline-block border border-1 w-60 px-3 py-2 text-m font-light text-black transition-opacity opacity-0  duration-300 bg-white rounded-lg shadow-xl tooltip">
+		    Kills all form data of a
+		    <span class="italic font-medium">
+			
+			specific event
+		    </span>
+		    , including all participants answers
+		    
+		</div>
 	    </td>
+
 	    <td>
+		<form action="{{ url_for('event_answers_page_overwritten')  }}" method="post">
+		    <div class="m-3">
+			<input type="hidden" name="eventId" value={{ e.id }} />
+			
+			<button name="button" value="start_create" type="submit" class="w-25 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">				
+			    overwritten
+			</button>
+		    </div>
+		</form>
+	    </td>
+		    <td>
 		<div class="m-2">
 		    <button type="submit" >
 			
@@ -152,7 +169,7 @@ Events
 	</tr>
 	{% endfor %}
 	<tr>
-	    <td colspan="12"></td>
+	    <td colspan="13"></td>
 	    <td>
 		<div class="m-3">
 		    <button type="submit" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">

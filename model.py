@@ -322,8 +322,34 @@ class FormQuestionAnswers(db.Model):
         return '<fieldname: {f} answers {a}>'.format(f=self.fieldName, a=self.answerString)
 
     
-    def to_dict(self):
-        return {"mcfId": self.mcfId, "fieldname": self.fieldname, "formname": self.formname, "fieldname": self.fieldname, "answers": self.answers}
+    # def to_dict(self):
+    #     return {"mcfId": self.mcfId, "fieldname": self.fieldname, "formname": self.formname, "fieldname": self.fieldname, "answers": self.answers}
+
+class FormQuestionAnswersDeleted(db.Model):
+    """
+    Answers for questions
+     Answers have no meaning to the code.
+     So, the only important fields for backend logic
+     is the user ID, fieldname & the eventId
+     Becoz our client only needs to glance through answers
+    
+    """
+    __tablename__ = "form_question_answers_deleted"
+    id = db.Column(db.Integer, primary_key=True)
+    mcfId = db.Column(db.Integer)
+    fieldName = db.Column(db.String(300), nullable=False) # fieldName?
+    # eventId = db.Column(db.String(200), nullable=False)
+    eventId = db.Column(db.Integer, nullable=False) 
+    answerString = db.Column(db.String(200), nullable=False)
+    subgroupId = db.Column(db.String(36), nullable=True)
+    deleted_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        # return f"Form('{self.formname}', '{self.field}')"
+        return '<fieldname: {f}, answers: {a}, deleted_at: {d}>'.format(f=self.fieldName, a=self.answerString, d=self.deleted_at)
+
+    
+
 
 
     
