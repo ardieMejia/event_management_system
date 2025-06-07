@@ -606,6 +606,15 @@ def form_submission():
             return redirect(url_for('member_front', whatHappened="something went wrong with the backup of old submissions"))
         # enddeleteandbackupsubmission
 
+        for fieldname,answer in request.form.items():
+            app.logger.info("======")
+            app.logger.info(fieldname)
+            app.logger.info(answer)
+            app.logger.info("======")
+
+
+            # endweirdtest
+            
             
         answers = []
         for fieldname,answer in request.form.items():
@@ -1131,7 +1140,6 @@ def event_form_creator():
 
             
             #endsubgroup
-            # return render_template('event-form-subgroup-creator.html', whatHappened=whatHappened, eventId=eventId, subgroupId=subgroupId)
             return redirect(url_for ('event_form_subgroup_creator', whatHappened=whatHappened, eventId=eventId, subgroupId=subgroupId))
         
 
@@ -1161,23 +1169,32 @@ def kill_form_descendents_by_id(eventId):
     statement = sa.delete(FormQuestion).where(FormQuestion.eventId == eventId)
     db.session.execute(statement)
     
-    try:
-        db.session.commit()
-    except:
-        db.session.rollback()
-        return None, "something went wrong"
+    # try:
+    #     db.session.commit()
+    # except:
+    #     db.session.rollback()
+    #     return None, "something went wrong"
 
     statement = sa.delete(FormQuestionAnswers).where(FormQuestionAnswers.eventId == eventId)
     db.session.execute(statement)
     
-    try:
-        db.session.commit()
-    except:
-        db.session.rollback()
-        return None, "something went wrong"
+    # try:
+    #     db.session.commit()
+    # except:
+    #     db.session.rollback()
+    #     return None, "something went wrong"
 
     
     statement = sa.delete(FormQuestionSubgroup).where(FormQuestionSubgroup.eventId == eventId)
+    db.session.execute(statement)
+    
+    # try:
+    #     db.session.commit()
+    # except:
+    #     db.session.rollback()
+    #     return None, "something went wrong"
+
+    statement = sa.delete(FormQuestionAnswersDeleted).where(FormQuestionAnswersDeleted.eventId == eventId)
     db.session.execute(statement)
     
     try:
