@@ -10,7 +10,7 @@
 
     <br>
 
-
+    
 
     <table id="member_details" class="w-full table-auto border border-yellow-400 border-2 justify-items-center">
 	<caption class="caption-top text-red-600 italic p-2">
@@ -23,6 +23,7 @@
 		    {% if loop.first %}
 
 			{% for fieldname,answer in membersAnswer.items() %}
+
 			    {% if answer.subgroupId is none %}
 				<th class="w-20 p-4 bg-yellow-400">
 				    {{ fieldname }}
@@ -32,6 +33,7 @@
 				    {{ fieldname }}
 				</th>
 			    {% endif %}
+
 			{% endfor %}
 
 
@@ -73,6 +75,21 @@
     </table>
 
     <br>
+
+        <div class="grid grid-col-3 p-3">
+	    <div class="items-center p-3">
+		<div class="font-bold w-25">
+		    <form action="{{ url_for('an_evt_ans_download')  }}" name="anEventAnswerDownload">
+			<button id="anEventAnswerDownload"  type="submit" class="border border-gray  py-2 px-2 ">
+			    Download
+			</button>
+			<input type="hidden" name="eventId" value={{ eventId }} />
+		    </form>
+		</div>
+	    </div>	    
+	</div>
+
+	    
 
 
 

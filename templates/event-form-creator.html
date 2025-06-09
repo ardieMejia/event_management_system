@@ -15,14 +15,35 @@
     <br>
     <br>
     <br>
-    <form name="formCreator" action="{{ url_for('event_form_creator') }}" method="post">
+    <form id="formCreator" name="formCreator" action="{{ url_for('event_form_creator') }}" method="post">
 	<caption class="caption-top text-orange-600 italic p-2">
 	    {{ whatHappened }}
 	</caption>
+	<caption class="caption-top text-orange-600 italic p-2">
+	    
+	</caption>
+
+	
 	<table>
 	    <tbody>
 		<input type="hidden" name="eventId" value={{ eventId }} />
-		
+		<tr>
+		    <th>
+			<div class="m-3 text-right">
+
+			    
+			    <!-- <input type="email" id="email" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required /> -->
+			</div>
+		    </th>
+		    <td class="bg-yellow-200">
+			
+			<div id="formCreatorInputInvalid" class="
+				 g-blue-100 border-t border-b border-red-300 text-red-600 px-4 py-3
+				 " role="alert" hidden>
+
+			</div>
+		    </td>
+		</tr>
 
 		<tr>
 		    <th>
@@ -36,7 +57,7 @@
 		    </th>
 		    <td class="bg-yellow-200">
 			<div class="m-2 font-light">
-			    <input id="field" name="field" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg block w-60 p-2" autocomplete="off" required/>
+			    <input id="field" name="field" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg block w-60 p-2" autocomplete="off"  required/>
 			</div>
 		    </td>
 		</tr>

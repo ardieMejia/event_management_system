@@ -78,30 +78,73 @@ all form derived data of specific event:
 
 
 
+	 $(document).ready(function(){
+	     /* alert("asd"); */
+	     var frm = $("#formCreator");
+	     /* frm.hide(); */
+
+		 // removeClass("border-none").addClass("border-3").addClass("border-red-600");
+	     
+
+	     frm.on("submit", function(event){
+		 event.preventDefault();
+		 stringVal = frm.find('#field').val();
+		 if(stringVal.includes(" ")){
+		     // alert("field cant contain space, make it memorable")
+		     $('#field').removeClass("border-none").addClass("border-3").addClass("border-red-600");
+		     $('#formCreatorInputInvalid').html(" <p>field should not contain spaces.</p> ").removeAttr("hidden");		     
+		     id="formCreatorInputInvalid"
+		 }else{
+		     $(this).unbind("submit")
+		 }
+	     });
+
+
+
+
+
+
+
+	 });
 
 
 
 	     $(window).on('load', function() {
-		 var choiceCount = $( "#tournament_name option" ).length
-		 console.log(choiceCount)
+	     var choiceCount = $( "#tournament_name option" ).length
+	     console.log(choiceCount)
 	     if (choiceCount == 0){
 		 /* $('#memberEventForm button').hide()		  */
-		 $('#eventDeleteButton').hide()
-		 $('#eventSaveButton').hide()
-		 $('#fillFormButton').hide()
+		 $('#eventDeleteButton').hide();
+		 $('#eventSaveButton').hide();
+		 $('#fillFormButton').hide();
 
+		 
+
+		 
+		 /* if (frm.email.type === 'text') {
+		    frm.onsubmit = function () {
+		    if (/\s/.test(frm.email.value)) {
+		    // Tell your user the field is invalid here, e.g.
+		    frm.email.className = 'invalid';
+		    
+		    // Prevent form submission
+		    return false;
+		    }
+		    }
+		    } */
+		 
 	     }
-
+	 
 
 	     
 	     $('input[type=radio]').click(function() {
 		 console.log("asdasd");
 		 var subgroupId = $(this).data('action-subgroup-id');
 		 console.log('Subgroup ID:', subgroupId);
-		 $("#" + subgroupId).show()
+		 $("#" + subgroupId).show();
 		 // Use the itemId as needed, e.g., in an AJAX request
 	     });
-	    
+	     
 
 
 
