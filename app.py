@@ -698,6 +698,10 @@ def event_answers_page():
 
     eventId = request.form.get('eventId')
 
+    app.logger.info("========")
+    app.logger.info(eventId)
+    app.logger.info("========")
+
     
     # tablecolumns    
     statement = db.select(FormQuestionAnswers).where(FormQuestionAnswers.eventId == eventId)
@@ -715,7 +719,6 @@ def event_answers_page():
     membersAnswers["000000"] = {}
 
 
-    
     membersAnswers["000000"]["mcfId"] = {"value": "", "subgroupId": None}
     for mcfId_eventId in single_mcfId_eventId:
         membersAnswers["000000"][mcfId_eventId.fieldName] = {"value": "", "subgroupId": mcfId_eventId.subgroupId}
@@ -729,9 +732,6 @@ def event_answers_page():
 
     for fqa in fqas:
         unique_key = str(fqa.mcfId) + str(eventId)
-        app.logger.info("$$$$$")
-        app.logger.info(fqa.mcfId)
-        app.logger.info("$$$$$")
         try:
             membersAnswers[unique_key]["mcfId"] = {
                 "value": fqa.mcfId,
@@ -752,23 +752,29 @@ def event_answers_page():
     membersAnswers
     )
     # ===== Example of sample return expected
+    #     # the key is meaningless and unique, like a primary key in DB, not used in the html, 00000 is meant for table column
     # membersAnswers = {
-    #     # the key is meaningless and unique, like a primary key in DB, stupid useless to humans but important
+    #     "000000": {
+    #         "mcfId": "1111",
+    #         "name": "spiderman",
+    #         "gender": "M",
+    #          ...
+    #     },
     #     "some_mcfIdSome_eventId": {
-    #         "mcfId": "1233",
+    #         "mcfId": "1112",
     #         "name": "Ardie",
     #         "gender": "M",
     #          ...
     #     },
     #     "some_mcfIdSome_eventId": {
-    #         "mcfId": "1233",
+    #         "mcfId": "1113",
     #         "name": "Hanifa",
     #         "gender": "F",
     #          ...
     #     }
     # }    
     
-    return render_template('event-answers-page.html', membersAnswers=membersAnswers, whatHappened=whatHappened)
+    return render_template('event-answers-page.html', membersAnswers=membersAnswers, eventId=eventId, whatHappened=whatHappened)
 
 
 @app.route('/event-answers-page-overwritten', methods = ['POST'])
@@ -1931,7 +1937,7 @@ def display_files_uploaded():
     
 
 
-@app.route('/partial-download') 
+@app.route('/partial-download', methods = ["POST"]) 
 def partial_download():
 
 
@@ -1961,6 +1967,105 @@ def partial_download():
     return send_file(output, download_name="Download" + str(datetime.date.today()) + "_Partial" + str(downloadOffset) + ".csv", as_attachment=True, mimetype="str") # not sure if mimetype is necessary, can try removing
 
     # return "nothing burger"
+
+
+@app.route('/an-evt-ans-download') 
+def an_evt_ans_download():
+
+
+    # query = sa.select(Member).order_by(Member.mcfName)
+
+    whatHappened = ""
+    membersAnswers = {}
+
+    eventId = request.args['eventId']
+
+    app.logger.info("++++++++++")
+    app.logger.info(eventId
+                    )
+    
+    app.logger.info("++++++++++")
+    
+
+
+    statement = db.select(Event).where(Event.id == eventId)
+    e = db.session.scalars(statement).first()
+    eventName = "_".join(e.tournamentName .split(" "))    
+
+    
+
+    statement = db.select(FormQuestionAnswers).where(FormQuestionAnswers.eventId == eventId)
+    fqas = db.session.scalars(statement).all()
+
+    for fqa in fqas:
+        unique_key = str(fqa.mcfId) + str(eventId)
+        app.logger.info("$$$$$")
+        app.logger.info(fqa.mcfId)
+        app.logger.info("$$$$$")
+        try:
+            membersAnswers[unique_key]["mcfId"] = fqa.mcfId
+                # "subgroupId": None
+
+            membersAnswers[unique_key][fqa.fieldName] = fqa.answerString
+                                                         # "subgroupId": fqa.subgroupId
+
+
+        except:
+            membersAnswers[unique_key] = {}
+            membersAnswers[unique_key]["mcfId"] = fqa.mcfId
+            membersAnswers[unique_key][fqa.fieldName] = fqa.answerString
+
+
+
+    # df = pd.DataFrame()
+    # rec = []
+    # for m in ms_paginate.items:
+    #     rec.append(m.as_dict_for_file("mcf.csv"))
+    #     # rec.append(m.as_dict())
+        
+    # df = df.from_dict(rec)
+
+    # output = BytesIO()
+    # df.to_csv(output, index=False)
+    # output.seek(0)
+
+
+    # ===== Example of sample return expected
+    # membersAnswers = {
+    #     # the key is meaningless and unique, like a primary key in DB, stupid useless to humans but important
+    #     "some_mcfIdSome_eventId": {
+    #         "mcfId": "1233",
+    #         "name": "Ardie",
+    #         "gender": "M"
+    #     },
+    #     "some_mcfIdSome_eventId": {
+    #         "mcfId": "1233",
+    #         "name": "Hanifa",
+    #         "gender": "F"
+    #     }
+    # }
+    
+    df = pd.DataFrame(membersAnswers)
+
+    output = BytesIO()
+    df.transpose().to_csv(output, index=False)
+    output.seek(0)
+    
+
+    # return "nothing"
+    
+    # not sure if mimetype is necessary, can try removing
+    # return "nothing burger"
+    return send_file(output, download_name=
+                     "Download" +
+                     str(datetime.date.today()) +
+                     # "_Partial" +
+                     # str(downloadOffset) +
+                     "_" +
+                     eventName +
+                     ".csv",
+                     as_attachment=True, mimetype="str")
+
      
 
 
