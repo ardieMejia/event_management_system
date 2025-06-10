@@ -140,13 +140,13 @@ National Interstate Chess Championship
 *** I HEREBY CONFIRMED THAT THE INFORMATION PROVIDED ABOVE ARE CORRECT AND ACCURATE *
 *** 
 * Things to present:
-** All negative checks passed so far, such as pressing upload when no file is chosen (both for member_front & admin page)
-** right now form is not atthced a single event. Mostly testing dynamic question creation
-** show download CSV feature
-* Convince payment:
-** each testing now literally takes 2wice as long, becoz I have to test everything form, form subgroups, and answers
-** from your end, the form looks like stakcking elements. But from my end, its getting more abstract. Coz its "elements creating elements". And on top of that, theres subgroups requiring more logic behind the scenes
-** basically, my brain has to work overtime.
+** DONE All negative checks passed so far, such as pressing upload when no file is chosen (both for member_front & admin page)
+** DONE right now form is not atthced a single event. Mostly testing dynamic question creation
+** DONE show download CSV feature
+** space blocks in field
+** download feature for event answers (download name as event name too)
+** checks mimetype, to ensure users dont upload random filetypes, and not just extension
+** 
 * Some limitations:
 ** subgroupsof questions cannot be tied to each answer, the logic is now to be complicated. It can only be tied to a question
 ** this means Questions like:

@@ -22,6 +22,7 @@ import datetime
 # from c_validation_funcs import convert_nan_to_string
 from c_validation_funcs import validate_before_saving
 import uuid
+import filetype
 
 import json
 
@@ -618,8 +619,16 @@ def form_submission():
             
         answers = []
         for fieldname,answer in request.form.items():
+            isFile = None
             if fieldname == "eventId":
                 continue
+
+            try:
+                uploadedDocument = request.files[fieldname]
+                app.logger.info(uploadedDocument)
+                isFile = True
+            except:
+                pass
 
             if "subgroup" in fieldname:
                 ignore, subgroupId, fieldname = fieldname.split("::")
@@ -641,7 +650,19 @@ def form_submission():
                     subgroupId=subgroupId
                 )
                 # endcheckboxsubmission
-            else:            
+            elif isFile:
+                fullfilePath = ""
+                isSuccess, errorMsg, fullFilePath = upload_document(uploadedDocument, eventId)
+                if isSuccess:
+                    fqa = FormQuestionAnswers(
+                        mcfId=current_user.mcfId,
+                        fieldName=fieldname,
+                        eventId=eventId,
+                        answerString=fullFilePath,
+                        subgroupId=subgroupId
+                    )
+                    # endfilesubmission
+            else:
                 fqa = FormQuestionAnswers(
                     mcfId=current_user.mcfId,
                     fieldName=fieldname,
@@ -957,7 +978,7 @@ def form_template():
                 "fieldName": fr_dict["fieldName"],
                 "type": fr_dict["type"],
                 "questionstring": fr_dict["questionstring"]}
-            # endtext
+            # endtextorfile
 
 
     elements = list(a_dict.values())
@@ -1035,7 +1056,7 @@ def event_form_subgroup_creator():
                         return redirect(url_for('event_form_subgroup_creator', whatHappened="Error: something went wrong with subgroup creation", eventId=eventId, subgroupId=subgroupId))
                 #enddropdownorcheckboxorradio
                 return redirect(url_for('event_form_subgroup_creator', whatHappened="dropdown/checkbox/radio created", eventId=eventId, subgroupId=subgroupId))
-            elif request.form.get("type") == "text":
+            elif request.form.get("type") == "text" or request.form.get("type") == "file":
                 if request.form.get("field") == "" or request.form.get("questionstring") == "":
                     return redirect(url_for('event_form_subgroup_creator', whatHappened="Error: only values field can be empty", eventId=eventId, subgroupId=subgroupId))
                 fqs = FormQuestionSubgroup(
@@ -1044,7 +1065,7 @@ def event_form_subgroup_creator():
                     eventId=eventId,
                     questionString=request.form.get("questionstring"),
                     value="",
-                    type="text"
+                    type=request.form.get("type")
                 )
                 try:
                     db.session.add(fqs)
@@ -1053,7 +1074,7 @@ def event_form_subgroup_creator():
                 except IntegrityError as i:
                     db.session.rollback()
                     return redirect(url_for('event_form_subgroup_creator', whatHappened="Error: something went wrong with subgroup element creation", eventId=eventId, subgroupId=subgroupId))
-                #endtext                        
+                #endtextorfile                        
             #endaddbutton
             return redirect(url_for('event_form_subgroup_creator', whatHappened=whatHappened, eventId=eventId, subgroupId=subgroupId))
         
@@ -1103,8 +1124,8 @@ def event_form_creator():
                     except IntegrityError as i:
                         db.session.rollback()
                         return redirect(url_for('event_form_creator', whatHappened="something went wrong when committing dropdowns", eventId=eventId))
-                #enddropdownorcheckbox
-                return redirect(url_for('event_form_creator', whatHappened="dropdown/checkbox/radio created", eventId=eventId))
+                #enddropdownorcheckboxorradio
+                return redirect(url_for('event_form_creator', whatHappened=request.form.get("type") + " created", eventId=eventId))
             else: 
                 fr = FormQuestion(eventId=eventId,
                                    fieldName=request.form.get("field"),
@@ -1117,10 +1138,10 @@ def event_form_creator():
                     db.session.commit()
                 except IntegrityError as i:
                     db.session.rollback()
-                    #endnotdropdown
                     return redirect(url_for('event_form_creator', whatHappened="something went wrong", eventId=eventId))
+                # endtextorfile
                 #endadd
-                return render_template("event-form-creator.html", whatHappened="text field created", eventId=eventId)
+                return render_template("event-form-creator.html", whatHappened=request.form.get("type") + " created", eventId=eventId)
         elif request.form.get("button") == "subgroup":
             whatHappened = ""
 
@@ -1348,54 +1369,61 @@ def member_front():
 
 
 
-@app.route('/upload-payment-proof', methods = ['GET', 'POST'])
-def upload_payment_proof():
-    if current_user.is_authenticated:
-        paymentProofs = []
-        paymentFile = request.files['paymentFile']
-        if paymentFile.filename == '':
-            # endemptycheck
-            return redirect(url_for('member_front', whatHappened="Error: There is no file uploaded", updatedTournamentId="", paymentProofs=paymentProofs))
+
+def upload_document(uploadFile, eventId):
+    # paymentProofs = []
+    # uploadFile = request.files['uploadFile']
+    # if uploadFile.filename == '':
+    #     # endemptycheck
+    #     return redirect(url_for('member_front', whatHappened="Error: There is no file uploaded", updatedTournamentId="", paymentProofs=paymentProofs))
 
 
-        if paymentFile and allowed_payment_file(paymentFile.filename):
-            filename = secure_filename(paymentFile.filename)
-            fname, ext = os.path.splitext(paymentFile.filename)
-            # disk_path = ""  # Path to the persistent disk
-            # folder_name = "my_folder"
-            # folder_path = os.path.join(disk_path, folder_name)
-            folder_path = os.path.join(f"storage", str(datetime.date.today()))
+    if uploadFile and allowed_payment_file(uploadFile.filename):
+        filename = secure_filename(uploadFile.filename)
+        fname, ext = os.path.splitext(uploadFile.filename)
+        # disk_path = ""  # Path to the persistent disk
+        # folder_name = "my_folder"
+        # folder_path = os.path.join(disk_path, folder_name)
+        statement = db.select(Event).where(Event.id == eventId)
+        e = db.session.scalars(statement).first()
         
-            try:
-                os.makedirs(folder_path, exist_ok=True)
-                # print(f"Folder '{folder_name}' created successfully at '{folder_path}'.")
-            except Exception as e:            
-                return redirect(url_for('member_front', whatHappened="Error: Something went wrong. Please contact web admin", paymentProofs=paymentProofs))
+        eventName = "_".join(e.tournamentName.split())
+        folder_path = os.path.join(f"storage", eventName, str(datetime.datetime.now().strftime("%Y-%m-%d__%H%M%S")))
 
-                
-                
-            # ===== use os.path.join with care, it interprets slashes, and inserts its own, and can hide errors
-            filename = str(current_user.mcfId) + ext
-            paymentFile.save(os.path.join(folder_path, filename))
+        try:
+            os.makedirs(folder_path, exist_ok=True)
+            # print(f"Folder '{folder_name}' created successfully at '{folder_path}'.")
+        except Exception as e:
             
-            f = File(filename=filename, filepath=folder_path)
-            try:
-                db.session.add(f)
-                db.session.commit()
-            except IntegrityError as i:
-                db.session.rollback()
-                return redirect(url_for('member_front', whatHappened="Something went wrong: " + i._message()))
-                             
+            return False, "something went wrong", ""
+            # return redirect(url_for('member_front', whatHappened="Error: Something went wrong. Please contact web admin"))
 
-            # endfilenamecheck
-            return redirect(url_for('member_front', whatHappened="Proof of payment successfully uploaded", paymentProofs=paymentProofs))
-        else:
-            whatHappened = "Error: File must either be pdf, png or jpeg"
-            # endfilenamecheckfail
-            return redirect(url_for('member_front', whatHappened=whatHappened))
-    else:
-        return render_template("login.html", whatHappened = "Session ended")
-        # return redirect(url_for('login', whatHappened="Something went wrong: " + i._message()))
+
+
+        # ===== use os.path.join with care, it interprets slashes, and inserts its own, and can hide errors
+        filename = str(current_user.mcfId) + ext
+        uploadFile.save(os.path.join(folder_path, filename))
+
+        f = File(filename=filename,
+                 filepath=folder_path,
+                 mcfId=current_user.mcfId,
+                 eventId=eventId
+                 )
+    
+        try:
+            db.session.add(f)
+            db.session.commit()
+        except IntegrityError as i:
+            db.session.rollback()
+            # endfileuploaderror
+            return False, "error in attempting to log file uplaod in DB", ""
+
+
+        
+
+        # endfileupload
+        return True, "", os.path.join(folder_path, filename)
+
 
 
 

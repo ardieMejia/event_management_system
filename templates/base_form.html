@@ -89,6 +89,7 @@ all form derived data of specific event:
 	     frm.on("submit", function(event){
 		 event.preventDefault();
 		 stringVal = frm.find('#field').val();
+		 if (typeof stringVal !== 'undefined'){
 		 if(stringVal.includes(" ")){
 		     // alert("field cant contain space, make it memorable")
 		     $('#field').removeClass("border-none").addClass("border-3").addClass("border-red-600");
@@ -97,6 +98,8 @@ all form derived data of specific event:
 		 }else{
 		     $(this).unbind("submit")
 		 }
+		 }
+		     
 	     });
 
 
@@ -109,7 +112,7 @@ all form derived data of specific event:
 
 
 
-	     $(window).on('load', function() {
+	 $(window).on('load', function() {
 	     var choiceCount = $( "#tournament_name option" ).length
 	     console.log(choiceCount)
 	     if (choiceCount == 0){

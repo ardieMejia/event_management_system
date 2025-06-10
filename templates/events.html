@@ -102,7 +102,7 @@ Events
 		<div class="m-3">{{ e.timeControl }}</div>
 	    </td>
 	    <td>
-		<form name="formCreator" id="formCreator" action="{{ url_for('event_form_creator')  }}" method="post" onsubmit="return submitFormCreator();">
+		<form  action="{{ url_for('event_form_creator')  }}" method="post" onsubmit="return submitFormCreator();">
 		    <div class="m-3">
 			<input type="hidden" name="eventId" value={{ e.id }} />
 			
