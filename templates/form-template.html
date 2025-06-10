@@ -13,7 +13,7 @@
 {% block form %}
 
     <br><br>
-    <form id="formTemplate" action="{{ url_for('form_submission')  }}" method="post">
+    <form enctype="multipart/form-data" id="formTemplate" action="{{ url_for('form_submission')  }}" method="post">
 	<caption class="caption-top text-orange-600 italic p-2">
 	    {{ whatHappened }}
 	</caption>
@@ -57,6 +57,8 @@
 					{% include 'form_elements/checkbox.html' %}
 				    {% elif element.type == "radio" %}
 					{% include 'form_elements/radio.html' %}
+				    {% elif element.type == "file" %}
+					{% include 'form_elements/file.html' %}
 				    {% else %}
 					<input id={{ element.fieldName }} name={{ element.fieldName }} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-60 p-2" required/>
 				    {% endif %}
