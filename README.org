@@ -146,7 +146,8 @@ National Interstate Chess Championship
 ** space blocks in field
 ** download feature for event answers (download name as event name too)
 ** checks mimetype, to ensure users dont upload random filetypes, and not just extension
-** 
+** file input now works, some different folder structure, and some disabled elements depending on subgroup or non-subgroup
+** show subgrouip answers page, and its relevant download feature
 * Some limitations:
 ** subgroupsof questions cannot be tied to each answer, the logic is now to be complicated. It can only be tied to a question
 ** this means Questions like:

@@ -34,127 +34,152 @@
 	<script>
 
 
-	 /* bulk_upload_all_files_1 */
+/* bulk_upload_all_files_1 */
 
 
 
 
-	 /* function initialise() {
-	    myFunction();
-	    anotherFunction();
-	    } */
+/* function initialise() {
+   myFunction();
+   anotherFunction();
+   } */
 
 
 
-	 // NOTE-TO-SELF: from a syntax POV, jquery onready consuses, where function has no ()
-	 /* $(document).ready(initialise); */
+// NOTE-TO-SELF: from a syntax POV, jquery onready consuses, where function has no ()
+/* $(document).ready(initialise); */
 
 	 
 
 
-	 function submitPartDownloadForm(){
-	     var selValue = document.getElementById("downloadOffset").value;
-	     console.log(selValue)
-	     if (selValue != -1){
-		 document.partialDownload.submit();
-	     }
-	 }
+function submitPartDownloadForm(){
+    var selValue = document.getElementById("downloadOffset").value;
+    console.log(selValue)
+    if (selValue != -1){
+	document.partialDownload.submit();
+    }
+}
 
 
-	 function submitFormCreator(){
-	     const text = `
+function submitFormCreator(){
+    const text = `
 Creating a new form will remove
 all form derived data of specific event:
  - all members answers of that event
  - all form questions of that event
 	     Continue?`;
-	     
-	     if (confirm(text) == true){
-		 return true;
-	     }else{
-		 return false;
-	     }
-	 }
-
-
-
-	 $(document).ready(function(){
-	     /* alert("asd"); */
-	     var frm = $("#formCreator");
-	     /* frm.hide(); */
-
-		 // removeClass("border-none").addClass("border-3").addClass("border-red-600");
-	     
-
-	     frm.on("submit", function(event){
-		 event.preventDefault();
-		 stringVal = frm.find('#field').val();
-		 if (typeof stringVal !== 'undefined'){
-		 if(stringVal.includes(" ")){
-		     // alert("field cant contain space, make it memorable")
-		     $('#field').removeClass("border-none").addClass("border-3").addClass("border-red-600");
-		     $('#formCreatorInputInvalid').html(" <p>field should not contain spaces.</p> ").removeAttr("hidden");		     
-		     id="formCreatorInputInvalid"
-		 }else{
-		     $(this).unbind("submit")
-		 }
-		 }
-		     
-	     });
+    
+    if (confirm(text) == true){
+	return true;
+    }else{
+	return false;
+    }
+}
 
 
 
 
 
 
-
-	 });
-
-
-
-	 $(window).on('load', function() {
-	     var choiceCount = $( "#tournament_name option" ).length
-	     console.log(choiceCount)
-	     if (choiceCount == 0){
-		 /* $('#memberEventForm button').hide()		  */
-		 $('#eventDeleteButton').hide();
-		 $('#eventSaveButton').hide();
-		 $('#fillFormButton').hide();
-
-		 
-
-		 
-		 /* if (frm.email.type === 'text') {
-		    frm.onsubmit = function () {
-		    if (/\s/.test(frm.email.value)) {
-		    // Tell your user the field is invalid here, e.g.
-		    frm.email.className = 'invalid';
-		    
-		    // Prevent form submission
-		    return false;
-		    }
-		    }
-		    } */
-		 
-	     }
-	 
-
-	     
-	     $('input[type=radio]').click(function() {
-		 console.log("asdasd");
-		 var subgroupId = $(this).data('action-subgroup-id');
-		 console.log('Subgroup ID:', subgroupId);
-		 $("#" + subgroupId).show();
-		 // Use the itemId as needed, e.g., in an AJAX request
-	     });
-	     
+$(document).ready(function(){
+    /* alert("asd"); */
+    var frm = $("#formCreator");
+    /* frm.hide(); */
+    
+    // removeClass("border-none").addClass("border-3").addClass("border-red-600");
+    
+    
+    frm.on("submit", function(event){
+	event.preventDefault();
+	     stringVal = frm.find('#formCreateID_field').val();
+	     if (typeof stringVal !== 'undefined'){
+	    if(stringVal.includes(" ")){
+		// alert("field cant contain space, make it memorable")
+		$('#field').removeClass("border-none").addClass("border-3").addClass("border-red-600");
+		$('#formCreatorInputInvalid').html(" <p>field should not contain spaces.</p> ").removeAttr("hidden");		     
+		id="formCreatorInputInvalid"
+	    }else{
+		$(this).unbind("submit")
+	    }
+	}
+	
+    });
+    
 
 
 
 
-	 }); 
 
-	 
+
+});
+
+
+
+$(window).on('load', function() {
+    var choiceCount = $( "#tournament_name option" ).length
+    console.log(choiceCount)
+    if (choiceCount == 0){
+	/* $('#memberEventForm button').hide()		  */
+	$('#eventDeleteButton').hide();
+	$('#eventSaveButton').hide();
+	$('#fillFormButton').hide();
+	
+	
+	
+	
+	/* if (frm.email.type === 'text') {
+	   frm.onsubmit = function () {
+	   if (/\s/.test(frm.email.value)) {
+	   // Tell your user the field is invalid here, e.g.
+	   frm.email.className = 'invalid';
+	   
+	   // Prevent form submission
+	   return false;
+	   }
+	   }
+	   } */
+	
+    }
+    
+    
+    
+    $('input[type=radio]').click(function() {
+	console.log("asdasd");
+	var subgroupId = $(this).data('action-subgroup-id');
+	console.log('Subgroup ID:', subgroupId);
+	$("#" + subgroupId).show();
+	// Use the itemId as needed, e.g., in an AJAX request
+    });
+
+
+
+
+
+    $('#formCreateID_subgroupName').prop('disabled', true);
+    $('#formCreateID_subgroupButton').prop('disabled', true);
+
+    $('#formCreateID_type').on('change', function(){
+	if (this.value == "subgroup radio"){	    
+	    $('#formCreateID_subgroupName').prop('disabled', false)
+	    $('#formCreateID_value').hide()
+	    $('#formCreateID_subgroupButton').prop('disabled', false);
+	}else{
+	    $('#formCreateID_subgroupName').prop('disabled', true)	    
+	    $('#formCreateID_value').show()
+	    $('#formCreateID_subgroupButton').prop('disabled', true);
+	}
+    });
+
+    
+    
+
+    
+    
+    
+    
+}); 
+
+
 
 
 

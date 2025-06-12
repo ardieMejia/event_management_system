@@ -661,6 +661,8 @@ def form_submission():
                         answerString=fullFilePath,
                         subgroupId=subgroupId
                     )
+                else:
+                    return redirect(url_for('member_front', whatHappened="Error: upload of file failed"))
                     # endfilesubmission
             else:
                 fqa = FormQuestionAnswers(
@@ -1049,13 +1051,12 @@ def event_form_subgroup_creator():
                     try:
                         db.session.add(fqs)
                         db.session.commit()
-                        whatHappened = "dropdown/radio/checkbox created"
+                        whatHappened = request.form.get("field") + " created"
                     except IntegrityError as i:
                         db.session.rollback()
-                        #endfor
                         return redirect(url_for('event_form_subgroup_creator', whatHappened="Error: something went wrong with subgroup creation", eventId=eventId, subgroupId=subgroupId))
-                #enddropdownorcheckboxorradio
-                return redirect(url_for('event_form_subgroup_creator', whatHappened="dropdown/checkbox/radio created", eventId=eventId, subgroupId=subgroupId))
+                #enddropdownorrradio
+                return redirect(url_for('event_form_subgroup_creator', whatHappened=whatHappened, eventId=eventId, subgroupId=subgroupId))
             elif request.form.get("type") == "text" or request.form.get("type") == "file":
                 if request.form.get("field") == "" or request.form.get("questionstring") == "":
                     return redirect(url_for('event_form_subgroup_creator', whatHappened="Error: only values field can be empty", eventId=eventId, subgroupId=subgroupId))
@@ -1070,10 +1071,10 @@ def event_form_subgroup_creator():
                 try:
                     db.session.add(fqs)
                     db.session.commit()
-                    whatHappened = "textbox created"
+                    whatHappened = request.form.get("field") + " created"
                 except IntegrityError as i:
                     db.session.rollback()
-                    return redirect(url_for('event_form_subgroup_creator', whatHappened="Error: something went wrong with subgroup element creation", eventId=eventId, subgroupId=subgroupId))
+                    return redirect(url_for('event_form_subgroup_creator', whatHappened=whatHappened, eventId=eventId, subgroupId=subgroupId))
                 #endtextorfile                        
             #endaddbutton
             return redirect(url_for('event_form_subgroup_creator', whatHappened=whatHappened, eventId=eventId, subgroupId=subgroupId))
@@ -1121,11 +1122,12 @@ def event_form_creator():
                     try:
                         db.session.add(fr)
                         db.session.commit()
+                        whatHappened = request.form.get("field") + " " + request.form.get("type") + " created"
                     except IntegrityError as i:
                         db.session.rollback()
                         return redirect(url_for('event_form_creator', whatHappened="something went wrong when committing dropdowns", eventId=eventId))
                 #enddropdownorcheckboxorradio
-                return redirect(url_for('event_form_creator', whatHappened=request.form.get("type") + " created", eventId=eventId))
+                return redirect(url_for('event_form_creator', whatHappened=whatHappened, eventId=eventId))
             else: 
                 fr = FormQuestion(eventId=eventId,
                                    fieldName=request.form.get("field"),
@@ -1378,7 +1380,7 @@ def upload_document(uploadFile, eventId):
     #     return redirect(url_for('member_front', whatHappened="Error: There is no file uploaded", updatedTournamentId="", paymentProofs=paymentProofs))
 
 
-    if uploadFile and allowed_payment_file(uploadFile.filename):
+    if uploadFile and allowed_user_upload(uploadFile):
         filename = secure_filename(uploadFile.filename)
         fname, ext = os.path.splitext(uploadFile.filename)
         # disk_path = ""  # Path to the persistent disk
@@ -1423,7 +1425,9 @@ def upload_document(uploadFile, eventId):
 
         # endfileupload
         return True, "", os.path.join(folder_path, filename)
-
+    else:
+        return False, "it doesntr work", ""
+        
 
 
 
@@ -1874,10 +1878,23 @@ def bulk_update_all_mcf():
 
 
 
-def allowed_payment_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+def allowed_user_upload(uploadedDocument):
+    mimetype = filetype.guess(uploadedDocument)
+    filename = uploadedDocument.filename
+    app.logger.info("+++++++")
+    app.logger.info("+++++++")
+    app.logger.info(
+        'png' in mimetype.mime or 'pdf' in mimetype.mime or 'jpg' in mimetype.mime or 'jpeg' in mimetype.mime
+    )
+    app.logger.info("png" in mimetype.mime)
 
+    app.logger.info("+++++++")
+
+    isMimeAllowed = 'png' in mimetype.mime or 'pdf' in mimetype.mime or 'jpg' in mimetype.mime or 'jpeg' in mimetype.mime
+    
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS'] and \
+           isMimeAllowed
 
 def allowed_bulk_mcf_upload(filename):
     # return True
@@ -1885,7 +1902,7 @@ def allowed_bulk_mcf_upload(filename):
     # return '.' in filename and \
     #        filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-    
+
 def allowed_bulk_frl_upload(filename):
     # return True
     return "frl" in filename.lower()
@@ -2076,7 +2093,13 @@ def an_evt_ans_download():
     df = pd.DataFrame(membersAnswers)
 
     output = BytesIO()
+    app.logger.info("==========++")
+    app.logger.info(membersAnswers)
+    app.logger.info("==========++")
+    app.logger.info(df)
     df.transpose().to_csv(output, index=False)
+    app.logger.info("==========++")
+    app.logger.info(df)
     output.seek(0)
     
 
