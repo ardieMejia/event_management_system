@@ -50,6 +50,9 @@ Events
 		<div class="m-3">Time Control</div>
 	    </th>
 	    <th>
+		<div class="m-3">Withdrawal Clause</div>
+	    </th>
+	    <th>
 		<div class="m-3">Form Creator</div>
 	    </th>
 	    <th>
@@ -102,7 +105,11 @@ Events
 		<div class="m-3">{{ e.timeControl }}</div>
 	    </td>
 	    <td>
+		<div class="m-3">{{ e.withdrawalClause }}</div>
+	    </td>
+	    <td>
 		<form  action="{{ url_for('event_form_creator')  }}" method="post" onsubmit="return submitFormCreator();">
+		    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 		    <div class="m-3">
 			<input type="hidden" name="eventId" value={{ e.id }} />
 			
@@ -114,6 +121,7 @@ Events
 	    </td>
 	    <td>
 		<form action="{{ url_for('event_answers_page')  }}" method="post">
+		    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 		    <div class="m-3">
 			<input type="hidden" name="eventId" value={{ e.id }} />
 			
@@ -126,6 +134,7 @@ Events
 	    <td>
 		<div class="m-3" data-tooltip-target="tooltip-form-data-kill-button{{ e.id }}">
 		    <form action="{{ url_for('kill_form_descendents')  }}" method="post">
+			<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 			<div class="m-3">
 			    <input type="hidden" name="eventId" value={{ e.id }} />
 			    
@@ -148,6 +157,7 @@ Events
 
 	    <td>
 		<form action="{{ url_for('event_answers_page_overwritten')  }}" method="post">
+		    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 		    <div class="m-3">
 			<input type="hidden" name="eventId" value={{ e.id }} />
 			
@@ -169,7 +179,7 @@ Events
 	</tr>
 	{% endfor %}
 	<tr>
-	    <td colspan="13"></td>
+	    <td colspan="14"></td>
 	    <td>
 		<div class="m-3">
 		    <button type="submit" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">

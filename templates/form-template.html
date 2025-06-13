@@ -14,6 +14,7 @@
 
     <br><br>
     <form enctype="multipart/form-data" id="formTemplate" action="{{ url_for('form_submission')  }}" method="post">
+	<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 	<caption class="caption-top text-orange-600 italic p-2">
 	    {{ whatHappened }}
 	</caption>
