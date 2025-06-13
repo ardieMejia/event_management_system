@@ -34,6 +34,7 @@
 		<td>
 		    
 		    <form action="{{ url_for('bulk_upload_all_files_1')  }}" method="post" enctype="multipart/form-data" data-tooltip-target="tooltip-files-allowed">
+			<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 			<div class="m-2 mb-5">
 			    <label class="block m-2 text-sm font-medium text-gray-900 dark:text-white" for="file1">Upload MCF file</label>
 			    <input  type="file" name="file1" class="border border-gray-500">

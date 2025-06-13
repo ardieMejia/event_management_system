@@ -16,6 +16,7 @@
     <br>
     <br>
     <form id="formCreator" name="formCreator" action="{{ url_for('event_form_creator') }}" method="post">
+	<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 	<caption class="caption-top text-orange-600 italic p-2">
 	    {{ whatHappened }}
 	</caption>
@@ -97,7 +98,7 @@
 		    </th>
 		    <td class="bg-yellow-200" data-tooltip-target="tooltip-files-allowed">
 			<div class="m-2 font-light">
-			    <input id="formCreateID_value" name="value" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg block w-60 p-2" required/>
+			    <input id="formCreateID_value" name="value" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg block w-60 p-2">
 			</div>
 		    </td>
 		</tr>

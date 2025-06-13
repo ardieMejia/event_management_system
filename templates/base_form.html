@@ -77,6 +77,26 @@ all form derived data of specific event:
 }
 
 
+function confirmWithAJAX(message, callback){
+
+    var dialog = $('<div>').dialog({
+        modal: true,
+        title: 'Confirmation',
+        buttons: {
+          'OK': function() {
+            var inputValue = input.val();
+            $(this).dialog('close');
+            callback(true, inputValue); // Pass true and input value on OK
+          },
+          'Cancel': function() {
+            $(this).dialog('close');
+            callback(false); // Pass false on Cancel
+          }
+        }
+    });
+	
+
+}
 
 
 
@@ -122,7 +142,7 @@ $(window).on('load', function() {
 	/* $('#memberEventForm button').hide()		  */
 	$('#eventDeleteButton').hide();
 	$('#eventSaveButton').hide();
-	$('#fillFormButton').hide();
+	// $('#fillFormButton').hide();
 	
 	
 	
@@ -161,18 +181,61 @@ $(window).on('load', function() {
     $('#formCreateID_type').on('change', function(){
 	if (this.value == "subgroup radio"){	    
 	    $('#formCreateID_subgroupName').prop('disabled', false)
-	    $('#formCreateID_value').hide()
+	    $('#formCreateID_addButton').prop('disabled', true)
+	    $('#formCreator #formCreateID_value').hide()
 	    $('#formCreateID_subgroupButton').prop('disabled', false);
 	}else{
-	    $('#formCreateID_subgroupName').prop('disabled', true)	    
-	    $('#formCreateID_value').show()
+	    $('#formCreateID_subgroupName').prop('disabled', true)
+	    $('#formCreateID_addButton').prop('disabled', false)
+	    $('#formCreator #formCreateID_value').show()
 	    $('#formCreateID_subgroupButton').prop('disabled', true);
 	}
     });
 
-    
+
+    let preventDefaultFlag = true;
+    let wDrawString = "";
+    $('#eventDeleteButton').click(function(e){
+	preventDefaultFlag = true
+	e.preventDefault();
+	function getClause(){	    
+	    return $.ajax({
+		// type: 'POST',
+		url: '/a-test1', // Replace 'my_view' with your URL name
+		data: {"eventId": $('#tournament_name').val()},
+		// dataType: 'text',
+	    });
+	}
+	function handleClause(data){
+	    if (data == null || data === ""){
+		$('#eventDeleteButton').unbind("click")
+	    }else{
+	    $('#confirmWithdrawalText').html(data)
+	    $('#confirmWithdrawal').show()
+		
+	    }
+	}
+	getClause().done(handleClause)	
+	
+	my_confirm(function() { 
+		$('#eventDeleteButton').unbind("click")
+	});
+    });
     
 
+
+    function my_confirm(confirmCallback, cancelCallback) {
+	// your confirm dialog	
+	$(document).on( 'click', '#confirmWithdrawal #confirmWithdrawalButton', function() {
+	    // if(typeof confirmCallback === 'function') {
+	    //     confirmCallback();
+	    // }
+	    console.log("clicked confirm");
+	    $('#confirmWithdrawal').hide();
+	    confirmCallback();
+	});	
+    }
+    
     
     
     

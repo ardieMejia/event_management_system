@@ -23,6 +23,7 @@ import datetime
 from c_validation_funcs import validate_before_saving
 import uuid
 import filetype
+from flask_wtf.csrf import CSRFProtect
 
 import json
 
@@ -35,6 +36,7 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 bcrypt = Bcrypt(app)
 login = LoginManager(app)
+csrf = CSRFProtect(app)
 # app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 
@@ -245,7 +247,7 @@ def member_update_page(mcfId):
 def create_event():
     
     with session_scope() as session:
-        e = Event(tournamentName=request.form['tournamentName'], startDate=request.form['startDate'], endDate=request.form['endDate'], discipline=request.form['discipline'], type=request.form['type'], eligibility=request.form['eligibility'], limitation=request.form['limitation'], rounds=request.form['rounds'], timeControl=request.form['timeControl'])
+        e = Event(tournamentName=request.form['tournamentName'], startDate=request.form['startDate'], endDate=request.form['endDate'], discipline=request.form['discipline'], type=request.form['type'], eligibility=request.form['eligibility'], limitation=request.form['limitation'], rounds=request.form['rounds'], timeControl=request.form['timeControl'], withdrawalClause=request.form['withdrawalClause'])
 
     
         if e.isDataInvalid(p_tournameName=e.tournamentName, p_startDate=e.startDate, p_endDate=e.endDate, p_discipline=e.discipline):
@@ -620,7 +622,7 @@ def form_submission():
         answers = []
         for fieldname,answer in request.form.items():
             isFile = None
-            if fieldname == "eventId":
+            if fieldname == "eventId" or fieldname == "csrf_token":
                 continue
 
             try:
@@ -1051,7 +1053,7 @@ def event_form_subgroup_creator():
                     try:
                         db.session.add(fqs)
                         db.session.commit()
-                        whatHappened = request.form.get("field") + " created"
+                        whatHappened = request.form.get("field") + " " + request.form.get("type") + " created"
                     except IntegrityError as i:
                         db.session.rollback()
                         return redirect(url_for('event_form_subgroup_creator', whatHappened="Error: something went wrong with subgroup creation", eventId=eventId, subgroupId=subgroupId))
@@ -1071,7 +1073,7 @@ def event_form_subgroup_creator():
                 try:
                     db.session.add(fqs)
                     db.session.commit()
-                    whatHappened = request.form.get("field") + " created"
+                    whatHappened = request.form.get("field") + " " + request.form.get("type") + " created"
                 except IntegrityError as i:
                     db.session.rollback()
                     return redirect(url_for('event_form_subgroup_creator', whatHappened=whatHappened, eventId=eventId, subgroupId=subgroupId))
@@ -1138,12 +1140,13 @@ def event_form_creator():
                 try:
                     db.session.add(fr)
                     db.session.commit()
+                    whatHappened = request.form.get("field") + " " + request.form.get("type") + " created"
                 except IntegrityError as i:
                     db.session.rollback()
                     return redirect(url_for('event_form_creator', whatHappened="something went wrong", eventId=eventId))
                 # endtextorfile
                 #endadd
-                return render_template("event-form-creator.html", whatHappened=request.form.get("type") + " created", eventId=eventId)
+                return render_template("event-form-creator.html", whatHappened=whatHappened, eventId=eventId)
         elif request.form.get("button") == "subgroup":
             whatHappened = ""
 
@@ -1169,7 +1172,7 @@ def event_form_creator():
 
             
             #endsubgroup
-            return redirect(url_for ('event_form_subgroup_creator', whatHappened=whatHappened, eventId=eventId, subgroupId=subgroupId))
+            return redirect(url_for ('event_form_subgroup_creator', whatHappened="new subgroup", eventId=eventId, subgroupId=subgroupId))
         
 
             
@@ -1261,7 +1264,7 @@ def kill_form_descendents():
 def member_front():
     if current_user.is_authenticated:
         if request.method == 'GET':
-            trnames = []
+            trlists = []
             paymentProofs = []
             m = Member.query.filter_by(mcfId=current_user.mcfId).first()
             query = sa.select(Event)
@@ -1283,12 +1286,12 @@ def member_front():
                 for em in ems:
                     statement = db.select(Event).where(Event.id == em.eventId)
                     e = db.session.scalars(statement).first()
-                    trnames.append(e.tournamentName)
+                    trlists.append(e)
             
 
-                    # trnames.append(e.tournamentName)
+                    # trlists.append(e.tournamentName)
             app.logger.info("%%%%%%%")
-            app.logger.info(trnames)
+            app.logger.info(trlists)
 
                 
             if not whatHappened:
@@ -1298,7 +1301,7 @@ def member_front():
             app.logger.info(whatHappened)
 
             # endget
-            return render_template("member-front.html", m=m, tournamentRegistered=trnames, tournamentOptions=es, whatHappened=whatHappened, paymentProofs=paymentProofs)
+            return render_template("member-front.html", m=m, tournamentRegistered=trlists, tournamentOptions=es, whatHappened=whatHappened, paymentProofs=paymentProofs)
         else:
             paymentProofs = []
             # app.logger.info("==========")
@@ -1328,12 +1331,20 @@ def member_front():
 
                     
                     # endsavebutton
-            elif request.form.get("button") == "delete":
+            elif request.form.get("button") == "withdraw":
 
+                
+
+                # return redirect(url_for('member_front', whatHappened="just a test", paymentProofs=""))
 
                 em = EventMember(mcfId=current_user.mcfId, eventId=request.form["tournament_name"])
                 statement = sa.delete(EventMember).where(EventMember.mcfId == current_user.mcfId, EventMember.eventId == request.form["tournament_name"])
                 db.session.execute(statement)
+
+                
+                statement = db.select(Event).where(Event.id == request.form["tournament_name"])
+                e = db.session.scalars(statement).first()
+                whatHappened = "Successully withdrawn from "
 
                 try:
                     db.session.commit()
@@ -1343,12 +1354,12 @@ def member_front():
 
                 
                 # enddeletebutton
-            elif request.form.get("button") == "fillForm":
-                eventId = request.form["tournament_name"]
+            elif "fillForm" in request.form.get("button"):
+                eventId = request.form.get("button").split("_")[1]
 
 
                 
-                # endfillformsample
+                # endfillform
                 return redirect(url_for('form_template', eventId=eventId))
 
 
@@ -2117,7 +2128,16 @@ def an_evt_ans_download():
                      ".csv",
                      as_attachment=True, mimetype="str")
 
-     
+
+@app.route('/a-test1', methods = ["POS", "GET"]) 
+def a_test1():
+    app.logger.info(request.args.get("eventId"))
+
+    statement = db.select(Event).where(Event.id == request.args.get("eventId"))
+    e = db.session.scalars(statement).first()
+    return e.withdrawalClause
+    
+    return "do you agree with a 50% refund?"
 
 
 if __name__=='__main__': 

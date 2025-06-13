@@ -66,6 +66,7 @@ class Event(db.Model):
     limitation = db.Column(db.String(64), index=True)
     rounds = db.Column(db.String(64), index=True)
     timeControl = db.Column(db.String(64), index=True)
+    withdrawalClause = db.Column(db.String(300), index=True)
     
     # members = db.relationship('Member', back_ref='event')
 
