@@ -20,7 +20,7 @@
 		{% elif sg_element.type == "radio" %}
 		    {% include 'subform_elements/radio.html' %}
 		{% else %}
-		    <input id={{ sg_element.fieldName }} name={{ 'subgroup::' + element.subgroupId + '::' + sg_element.fieldName }} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-60 p-2" required/>
+		    <input id={{ sg_element.fieldName }} name={{ 'subgroup::' + element.subgroupId + '::' + sg_element.fieldName }} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-60 p-2"/>
 	    {% endif %}
 	</div>
 	{% endfor %}

@@ -163,12 +163,17 @@ $(window).on('load', function() {
     
     
     
-    $('input[type=radio]').click(function() {
-	console.log("asdasd");
+    // $('input[type=radio]')
+    $("input[type='radio'][id^='subgroup']") .click(function() {
+	console.log($(this).val())
 	var subgroupId = $(this).data('action-subgroup-id');
-	console.log('Subgroup ID:', subgroupId);
-	$("#" + subgroupId).show();
-	// Use the itemId as needed, e.g., in an AJAX request
+	if($(this).val() === "Yes"){
+	    $("#" + subgroupId).show();	    
+	}else{
+	    $("#" + subgroupId).hide();	    
+	}
+	
+	// console.log('Subgroup ID:', subgroupId);
     });
 
 
@@ -193,54 +198,68 @@ $(window).on('load', function() {
     });
 
 
-    let preventDefaultFlag = true;
-    let wDrawString = "";
-    $('#eventDeleteButton').click(function(e){
-	preventDefaultFlag = true
-	e.preventDefault();
-	function getClause(){	    
-	    return $.ajax({
-		// type: 'POST',
-		url: '/a-test1', // Replace 'my_view' with your URL name
-		data: {"eventId": $('#tournament_name').val()},
-		// dataType: 'text',
-	    });
-	}
-	function handleClause(data){
-	    if (data == null || data === ""){
-		$('#eventDeleteButton').unbind("click")
-	    }else{
+let preventDefaultFlag = true;
+let wDrawString = "";
+$('#eventDeleteButton').click(function(e){
+    preventDefaultFlag = true
+    e.preventDefault();
+    function getClause(){	    
+	return $.ajax({
+	    // type: 'POST',
+	    url: '/a-test1', // Replace 'my_view' with your URL name
+	    data: {"eventId": $('#tournament_name').val()},
+	    // dataType: 'text',
+	});
+    }
+    function handleClause(data){
+	if (data == null || data === ""){
+	    $('#eventDeleteButton').unbind("click")
+	    $('#eventDeleteButton').click(); /* trigger click of button, our days long struggle was this simple, we dont know this */
+	}else{
 	    $('#confirmWithdrawalText').html(data)
 	    $('#confirmWithdrawal').show()
-		
-	    }
+	    my_confirm(function(continueClick) {
+		if (continueClick){		    
+		    $('#eventDeleteButton').unbind("click")
+		    $('#eventDeleteButton').click(); /* trigger click of button, our days long struggle was this simple, we dont know this */
+		}else{
+		    
+		}
+	    });
+	    
 	}
-	getClause().done(handleClause)	
-	
-	my_confirm(function() { 
-		$('#eventDeleteButton').unbind("click")
-	});
-    });
-    
-
-
-    function my_confirm(confirmCallback, cancelCallback) {
-	// your confirm dialog	
-	$(document).on( 'click', '#confirmWithdrawal #confirmWithdrawalButton', function() {
-	    // if(typeof confirmCallback === 'function') {
-	    //     confirmCallback();
-	    // }
-	    console.log("clicked confirm");
-	    $('#confirmWithdrawal').hide();
-	    confirmCallback();
-	});	
     }
+    getClause().done(handleClause)	
     
-    
-    
-    
-    
-}); 
+});
+
+
+
+function my_confirm(confirmCallback, cancelCallback) {
+    // your confirm dialog	
+    $(document).on( 'click', '#confirmWithdrawal #confirmWithdrawalButton', function() {
+	// if(typeof confirmCallback === 'function') {
+	//     confirmCallback();
+	// }
+	console.log("clicked confirm");
+	$('#confirmWithdrawal').hide();
+	confirmCallback(true);
+    });
+    $(document).on( 'click', '#confirmWithdrawal #cancelWithdrawalButton', function() {
+	// if(typeof confirmCallback === 'function') {
+	//     confirmCallback();
+	// }
+	console.log("clicked confirm");
+	$('#confirmWithdrawal').hide();
+	confirmCallback(false);
+    });
+	     cancelWithdrawalButton
+	 }    
+	     
+	     
+	     
+	     
+	 }); 
 
 
 
