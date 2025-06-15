@@ -74,8 +74,21 @@
 
     <br>
 
-
-
+    
+    <div class="grid grid-col-3 p-3">
+	<div class="items-center p-3">
+	    <div class="font-bold w-25">
+		<form action="{{ url_for('an_evt_ans_download_overwritten')  }}" name="anEventAnswerDownload">
+		    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+		    <button id="anEventAnswerDownload"  type="submit" class="border border-gray  py-2 px-2 ">
+			Download
+		    </button>
+		    <input type="hidden" name="eventId" value={{ eventId }} />
+		</form>
+	    </div>
+	</div>	    
+    </div>
+    
 
 
 

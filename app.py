@@ -11,6 +11,7 @@ from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, current_user, login_user, logout_user
 from flask_paginate import Pagination, get_page_args
 from werkzeug.utils import secure_filename
+from werkzeug.exceptions import BadRequest
 from sqlalchemy.orm import sessionmaker
 from contextlib import contextmanager
 from sqlalchemy.orm import close_all_sessions
@@ -19,6 +20,7 @@ import time
 import pandas as pd
 from io import StringIO, BytesIO
 import datetime
+import pytz
 # from c_validation_funcs import convert_nan_to_string
 from c_validation_funcs import validate_before_saving
 import uuid
@@ -565,6 +567,11 @@ def login():
 
 
 
+@app.errorhandler(BadRequest)
+def handle_bad_request(e):
+    if "The CSRF token is missing" in str(e) or "The CSRF token has expired" in str(e) :
+       return redirect('/login') #Redirect to your login page
+    return "Bad Request",400
 
 
 @app.route('/form-submission', methods = ['POST'])
@@ -688,10 +695,11 @@ def form_submission():
         except IntegrityError as i:
             db.session.rollback()
             whatHappened = "something went wrong, answers failed to save, please re-fill form"
+            return redirect(url_for('member_front', whatHappened=whatHappened))
         # endforloopanswers
 
-        return redirect(url_for('member_front', whatHappened=whatHappened))
         # return "nothing here"
+    return redirect(url_for('member_front', whatHappened=whatHappened))
 
         
         
@@ -830,6 +838,12 @@ def event_answers_page_overwritten():
     membersAnswers["000000"]["mcfId"] = {"value": "", "subgroupId": None}
     for mcfId_eventId in single_mcfId_eventId:
         membersAnswers["000000"][mcfId_eventId.fieldName] = {"value": "", "subgroupId": mcfId_eventId.subgroupId}
+        
+    membersAnswers["000000"]["Deleted on"] = {"value": "", "subgroupId": None}
+
+
+
+
 
     # endsubtablecolumns
 
@@ -855,6 +869,15 @@ def event_answers_page_overwritten():
             membersAnswers[unique_key]["mcfId"] = fqa.mcfId
             membersAnswers[unique_key][fqa.fieldName] = {"value": fqa.answerString, "subgroupId": fqa.subgroupId}
 
+            
+
+
+    for fqa in fqas:
+        unique_key = str(fqa.mcfId) + str(eventId)
+        converted_time = fqa.deleted_at.astimezone(pytz.timezone('Asia/Kuala_Lumpur'))
+        formatted_time = converted_time.strftime("%d/%m/%Y %H:%M")
+        membersAnswers[unique_key]["Deleted on"] = {"value": formatted_time, "subgroupId": None}
+
 
 
 
@@ -879,7 +902,7 @@ def event_answers_page_overwritten():
     #     }
     # }    
     
-    return render_template('event-answers-page-overwritten.html', membersAnswers=membersAnswers, whatHappened=whatHappened)
+    return render_template('event-answers-page-overwritten.html', membersAnswers=membersAnswers, eventId=eventId, whatHappened=whatHappened)
 
 
         
@@ -2032,6 +2055,8 @@ def an_evt_ans_download():
     # query = sa.select(Member).order_by(Member.mcfName)
 
     whatHappened = ""
+    # ===== OrderDict is part of Python already, if you remember what you read in EloquentPython
+    # membersAnswers = {}
     membersAnswers = {}
 
     eventId = request.args['eventId']
@@ -2071,6 +2096,8 @@ def an_evt_ans_download():
             membersAnswers[unique_key]["mcfId"] = fqa.mcfId
             membersAnswers[unique_key][fqa.fieldName] = fqa.answerString
 
+    key_1st = next(iter(membersAnswers))
+    correct_columns = list(membersAnswers[key_1st])
 
 
     # df = pd.DataFrame()
@@ -2101,6 +2128,7 @@ def an_evt_ans_download():
     #     }
     # }
     
+    # df = pd.DataFrame(membersAnswers)
     df = pd.DataFrame(membersAnswers)
 
     output = BytesIO()
@@ -2108,7 +2136,9 @@ def an_evt_ans_download():
     app.logger.info(membersAnswers)
     app.logger.info("==========++")
     app.logger.info(df)
-    df.transpose().to_csv(output, index=False)
+    # ===== basically reordering internal or 2nd dimension, not the most readable one liner
+    df.transpose()[correct_columns].to_csv(output, index=False)
+    # df.transpose().to_csv(output, index=False)
     app.logger.info("==========++")
     app.logger.info(df)
     output.seek(0)
@@ -2120,6 +2150,123 @@ def an_evt_ans_download():
     # return "nothing burger"
     return send_file(output, download_name=
                      "Download" +
+                     str(datetime.date.today()) +
+                     # "_Partial" +
+                     # str(downloadOffset) +
+                     "_" +
+                     eventName +
+                     ".csv",
+                     as_attachment=True, mimetype="str")
+
+@app.route('/an-evt-ans-download-overwritten') 
+def an_evt_ans_download_overwritten():
+
+
+    # query = sa.select(Member).order_by(Member.mcfName)
+
+    whatHappened = ""
+    # ===== OrderDict is part of Python already, if you remember what you read in EloquentPython
+    # membersAnswers = {}
+    membersAnswers = {}
+
+    eventId = request.args['eventId']
+
+    app.logger.info("++++++++++")
+    app.logger.info(eventId
+                    )
+    
+    app.logger.info("++++++++++")
+    
+
+
+    statement = db.select(Event).where(Event.id == eventId)
+    e = db.session.scalars(statement).first()
+    eventName = "_".join(e.tournamentName .split(" "))    
+
+    
+
+    statement = db.select(FormQuestionAnswersDeleted).where(FormQuestionAnswersDeleted.eventId == eventId)
+    fqas = db.session.scalars(statement).all()
+
+    for fqa in fqas:
+        unique_key = str(fqa.mcfId) + str(eventId)
+        # app.logger.info("$$$$$")
+        # app.logger.info(fqa.mcfId)
+        # app.logger.info("$$$$$")
+        try:
+            membersAnswers[unique_key]["mcfId"] = fqa.mcfId
+                # "subgroupId": None
+
+            membersAnswers[unique_key][fqa.fieldName] = fqa.answerString
+                                                         # "subgroupId": fqa.subgroupId
+
+
+        except:
+            membersAnswers[unique_key] = {}
+            membersAnswers[unique_key]["mcfId"] = fqa.mcfId
+            membersAnswers[unique_key][fqa.fieldName] = fqa.answerString
+
+    for fqa in fqas:
+        unique_key = str(fqa.mcfId) + str(eventId)
+        converted_time = fqa.deleted_at.astimezone(pytz.timezone('Asia/Kuala_Lumpur'))
+        formatted_time = converted_time.strftime("%d/%m/%Y %H:%M")
+        membersAnswers[unique_key]["Deleted on"] = formatted_time
+
+
+    key_1st = next(iter(membersAnswers))
+    correct_columns = list(membersAnswers[key_1st])
+
+
+    # df = pd.DataFrame()
+    # rec = []
+    # for m in ms_paginate.items:
+    #     rec.append(m.as_dict_for_file("mcf.csv"))
+    #     # rec.append(m.as_dict())
+        
+    # df = df.from_dict(rec)
+
+    # output = BytesIO()
+    # df.to_csv(output, index=False)
+    # output.seek(0)
+
+
+    # ===== Example of sample return expected
+    # membersAnswers = {
+    #     # the key is meaningless and unique, like a primary key in DB, stupid useless to humans but important
+    #     "some_mcfIdSome_eventId": {
+    #         "mcfId": "1233",
+    #         "name": "Ardie",
+    #         "gender": "M"
+    #     },
+    #     "some_mcfIdSome_eventId": {
+    #         "mcfId": "1233",
+    #         "name": "Hanifa",
+    #         "gender": "F"
+    #     }
+    # }
+    
+    # df = pd.DataFrame(membersAnswers)
+    df = pd.DataFrame(membersAnswers)
+
+    output = BytesIO()
+
+    # ===== basically reordering internal or 2nd dimension, not the most readable one liner
+    df.transpose()[correct_columns].to_csv(output, index=False)
+    # df = df[correct_columns]x
+    app.logger.info("==========++")
+    app.logger.info(df)
+    app.logger.info(correct_columns)
+    app.logger.info("==========++")
+    app.logger.info(df)
+    output.seek(0)
+    
+
+    # return "nothing"
+    
+    # not sure if mimetype is necessary, can try removing
+    # return "nothing burger"
+    return send_file(output, download_name=
+                     "Download_overwritten_" +
                      str(datetime.date.today()) +
                      # "_Partial" +
                      # str(downloadOffset) +

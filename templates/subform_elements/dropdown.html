@@ -1,6 +1,6 @@
 
 
-<select name = {{ 'subgroup::' + element.subgroupId + '::' + sg_element.fieldName }} id = {{ sg_element.fieldName }}>
+<select name = "{{ 'subgroup::' + element.subgroupId + '::' + sg_element.fieldName }}" id = {{ sg_element.fieldName }}>
     <option value="-"> - </option>
     {%  for value in sg_element.value %}
 	<option value={{ value }}>
