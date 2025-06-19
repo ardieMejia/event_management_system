@@ -14,7 +14,7 @@ Events
 
 
 <table id="member_details" class="table-auto border border-yellow-400 border-2">
-    <caption class="caption-top text-green-600 italic p-2" >
+    <caption class="caption-top {{ 'text-orange-600' if 'Error' in whatHappened else 'text-green-600'}} italic p-2">
 	{{ whatHappened }}
     </caption>
     <thead>
@@ -167,12 +167,14 @@ Events
 		    </div>
 		</form>
 	    </td>
-		    <td>
+	    <td>
 		<div class="m-2">
-		    <button type="submit" >
-			
-			<a href={{ url_for('kill_event', id=e.id )}}>{% include 'trash.j2' %}</a>			
-		    </button>
+		    <form action={{ url_for('kill_event', id=e.id )}}  method="get" onsubmit="return MCFeventKillEvent();">
+			<button type="submit" class="MCFeventKillEvent">
+			    
+			    <a>{% include 'trash.j2' %}</a>			
+			</button>
+		    </form>
 		</div>
 	    </td>			  
 

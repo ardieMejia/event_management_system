@@ -98,8 +98,6 @@ National Interstate Chess Championship
 ** Show removing events registered
 ** Showing logging in
 ** Showing dropdown download
-** 
-** Searching members of a single event is doable but not implemented
 * Form creation test:
 | form     | field       | value                           | type     |
 |----------+-------------+---------------------------------+----------|
@@ -110,44 +108,40 @@ National Interstate Chess Championship
 | Q1 event | description | "a KL based event for under 18" | text     |
 * Form questions:
 ** National Youth Chess Championship 2024
-** Is it a Hold Harmless Agreement
-*** THIS IS TO CONFIRM THAT I HAVE READ, UNDERSTOOD, AND HEREBY AGREE TO ABIDE BY THE RULES AND REGULATIONS *
-** Please provide MCFID (Not required, becoz system login requires MCFid)
-** Please provide full name?
-** Please provide full IC number
-** ===== for now its, simple all questions in 1 page =====
-** Are you a PARA/OKU player:
-*** Disabled **
-**** Please provide your disability ID card no *
-**** Physical, Visual, Hearing, etc ***
-**** Do you require a wheel chair **
-**** Do you requre assistance to play the game **
-*** I hereby confirm that Im allowing my child to participat in the Malaysian Chess * Chamionship 2024
-*** Guardian Full Name *
-*** Guardian NRIC *
-*** Guardian Email Address *
-*** THIS IS TO CONFIRM THAT I AM AWARE OF MY CHILD/CHILDREN/FAMILY PARTICIPATION AT THE NATIONAL YOUTH CHESS CHAMPIONSHIP 2024 *
-*** Entry fee is RM60 fixed (for all ages, status, rating)
-*** Please choose your event ** (Open/Boys, Girls)
-*** Please choose your section *** 
-**** Under-08: Born on or after 1 January 2016
-**** Under-10: Born on or after 1 January 2014
-**** Under-12: Born on or after 1 January 2012
-**** Under-14: Born on or after 1 January 2010
-**** Under-16: Born on or after 1 January 2008
-**** Under-18: Born on or after 1 January 2006
-*** Please upload your proof of payment ( <input type="file">)
-*** I HEREBY CONFIRMED THAT THE INFORMATION PROVIDED ABOVE ARE CORRECT AND ACCURATE *
+** hold harmless agreement
+*** This is to confirm I have read and understood the regulations
 *** 
+** please provide full IC name
+** Are you a PARA/OKU player
+*** Please 
+** As this event caters for under-18,pleae obtain permission from parents. I hereby confirm that Im allowing my child to participiate in this event. 
+** Please provide full guardia name
+** please provide guardian IC
+** please provide guardian email address
+** I hereby agree to not hold the management accountable to any loss or damage
+** The entrry is fixed at RM 60 regardless of age, or rating. Please choose an event:
+*** open event
+*** girls event
+** please choose an age category
+*** under-8
+*** under-18
+** Please upload proof of payment (RM 60)
+
+
 * Things to present:
 ** DONE All negative checks passed so far, such as pressing upload when no file is chosen (both for member_front & admin page)
 ** DONE right now form is not atthced a single event. Mostly testing dynamic question creation
 ** DONE show download CSV feature
+** Reassure Terry: screenshot "tasksI do daily" in meeting_docs
 ** space blocks in field
 ** download feature for event answers (download name as event name too)
 ** checks mimetype, to ensure users dont upload random filetypes, and not just extension
 ** file input now works, some different folder structure, and some disabled elements depending on subgroup or non-subgroup
 ** show subgrouip answers page, and its relevant download feature
+** show error of "no form for this event"
+** full blown question flow like National Youth Chess Championship 2024, also include checks of spaces in subgroup fieldname, and missing subgroup fieldname
+** show the upload folder structure created (path nameand filename), especially when uploading 2 files
+** show that repeated file uploads dont clash, thanks to date
 * Some limitations:
 ** subgroupsof questions cannot be tied to each answer, the logic is now to be complicated. It can only be tied to a question
 ** this means Questions like:

@@ -17,15 +17,15 @@
     <br>
     <form id="formCreator" name="formCreator" action="{{ url_for('event_form_creator') }}" method="post">
 	<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-	<caption class="caption-top text-orange-600 italic p-2">
-	    {{ whatHappened }}
-	</caption>
-	<caption class="caption-top text-orange-600 italic p-2">
-	    
-	</caption>
+	<!-- <caption class="caption-top text-orange-600 italic p-2"> -->
+
+
 
 	
 	<table>
+	<caption class="caption-top {{ 'text-orange-600' if 'Error' in whatHappened else 'text-green-600'}} italic p-2">
+		{{ whatHappened }}
+	</caption>
 	    <tbody>
 		<input type="hidden" name="eventId" value={{ eventId }} />
 		<tr>
@@ -41,6 +41,7 @@
 			<div id="formCreatorInputInvalid" class="
 				 g-blue-100 border-t border-b border-red-300 text-red-600 px-4 py-3
 				 " role="alert" hidden>
+			    
 
 			</div>
 		    </td>
@@ -87,10 +88,16 @@
 			    <!-- <input type="email" id="email" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required /> -->
 			    <div id="tooltip-files-allowed" role="tooltip" placement="bottom" class="absolute z-10  inline-block border border-1 w-60 px-3 py-2 text-m font-medium text-black transition-opacity opacity-0  duration-300 bg-white rounded-lg shadow-xl tooltip text-left">
 				<div class="font-light">
-				Write values separated by 2 colons and no spaces. <br>
+				    Write values separated by 2 colons and no spaces in between. <br>
 				    <span class="italic"> Eg: </span>
 				    <br>
 				    <span class="font-normal"> Day 1::Day 2::Day 3 </span>
+				    <br>
+				    <br>
+				    <div class="text-sm">
+					For empty values, can leave anything such as dash
+					<span class="font-bold">-</span>
+				    </div>
 				</div>
 
 			    </div>
@@ -98,7 +105,7 @@
 		    </th>
 		    <td class="bg-yellow-200" data-tooltip-target="tooltip-files-allowed">
 			<div class="m-2 font-light">
-			    <input id="formCreateID_value" name="value" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg block w-60 p-2">
+			    <input id="formCreateID_value" name="value" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg block w-60 p-2" required>
 			</div>
 		    </td>
 		</tr>

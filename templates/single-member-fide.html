@@ -23,6 +23,7 @@
     <br>
 
     <form name="FIDEform" action="{{ url_for('update_fide', mcfId=m.mcfId ) }}" method="post">
+	<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
 
 	<table class="border border-yellow-400 border-2 w-100">
