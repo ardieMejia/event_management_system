@@ -62,7 +62,7 @@
 				    {% elif element.type == "file" %}
 					{% include 'form_elements/file.html' %}
 				    {% else %}
-					<input id={{ element.fieldName }} name={{ element.fieldName }} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-60 p-2" required/>
+					<input name={{ element.fieldName }} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-60 p-2" required/>
 				    {% endif %}
 				</div>
 			    </td>

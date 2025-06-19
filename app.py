@@ -252,23 +252,29 @@ def create_event():
         e = Event(tournamentName=request.form['tournamentName'], startDate=request.form['startDate'], endDate=request.form['endDate'], discipline=request.form['discipline'], type=request.form['type'], eligibility=request.form['eligibility'], limitation=request.form['limitation'], rounds=request.form['rounds'], timeControl=request.form['timeControl'], withdrawalClause=request.form['withdrawalClause'])
 
     
-        if e.isDataInvalid(p_tournameName=e.tournamentName, p_startDate=e.startDate, p_endDate=e.endDate, p_discipline=e.discipline):
-            errorsList = e.isDataInvalid(p_tournameName=e.tournamentName, p_startDate=e.startDate, p_endDate=e.endDate, p_discipline=e.discipline)
-            return C_templater.custom_render_template(errorTopic="Invalid Input Error", errorsList=errorsList, isTemplate=True)
+        # if e.old_isDataInvalid(p_tournameName=e.tournamentName, p_startDate=e.startDate, p_endDate=e.endDate, p_discipline=e.discipline):
+        #     errorsList = e.old_isDataInvalid(p_tournameName=e.tournamentName, p_startDate=e.startDate, p_endDate=e.endDate, p_discipline=e.discipline)
+        #     return C_templater.custom_render_template(errorTopic="Invalid Input Error", errorsList=errorsList, isTemplate=True)
+
+        errorsList = e.isDataInvalid(p_tournameName=e.tournamentName, p_startDate=e.startDate, p_endDate=e.endDate, p_discipline=e.discipline)
+        if errorsList:
+            # errorsList = e.isDataInvalid(p_tournameName=e.tournamentName, p_startDate=e.startDate, p_endDate=e.endDate, p_discipline=e.discipline)
+            # return C_templater.custom_render_template(errorTopic="Invalid Input Error", errorsList=errorsList, isTemplate=True)
+            errorMessage = " -- "+" -- ".join(errorsList)
+            return redirect(url_for('find_events', whatHappened="Error: "+errorMessage))
 
 
         e.id = e.set_id()
         db.session.add(e)
-        db.session.commit()
+        # db.session.commit()
 
     
     
-        # try:
-        #     db.session.commit()
-        # except IntegrityError as i:
-        #     db.session.rollback()
-        # return C_templater.custom_render_template(errorTopic="DB-API IntegrityError", errorsList=[i._message], isTemplate=True)
-        # this ones good ===== return c_templater("Data entry error", "tournament name duplicate", "error.html")
+        try:
+            db.session.commit()
+        except IntegrityError as i:
+            db.session.rollback()
+            return redirect(url_for('find_events', whatHappened="Error: "+i._message()))
         
 
         return redirect(url_for('find_events'))
@@ -341,12 +347,65 @@ def kill_event(id):
         whatHappened = "something went wrong"
     db.session.close()
 
+
+    stmt = sa.delete(FormQuestion).where(FormQuestion.eventId == id)
+    db.session.execute(stmt)
+    db.session.commit()
+
+    try:
+        db.session.commit()
+        whatHappened = "this event and its associated events-members, formquestions deleted"
+    except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
+        db.session.rollback()
+        whatHappened = "something went wrong"
+    db.session.close()
+
+    
+    stmt = sa.delete(FormQuestionSubgroup).where(FormQuestionSubgroup.eventId == id)
+    db.session.execute(stmt)
+    db.session.commit()
+
+    try:
+        db.session.commit()
+        whatHappened = "this event and its associated events-members, formquestions, formquestionssubgroup, deleted"
+    except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
+        db.session.rollback()
+        whatHappened = "something went wrong"
+    db.session.close()
+
+    
+    stmt = sa.delete(FormQuestionAnswers).where(FormQuestionAnswers.eventId == id)
+    db.session.execute(stmt)
+    db.session.commit()
+
+    try:
+        db.session.commit()
+        whatHappened = "this event and its associated events-members, formquestions, formquestionssubgroup, formquestionanswers deleted"
+    except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
+        db.session.rollback()
+        whatHappened = "something went wrong"
+    db.session.close()
+
+    
+    stmt = sa.delete(FormQuestionAnswersDeleted).where(FormQuestionAnswersDeleted.eventId == id)
+    db.session.execute(stmt)
+    db.session.commit()
+
+    try:
+        db.session.commit()
+        whatHappened = "this event and its associated events-members, formquestions, formquestionssubgroup, formquestionanswers and overwritten answers deleted"
+    except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
+        db.session.rollback()
+        whatHappened = "something went wrong"
+    db.session.close()
+
     
     query = sa.select(Event)
     es = db.session.scalars(query).all()
     db.session.close()
     
-    return render_template("events.html", es=es, whatHappened="Event successfully killed")
+    # return render_template("events.html", es=es, whatHappened="Event successfully killed")
+    return redirect(url_for('find_events', whatHappened="this event (and all its associated data) successfully killed"))
 
 
 @app.route('/kill-events') 
@@ -372,6 +431,47 @@ def kill_events():
     try:
         db.session.commit()
         whatHappened = "all member-events relations deleted"
+    except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
+        db.session.rollback()
+        whatHappened = "something went wrong, contact the web app dev"
+
+    stmt = sa.delete(FormQuestion)
+    db.session.execute(stmt)
+
+    try:
+        db.session.commit()
+        whatHappened = "all member-events rel, formquestion deleted"
+    except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
+        db.session.rollback()
+        whatHappened = "something went wrong, contact the web app dev"
+
+        
+    stmt = sa.delete(FormQuestionSubgroup)
+    db.session.execute(stmt)
+
+    try:
+        db.session.commit()
+        whatHappened = "all member-events rel, formquestion, formquestionsubgroup deleted"
+    except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
+        db.session.rollback()
+        whatHappened = "something went wrong, contact the web app dev"
+
+    stmt = sa.delete(FormQuestionAnswers)
+    db.session.execute(stmt)
+
+    try:
+        db.session.commit()
+        whatHappened = "all member-events rel, formquestion, formquestionsubgroup, answers deleted"
+    except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
+        db.session.rollback()
+        whatHappened = "something went wrong, contact the web app dev"
+
+    stmt = sa.delete(FormQuestionAnswersDeleted)
+    db.session.execute(stmt)
+
+    try:
+        db.session.commit()
+        whatHappened = "all member-events rel, formquestion, formquestionsubgroup, answers & overwritten answers deleted"
     except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
         db.session.rollback()
         whatHappened = "something went wrong, contact the web app dev"
@@ -546,32 +646,39 @@ def login():
 
             
             
-            tr = []
+
 
             statement = db.select(EventMember).where(EventMember.mcfId == current_user.mcfId)
             ems = db.session.execute(statement).all()
 
-            tr = []
+
 
             # if m.getEvents() != "":
             #     for e in m.getEvents():            
             #         statement = db.select(Event).where(Event.id == e)
             #         e = db.session.scalars(statement).first()
             #         tr.append(e.tournamentName)
-                        
-            return render_template("member-front.html", m=m, tournamentRegistered=tr, tournamentOptions=es)
+
+            return redirect(url_for('member_front'))
             
 
+            # endpost
     else:
-        return render_template("login.html")
+        whatHappened = request.args.get("whatHappened")
+        # endget
+        return render_template('login.html', whatHappened=whatHappened)
+
 
 
 
 @app.errorhandler(BadRequest)
 def handle_bad_request(e):
     if "The CSRF token is missing" in str(e) or "The CSRF token has expired" in str(e) :
-       return redirect('/login') #Redirect to your login page
-    return "Bad Request",400
+        return redirect(url_for('login', whatHappened="Error: "+str(e)))
+    
+    # return "Bad Request",400
+    return redirect(url_for('login', whatHappened="Error: "+str(e)))
+
 
 
 @app.route('/form-submission', methods = ['POST'])
@@ -661,7 +768,7 @@ def form_submission():
                 # endcheckboxsubmission
             elif isFile:
                 fullfilePath = ""
-                isSuccess, errorMsg, fullFilePath = upload_document(uploadedDocument, eventId)
+                isSuccess, errorMsg, fullFilePath = upload_document(uploadedDocument, eventId, fieldname)
                 if isSuccess:
                     fqa = FormQuestionAnswers(
                         mcfId=current_user.mcfId,
@@ -671,7 +778,7 @@ def form_submission():
                         subgroupId=subgroupId
                     )
                 else:
-                    return redirect(url_for('member_front', whatHappened="Error: upload of file failed"))
+                    return redirect(url_for('member_front', whatHappened="Error: " + errorMsg))
                     # endfilesubmission
             else:
                 fqa = FormQuestionAnswers(
@@ -917,7 +1024,7 @@ def form_template():
     statement = db.select(FormQuestion).where(FormQuestion.eventId == eventId)
     frs = db.session.scalars(statement).all()
     if not frs:
-        return redirect(url_for("member_front", whatHappened="No form for this event yet"))
+        return redirect(url_for("member_front", whatHappened="Error: No form for this event yet"))
 
 
     # app.logger.info("==========")
@@ -1174,6 +1281,10 @@ def event_form_creator():
             whatHappened = ""
 
             subgroupName = request.form.get("subgroupName")
+            if not subgroupName:
+                return redirect(url_for('event_form_creator', whatHappened="Error: subgroup name must not be empty", eventId=eventId))
+
+                            
             app.logger.info(subgroupName)
             
             subgroupId=uuid.uuid4()
@@ -1354,18 +1465,24 @@ def member_front():
 
                     
                     # endsavebutton
-            elif request.form.get("button") == "withdraw":
+            # elif request.form.get("button") == "withdraw":
+            elif "withdraw" in request.form.get("button"):
+                eventId = request.form.get("button").split("_")[1]
+                app.logger.info(eventId)
+                app.logger.info("********************************************************************************")
+                app.logger.info(eventId)
+                app.logger.info(eventId)
 
                 
 
                 # return redirect(url_for('member_front', whatHappened="just a test", paymentProofs=""))
 
-                em = EventMember(mcfId=current_user.mcfId, eventId=request.form["tournament_name"])
-                statement = sa.delete(EventMember).where(EventMember.mcfId == current_user.mcfId, EventMember.eventId == request.form["tournament_name"])
+                # em = EventMember(mcfId=current_user.mcfId, eventId=request.form["tournament_name"])
+                statement = sa.delete(EventMember).where(EventMember.mcfId == current_user.mcfId, EventMember.eventId == eventId)
                 db.session.execute(statement)
 
                 
-                statement = db.select(Event).where(Event.id == request.form["tournament_name"])
+                statement = db.select(Event).where(Event.id == eventId)
                 e = db.session.scalars(statement).first()
                 whatHappened = "Successully withdrawn from "
 
@@ -1406,7 +1523,7 @@ def member_front():
 
 
 
-def upload_document(uploadFile, eventId):
+def upload_document(uploadFile, eventId, fieldname):
     # paymentProofs = []
     # uploadFile = request.files['uploadFile']
     # if uploadFile.filename == '':
@@ -1424,7 +1541,9 @@ def upload_document(uploadFile, eventId):
         e = db.session.scalars(statement).first()
         
         eventName = "_".join(e.tournamentName.split())
-        folder_path = os.path.join(f"storage", eventName, str(datetime.datetime.now().strftime("%Y-%m-%d__%H%M%S")))
+        fieldname = "_".join(fieldname.split())
+        mcfIdString = str(current_user.mcfId)
+        folder_path = os.path.join(f"storage", eventName, mcfIdString)
 
         try:
             os.makedirs(folder_path, exist_ok=True)
@@ -1437,8 +1556,8 @@ def upload_document(uploadFile, eventId):
 
 
         # ===== use os.path.join with care, it interprets slashes, and inserts its own, and can hide errors
-        filename = str(current_user.mcfId) + ext
-        uploadFile.save(os.path.join(folder_path, filename))
+        base_filename = fieldname + "_" + str(datetime.datetime.now().strftime("%Y-%m-%d__%H%M%S"))  + ext
+        uploadFile.save(os.path.join(folder_path, base_filename))
 
         f = File(filename=filename,
                  filepath=folder_path,
@@ -1460,7 +1579,7 @@ def upload_document(uploadFile, eventId):
         # endfileupload
         return True, "", os.path.join(folder_path, filename)
     else:
-        return False, "it doesntr work", ""
+        return False, "File upload failed due to wrong filetype or something else", ""
         
 
 

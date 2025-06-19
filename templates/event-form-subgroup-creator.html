@@ -26,7 +26,7 @@
 	    </th>
 	</table>
 	
-	<form action="{{ url_for('event_form_subgroup_creator') }}" method="post">
+	<form id="subFormCreator" action="{{ url_for('event_form_subgroup_creator') }}" method="post">
 	    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 	    <caption class="caption-top text-orange-600 italic p-2">
 	    {{ whatHappened }}
@@ -36,7 +36,22 @@
 		<input type="hidden" name="eventId" value={{ eventId }} />
 		<input type="hidden" name="subgroupId" value={{ subgroupId }} />
 		
+		<tr>
+		<tr>
+		    <th>
 
+		    </th>
+		    
+		    <td>
+			
+			<div id="subFormCreatorInputInvalid" class="
+				 g-blue-100 border-2 border-red-600 text-red-600 px-4 py-3 bg-yellow-200 m-2
+				 " role="alert" hidden>
+			    
+			</div>
+		    </td>
+		</tr>
+		
 		<tr>
 		    <th>
 			<div class="m-3 text-right">
@@ -49,7 +64,7 @@
 		    </th>
 		    <td>
 			<div class="m-2 font-light">
-			    <input id="field" name="field" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg block w-60 p-2" autocomplete="off"/>
+			    <input id="subFormCreateID_field" name="field" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg block w-60 p-2" autocomplete="off"/>
 			</div>
 		    </td>
 		</tr>

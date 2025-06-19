@@ -57,7 +57,7 @@ class Event(db.Model):
                   
 
     id = db.Column(db.Integer, primary_key=True)
-    tournamentName = db.Column(db.String(128), index=True)
+    tournamentName = db.Column(db.String(128), index=True, unique=True)
     startDate = db.Column(db.String(64), index=True)
     endDate = db.Column(db.String(64), index=True)
     discipline = db.Column(db.String(64), index=True)
@@ -81,6 +81,7 @@ class Event(db.Model):
     def __repr__(self):
         return '<tournament name {tn}>'.format(tn=self.tournamentName)
 
+    
     def isDataInvalid(self, p_tournameName, p_startDate, p_endDate, p_discipline):
         errorsList = []
         if not p_tournameName:
@@ -240,6 +241,7 @@ class FormQuestion(db.Model):
     # value = db.Column(db.DateTime, default=datetime.utcnow)
     value = db.Column(db.String(100), nullable=False)
     type = db.Column(db.String(30), nullable=False)
+    # ===== subGroupId - unique, nullable, mostly useless except for subgroups.
     subgroupId = db.Column(db.String(36), unique=True, nullable=True)
     subgroupName = db.Column(db.String(100), nullable=True)
 

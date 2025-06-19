@@ -144,14 +144,28 @@
 		    <td class="bg-yellow-200">
 			
 			<div class="m-2 font-light">
-			    <ul class="max-w-md space-y-1 list-disc list-inside ">
-				{% for tr in tournamentRegistered %}
-				    <li>
+			    <!-- <ul class="max-w-md space-y-1 list-disc list-inside "> -->
+			    {% for tr in tournamentRegistered %}
+				<div class="flex pt-2">
+				    <div class="grid grid-flow-col justify-start">
+					
 					{{ tr.tournamentName }}
-					<button type="submit" name="button"  value={{ "fillForm_" + tr.id|string }} class="w-30 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Fill Form</button>
-				    </li>
+				    </div>				    
+				    <div class="mx-2">
+					<button type="submit" name="button"  value={{ "fillForm_" + tr.id|string }} class="w-20 rounded-md bg-white py-2 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Fill Form</button>
+				    </div>
+				    <div class="mx-2">
+					<button type="submit" name="button" id={{ "eventDeleteButton_" + tr.id|string }} value={{ "withdraw_" + tr.id|string }}  class="w-20 rounded-md bg-white py-2 border text-center text-sm font-bold text-red-700 transition-all shadow-md hover:shadow-xl focus:bg-grey-700 hover:bg-red-700 hover:text-white hover:font-bold">Withdraw</button>
+
+				    </div>
+
+
+				    
+				</div>
+				    <!-- <li> -->
+					<!-- </li> -->
 				{% endfor %}				
-			    </ul>
+				<!-- </ul> -->
 			    
 
 			    <!-- <button type="submit" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Save event</button> -->
@@ -246,22 +260,7 @@
 				<button type="submit" name="button" id="eventSaveButton" value="save" class="w-30 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Register event</button>
 			    </div>
 			</td>
-		    </tr>
-		    <tr>
-			<th></th>
-			<td class="bg-yellow-400">
-			    <div class="flex ">
-				
-				<div class="m-2">
-				    <button type="submit" name="button" id="eventDeleteButton" value="withdraw" class="w-30 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Withdraw from event</button>
-				    <!-- </div>
-					 <div class="m-2"> -->
-
-
-				</div>
-			    </div>
-			</td>
-		    </tr>
+		    </tr>		    
 		</form>
 		
 		<!-- ================================================== -->
