@@ -138,10 +138,10 @@ National Interstate Chess Championship
 ** checks mimetype, to ensure users dont upload random filetypes, and not just extension
 ** file input now works, some different folder structure, and some disabled elements depending on subgroup or non-subgroup
 ** show subgrouip answers page, and its relevant download feature
-** show error of "no form for this event"
-** full blown question flow like National Youth Chess Championship 2024, also include checks of spaces in subgroup fieldname, and missing subgroup fieldname
-** show the upload folder structure created (path nameand filename), especially when uploading 2 files
-** show that repeated file uploads dont clash, thanks to date
+** DONE show error of "no form for this event"
+** DONE full blown question flow like National Youth Chess Championship 2024, also include checks of spaces in subgroup fieldname, and missing subgroup fieldname
+** DONE show the upload folder structure created (path nameand filename), especially when uploading 2 files
+** show that repeated file uploads dont clash, thanks to date, show the upload_logs page
 * Some limitations:
 ** subgroupsof questions cannot be tied to each answer, the logic is now to be complicated. It can only be tied to a question
 ** this means Questions like:

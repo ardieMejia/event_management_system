@@ -170,6 +170,7 @@ Events
 	    <td>
 		<div class="m-2">
 		    <form action={{ url_for('kill_event', id=e.id )}}  method="get" onsubmit="return MCFeventKillEvent();">
+			<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 			<button type="submit" class="MCFeventKillEvent">
 			    
 			    <a>{% include 'trash.j2' %}</a>			
