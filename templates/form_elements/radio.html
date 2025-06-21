@@ -1,5 +1,9 @@
+{% set ns = namespace(counter=1) %}    
 {% for value in element.value %}
-    <input type="radio" value={{ value }} name={{ element.fieldName }} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-    <label for={{ element.fieldName }} class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">{{ value }}</label>
+    <div class="flex items-center m-2">
+	<input type="radio" value={{ value }} id='{{ element.fieldName + ns.counter|string }}' name={{ element.fieldName }} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+	<label  for='{{ element.fieldName + ns.counter|string }}' class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300 mb-2">{{ value }}</label>	
+    </div>
+    {% set ns.counter = ns.counter + 1 %}
 {% endfor %}
 <input name={{ element.fieldName}} value="-" hidden>

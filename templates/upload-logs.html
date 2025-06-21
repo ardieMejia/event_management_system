@@ -1,0 +1,83 @@
+{% extends "base_form_h.html" %}
+
+
+
+
+{% block heading_1 %}
+    Upload logs
+{% endblock %}
+
+
+{%  block form %}
+
+    <br>
+
+
+    <table  class="table-auto border border-yellow-400 border-2">
+	<caption class="caption-top {{ 'text-orange-600' if 'Error' in whatHappened else 'text-green-600'}} italic p-2">
+	    {{ whatHappened }}
+	</caption>
+	<thead>
+	    <tr class="bg-yellow-400">
+		<th class="w-100">
+		    <div class="m-3">ID</div>
+		</th>
+		<th class="w-100">
+		    <div class="m-3">File Name</div>
+		</th>
+		<th>
+		    <div class="m-3">File Path</div>
+		</th>
+		<th>
+		    <div class="m-3">MCF ID</div>
+		</th>
+		<th>
+		    <div class="m-3">Event ID</div>
+		</th>
+		<th>
+		    <div class="m-3">Created At</div>
+		</th>
+	    </tr>
+	</thead>
+	<tbody>
+	    {% for f in fs %}
+		<tr class="border border-yellow-400 border-2">
+		    
+
+		    
+		    <td>
+			<div class="m-3">{{ f.id }}</div>
+		    </td>
+		    <td>
+			<div class="m-3">{{ f.filename }}</div>
+		    </td>
+		    <td>
+			<div class="m-3">{{ f.filepath }}</div>
+		    </td>
+		    <td>
+			<div class="m-3">{{ f.mcfId }}</div>
+		    </td>
+		    <td>
+			<div class="m-3">{{ f.eventId }}</div>
+		    </td>
+		    <td>
+			<div class="m-3">{{ f.created_at }}</div>
+		    </td>
+
+
+
+
+
+			  
+
+		</tr>
+	    {% endfor %}
+
+	</tbody>
+    </table>
+
+
+
+{% endblock %}
+
+

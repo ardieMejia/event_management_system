@@ -8,7 +8,7 @@ class Config:
     # print(os.environ['YOURAPPLICATION_MODE'], file=sys.stderr)
     
     SECRET_KEY = os.environ.get('SECRET_KEY')
-    UPLOAD_FOLDER = './storage'
+    # UPLOAD_FOLDER = './storage'
     ALLOWED_EXTENSIONS = {'png', 'pdf', 'jpg', 'jpeg'}
 
     SQLALCHEMY_ENGINE_OPTIONS = {
@@ -26,4 +26,9 @@ class Config:
         'sqlite:///' + os.path.join(basedir, 'app.db')
     if os.environ.get('YOURAPPLICATION_MODE') == "production":
         SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI')
+
+        
+    UPLOAD_FOLDER = "storage"
+    if os.environ.get('YOURAPPLICATION_MODE') == "production":
+        UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER')
         

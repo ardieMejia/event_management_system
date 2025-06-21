@@ -112,14 +112,14 @@ def tryRemoveMcfFile(filename):
 
 
 def isFileUploaded(filename):
-    if os.path.isfile(r'./storage/'+filename):
+    if os.path.isfile(os.path.join(app.config['UPLOAD_FOLDER'], filename)):
         return True
     return False
 
 
 def isFileOversized(filename):
 
-    df = pd.read_csv(r'./storage/'+filename)
+    df = pd.read_csv(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
     if len(df) > 502:
         return True
@@ -300,7 +300,8 @@ def create_member():
         db.session.commit()
     except IntegrityError as i:
         db.session.rollback()
-        return C_templater.custom_render_template(errorTopic="DB-API IntegrityError", errorsList=[i._message], isTemplate=True)
+        return redirect(url_for('find_members', whatHappened="Error: "+i._message()))
+        # return C_templater.custom_render_template(errorTopic="DB-API IntegrityError", errorsList=[i._message], isTemplate=True)
     # example of final form ===== return c_templater("Data entry error", "tournament name duplicate", "error.html")
         
     # app.logger.info('========== event ==========')
@@ -322,14 +323,16 @@ def kill_event(id):
     
     stmt = sa.delete(Event).where(Event.id == id)
     db.session.execute(stmt)
-    db.session.commit()
     
     try:
         db.session.commit()
         whatHappened = "events deleted across all members"
     except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
         db.session.rollback()
-        whatHappened = "something went wrong"
+        whatHappened="Error: "+i._message()
+                                
+                        
+
     db.session.close()
 
 
@@ -405,7 +408,7 @@ def kill_event(id):
     db.session.close()
     
     # return render_template("events.html", es=es, whatHappened="Event successfully killed")
-    return redirect(url_for('find_events', whatHappened="this event (and all its associated data) successfully killed"))
+    return redirect(url_for('find_events', whatHappened=whatHappened))
 
 
 @app.route('/kill-events') 
@@ -597,7 +600,28 @@ def find_members():
     # ms_dict = [m.__dict__ for m in ms]
     return render_template("members.html", ms=ms_paginate.items, prev_url=prev_url, next_url=next_url, page=page, totalPages=ms_paginate.pages, totalCount=count)
 
-                    
+@app.route('/upload-logs', methods = ["GET"]) 
+def upload_logs():
+
+    # page = request.args.get("page", 1, type=int)
+    
+    # query = sa.select(Member).order_by(Member.mcfName)
+    # ms_paginate=db.paginate(query, page=page, per_page=20, error_out=False)
+    # ms = db.session.scalars(query).all()
+
+    # prev_url = "a_page/page=23"
+    # prev_url = url_for("find_members", page=ms_paginate.prev_num)
+    # next_url = url_for("find_members", page=ms_paginate.next_num)
+
+
+    # https://stackoverflow.com/questions/14754994/why-is-sqlalchemy-count-much-slower-than-the-raw-query
+    statement = db.select(File)
+    fs = db.session.scalars(statement).all() # coz I dont know a better/faster way to count records
+
+
+    
+
+    return render_template("upload-logs.html", fs=fs)                    
 
 
 
@@ -720,7 +744,8 @@ def form_submission():
             whatHappened = "answers successfully recorded"
         except IntegrityError as i:
             db.session.rollback()
-            return redirect(url_for('member_front', whatHappened="something went wrong with the backup of old submissions"))
+            whatHappened="Error: "+i._message()
+            return redirect(url_for('member_front', whatHappened=whatHappened))
         # enddeleteandbackupsubmission
 
         for fieldname,answer in request.form.items():
@@ -801,7 +826,7 @@ def form_submission():
             whatHappened = "answers successfully recorded"
         except IntegrityError as i:
             db.session.rollback()
-            whatHappened = "something went wrong, answers failed to save, please re-fill form"
+            whatHappened="Error: "+i._message()
             return redirect(url_for('member_front', whatHappened=whatHappened))
         # endforloopanswers
 
@@ -1186,7 +1211,8 @@ def event_form_subgroup_creator():
                         whatHappened = request.form.get("field") + " " + request.form.get("type") + " created"
                     except IntegrityError as i:
                         db.session.rollback()
-                        return redirect(url_for('event_form_subgroup_creator', whatHappened="Error: something went wrong with subgroup creation", eventId=eventId, subgroupId=subgroupId))
+                        whatHappened="Error: "+i._message()
+                        return redirect(url_for('event_form_subgroup_creator', whatHappened=whatHappened, eventId=eventId, subgroupId=subgroupId))
                 #enddropdownorrradio
                 return redirect(url_for('event_form_subgroup_creator', whatHappened=whatHappened, eventId=eventId, subgroupId=subgroupId))
             elif request.form.get("type") == "text" or request.form.get("type") == "file":
@@ -1206,6 +1232,7 @@ def event_form_subgroup_creator():
                     whatHappened = request.form.get("field") + " " + request.form.get("type") + " created"
                 except IntegrityError as i:
                     db.session.rollback()
+                    whatHappened="Error: "+i._message()
                     return redirect(url_for('event_form_subgroup_creator', whatHappened=whatHappened, eventId=eventId, subgroupId=subgroupId))
                 #endtextorfile                        
             #endaddbutton
@@ -1257,7 +1284,8 @@ def event_form_creator():
                         whatHappened = request.form.get("field") + " " + request.form.get("type") + " created"
                     except IntegrityError as i:
                         db.session.rollback()
-                        return redirect(url_for('event_form_creator', whatHappened="something went wrong when committing dropdowns", eventId=eventId))
+                        whatHappened="Error: "+i._message()
+                        return redirect(url_for('event_form_creator', whatHappened=whatHappened, eventId=eventId))
                 #enddropdownorcheckboxorradio
                 return redirect(url_for('event_form_creator', whatHappened=whatHappened, eventId=eventId))
             else: 
@@ -1273,7 +1301,8 @@ def event_form_creator():
                     whatHappened = request.form.get("field") + " " + request.form.get("type") + " created"
                 except IntegrityError as i:
                     db.session.rollback()
-                    return redirect(url_for('event_form_creator', whatHappened="something went wrong", eventId=eventId))
+                    whatHappened="Error: "+i._message()
+                    return redirect(url_for('event_form_creator', whatHappened=whatHappened, eventId=eventId))
                 # endtextorfile
                 #endadd
                 return render_template("event-form-creator.html", whatHappened=whatHappened, eventId=eventId)
@@ -1302,7 +1331,8 @@ def event_form_creator():
                 db.session.commit()
             except IntegrityError as i:
                 db.session.rollback()
-                return redirect(url_for('event_form_creator', whatHappened="Error: subgroup creation failed, inform web admin", eventId=eventId))
+                whatHappened="Error: "+i._message()
+                return redirect(url_for('event_form_creator', whatHappened=whatHappened, eventId=eventId))
 
             
             #endsubgroup
@@ -1461,7 +1491,7 @@ def member_front():
                     whatHappened="Saved: "
                 except IntegrityError as i: 
                     db.session.rollback()
-                    whatHappened = "something went wrong, contact your web dev"                
+                    whatHappened="Error: "+i._message()
 
                     
                     # endsavebutton
@@ -1490,7 +1520,9 @@ def member_front():
                     db.session.commit()
                 except IntegrityError as i:
                     db.session.rollback()
-                    whatHappened = "something went wrong"
+                    whatHappened="Error: "+i._message()
+
+
 
                 
                 # enddeletebutton
@@ -1543,7 +1575,7 @@ def upload_document(uploadFile, eventId, fieldname):
         eventName = "_".join(e.tournamentName.split())
         fieldname = "_".join(fieldname.split())
         mcfIdString = str(current_user.mcfId)
-        folder_path = os.path.join(f"storage", eventName, mcfIdString)
+        folder_path = os.path.join(app.config['UPLOAD_FOLDER'], eventName, mcfIdString)
 
         try:
             os.makedirs(folder_path, exist_ok=True)
@@ -1559,7 +1591,7 @@ def upload_document(uploadFile, eventId, fieldname):
         base_filename = fieldname + "_" + str(datetime.datetime.now().strftime("%Y-%m-%d__%H%M%S"))  + ext
         uploadFile.save(os.path.join(folder_path, base_filename))
 
-        f = File(filename=filename,
+        f = File(filename=base_filename,
                  filepath=folder_path,
                  mcfId=current_user.mcfId,
                  eventId=eventId
@@ -1577,7 +1609,7 @@ def upload_document(uploadFile, eventId, fieldname):
         
 
         # endfileupload
-        return True, "", os.path.join(folder_path, filename)
+        return True, "", os.path.join(folder_path, base_filename)
     else:
         return False, "File upload failed due to wrong filetype or something else", ""
         
@@ -1609,8 +1641,8 @@ def bulk_upload_events_csv():
                 db.session.commit()
             except IntegrityError as i:
                 db.session.rollback()
-                app.logger.info(i._message())
-                return C_templater.custom_render_template("DB-API IntegrityError", [i._message()], True)        
+                whatHappened="Error: "+i._message()
+                return render_template("main-page.html", whatHappened=whatHappened)
 
 
     # return C_templater.custom_render_template("Successfull bulk upload", "event data", False)
@@ -1646,9 +1678,8 @@ def bulk_upload_members_csv():
 
         except IntegrityError as i:
             db.session.rollback()
-            app.logger.info(i._message())
-                # return C_templater.custom_render_template("Data entry error", i._message(), False)
-            return C_templater.custom_render_template("DB-API IntegrityError", [i._message()], True)
+            whatHappened="Error: "+i._message()
+            return render_template("main-page.html", whatHappened=whatHappened)
         
 
         if not duplicatesList:            
@@ -1695,7 +1726,8 @@ def bulk_upload_fide_csv():
         try:
             db.session.commit()
         except IntegrityError as i:
-            return C_templater.custom_render_template("DB-API IntegrityError", [i._message()], True)        
+            whatHappened="Error: "+i._message()
+            return render_template("main-page.html", whatHappened="")
         
             # query = sa.select(Member).where(Member.mcfId == row[''])
             # f = db.session.scalar(query)
@@ -1706,9 +1738,8 @@ def bulk_upload_fide_csv():
             db.session.commit()
         except IntegrityError as i:
             db.session.rollback()
-            app.logger.info(i._message())
-                # return C_templater.custom_render_template("Data entry error", i._message(), False)
-            return C_templater.custom_render_template("DB-API IntegrityError", [i._message()], True)        
+            whatHappened="Error: "+i._message()
+            return render_template("main-page.html", whatHappened=whatHappened)
 
     # if not duplicatesList:            
     #     whatHappened = "Upload successful with no duplicates"
@@ -1727,8 +1758,9 @@ def processMcfList():
 
     wanted_columns = [mapFrom['mcfId'], mapFrom['mcfName'], mapFrom['gender'], mapFrom['yearOfBirth'], mapFrom['state'], mapFrom['nationalRating'], mapFrom['fideId']]
 
-    chunksize = 200    
-    df = pd.read_csv(r'./storage/'+filename, usecols=wanted_columns, chunksize=chunksize, dtype=str)
+    chunksize = 200
+    fullfilename = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    df = pd.read_csv(fullfilename, usecols=wanted_columns, chunksize=chunksize, dtype=str)
 
 
     skippedList = []
@@ -1812,7 +1844,8 @@ def processMcfList():
     else:
         whatHappened = "Some skipped records"
 
-    tryRemoveMcfFile("./storage/mcf.csv")                
+    fullfilename = os.path.join(app.config['UPLOAD_FOLDER'], "mcf.csv")
+    tryRemoveMcfFile(fullfilename)                
 
 
     return whatHappened, skippedList, newList
@@ -1828,7 +1861,7 @@ def processFrlList():
     updatesList = []
 
     mapFrom = C_mapper.excelToDatabase[filename]
-    with open(r'./storage/'+filename, newline='') as csvfile:
+    with open(os.path.join(app.config['UPLOAD_FOLDER'], filename), newline='') as csvfile:
         dictreader = csv.DictReader(csvfile, delimiter=',')
         for row in dictreader:
 
@@ -1865,7 +1898,7 @@ def processFrlList():
         whatHappened = "Successful upload with details below"
 
 
-    tryRemoveMcfFile("./storage/frl.csv")                
+    tryRemoveMcfFile(os.path.join(app.config['UPLOAD_FOLDER'], "frl.csv"))
 
 
     return whatHappened, skippedList, updatesList
@@ -1883,7 +1916,8 @@ def updateMcfList():
 
 
     try:
-        df = pd.read_csv(r'./storage/'+filename, usecols=wanted_columns, dtype=str)
+        fullfilename = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        df = pd.read_csv(fullfilename, usecols=wanted_columns, dtype=str)
     except FileNotFoundError as f:
         return redirect(url_for('main_page', whatHappened="Error: File Not Found, Upload again" ))
         
@@ -1954,7 +1988,7 @@ def updateMcfList():
         whatHappened = "Updated record details below"
 
 
-    tryRemoveMcfFile("./storage/mcf.csv")                
+    tryRemoveMcfFile(os.path.join(app.config['UPLOAD_FOLDER'], "mcf.csv"))                
                 
 
 
@@ -2081,7 +2115,7 @@ def bulk_upload_all_files_1():
     if file1 \
        and allowed_bulk_mcf_upload(file1.filename):
         filename1 = secure_filename(file1.filename)
-        file1.save(os.path.join('./storage/mcf.csv'))
+        file1.save(os.path.join(app.config['UPLOAD_FOLDER'], 'mcf.csv'))
         return render_template("main-page.html", whatHappened="MCF file successfully uploaded")
     else:
         whatHappened = "CSV filename must contain mcf.   Eg: mcf-Q1.csv"
@@ -2104,7 +2138,7 @@ def bulk_upload_all_files_2():
     if file2 \
        and allowed_bulk_frl_upload(file2.filename):
         filename2 = secure_filename(file2.filename)
-        file2.save(os.path.join('./storage/frl.csv'))
+        file2.save(os.path.join(app.config['UPLOAD_FOLDER'], 'frl.csv'))
         # return 'File successfully uploaded'
         return render_template("main-page.html", whatHappened="FRL file successfully uploaded")
     else:
