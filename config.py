@@ -32,3 +32,8 @@ class Config:
     if os.environ.get('YOURAPPLICATION_MODE') == "production":
         UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER')
         
+    EXPIRY_PERIOD = 730 # 730 hours is 1 month
+    EXPIRY_PERIOD = 1
+    if os.environ.get('YOURAPPLICATION_MODE') == "production":
+        EXPIRY_PERIOD = os.environ.get('EXPIRY_PERIOD')
+        

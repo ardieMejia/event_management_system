@@ -24,19 +24,27 @@
 		    <p>Subgroup Creator</p>
 		</div>
 	    </th>
+	    </tr>
 	</table>
 	
 	<form id="subFormCreator" action="{{ url_for('event_form_subgroup_creator') }}" method="post">
 	    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-	    <caption class="caption-top text-orange-600 italic p-2">
-	    {{ whatHappened }}
-	</caption>
 	<table>
 	    <tbody>
 		<input type="hidden" name="eventId" value={{ eventId }} />
 		<input type="hidden" name="subgroupId" value={{ subgroupId }} />
 		
-		<tr>
+
+		<span class="caption-top {{ 'text-orange-600' if 'Error' in whatHappened else 'text-green-600'}} italic p-2">
+		    {% set whatHappenedList = whatHappened.split(' - ') %}
+		    {% if whatHappenedList[1] %}
+		    
+		    <span class="font-bold">{{  whatHappenedList[0] }}</span>
+		    {{ whatHappenedList[1] }}
+		{% else %}
+		    {{ whatHappened }}
+		{% endif %}
+	    </span>
 		<tr>
 		    <th>
 
@@ -126,6 +134,7 @@
 				<option value="radio">radio</option>
 				<!-- <option value="datetime">datetime</option> -->
 				<option value="text">text</option>
+				<option value="file">file</option>
 			    </select>
 			</div>
 		    </td>

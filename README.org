@@ -86,8 +86,17 @@ National Interstate Chess Championship
 
 
 #+end_quote
-** What happens if the user to refill an event form again?
-*** Should it delete all previous eventID-specific entries?
+** Event expiry flow should not create dangling data
+*** create event
+*** member 1 registers event
+*** create form
+*** member 1 registers event
+*** member 2 registers event
+*** member RE-registers event
+*** we expire event,
+*** member 3 registers event, gets soft warning
+*** member 1 checks his page, no problems
+** 2nd variation
 * Video:
 ** All the processes from the video
 ** Show wrongly uploading a video
@@ -132,7 +141,7 @@ National Interstate Chess Championship
 ** DONE All negative checks passed so far, such as pressing upload when no file is chosen (both for member_front & admin page)
 ** DONE right now form is not atthced a single event. Mostly testing dynamic question creation
 ** DONE show download CSV feature
-** Reassure Terry: screenshot "tasksI do daily" in meeting_docs
+** DONE Reassure Terry: screenshot "tasksI do daily" in meeting_docs
 ** space blocks in field
 ** download feature for event answers (download name as event name too)
 ** checks mimetype, to ensure users dont upload random filetypes, and not just extension
@@ -142,6 +151,8 @@ National Interstate Chess Championship
 ** DONE full blown question flow like National Youth Chess Championship 2024, also include checks of spaces in subgroup fieldname, and missing subgroup fieldname
 ** DONE show the upload folder structure created (path nameand filename), especially when uploading 2 files
 ** show that repeated file uploads dont clash, thanks to date, show the upload_logs page
+** DONE remind Terry that the way event expiry is setup, you MUST backup/download users form answers, before expiring the event, coz all related entities are deleted for real. The only difference between DELETED and EXPIRED event is EXPIRED event is stored in its own table, and user gets a soft warning, when attempting to register. Show the flow of expiring an event. Which is triggered upon creation of event. show the message the user gets.
+** NOT present, but rather reminder that soft-deleted events essentially serve special purpose in the business logic.
 * Some limitations:
 ** subgroupsof questions cannot be tied to each answer, the logic is now to be complicated. It can only be tied to a question
 ** this means Questions like:
