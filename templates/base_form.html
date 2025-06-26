@@ -79,12 +79,27 @@ all form derived data of specific event:
     function MCFeventKillEvent(){
 
 	const text = `
-Deleting this event will remove
-all form derived data of specific event:
- - all members answers of that event
- - all form questions of that event
- - overwritten (old) answers of members of that event
-	     Continue?`;
+Hard deleting will also remove
+this event data in related entities
+
+Continue?`;
+	
+	if (confirm(text) == true){
+	    return true;
+	}else{
+	    return false;
+	}
+    }
+
+    function MCFeventSoftKillEvent(){
+
+	const text = `
+Expiring an event also
+deletes data in related entities
+it stays expires for 1 month then
+auto deletes
+
+Continue?`;
 	
 	if (confirm(text) == true){
 	    return true;
@@ -127,18 +142,23 @@ $(document).ready(function(){
 
     creatorForm.on("submit", function(event){
 	event.preventDefault();
-	stringVal = creatorForm.find('#formCreateID_field').val();
-	if (typeof stringVal !== 'undefined'){
-	    if(stringVal.includes(" ")){
-		// alert("field cant contain space, make it memorable")
+	fieldstringVal = creatorForm.find('#formCreateID_field').val();
+	valuestringVal = creatorForm.find('#formCreateID_value').val();
+
+
+
+	if (typeof fieldstringVal !== 'undefined'){
+	    if (fieldstringVal.includes(" ")){
 		$('#field').removeClass("border-none").addClass("border-3").addClass("border-red-600");
-		$('#formCreatorInputInvalid').html(" <p>field should not contain spaces.</p> ").removeAttr("hidden");		     
-		id="formCreatorInputInvalid"
-	    }else{
+		$('#formCreatorInputInvalid').html("<p>field cannot contain spaces</p>").removeAttr("hidden");
+	    }else if (valuestringVal === ""){
+		$('#field').removeClass("border-none").addClass("border-3").addClass("border-red-600");
+		$('#formCreatorInputInvalid').html("<p>value cannot be empty</p>").removeAttr("hidden");
+	    }else{		
 		$(this).unbind("submit")
 	    }
 	}
-	// ----- creatorformend
+
     });
 
 
@@ -277,7 +297,7 @@ $(window).on('load', function() {
 	function getClause(){	    
 	    return $.ajax({
 		// type: 'POST',
-		url: '/a-test1', // Replace 'my_view' with your URL name
+		url: '/get-withdrawal-clause-by-id', // Replace 'my_view' with your URL name
 		data: {"eventId": eventId
 		       // "1750070176"
 		      },

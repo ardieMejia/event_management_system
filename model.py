@@ -10,7 +10,7 @@ import sqlalchemy as sa
 import sqlalchemy.orm as so
 from app import db, bcrypt, app, login
 from flask_login import UserMixin
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
 from c_mapper import C_mapper
 # from sqlalchemy import Column, Table, ForeignKey, Integer, String
@@ -354,19 +354,46 @@ class FormQuestionAnswersDeleted(db.Model):
         return '<fieldname: {f}, answers: {a}, deleted_at: {d}>'.format(f=self.fieldName, a=self.answerString, d=self.deleted_at)
 
     
+class EventDeleted(db.Model):
+    __tablename__ = "events_deleted"
 
+                  
 
-
+    id = db.Column(db.Integer, primary_key=True)
+    tournamentName = db.Column(db.String(128), index=True, unique=True)
+    startDate = db.Column(db.String(64), index=True)
+    endDate = db.Column(db.String(64), index=True)
+    discipline = db.Column(db.String(64), index=True)
+    type = db.Column(db.String(64), index=True)
+    eligibility = db.Column(db.String(64), index=True)
+    limitation = db.Column(db.String(64), index=True)
+    rounds = db.Column(db.String(64), index=True)
+    timeControl = db.Column(db.String(64), index=True)
+    withdrawalClause = db.Column(db.String(300), index=True)
+    deleted_at = db.Column(db.DateTime, default=datetime.utcnow)
     
-    # @classmethod
-    # def doesFideExist(cls, id):
-    #     # isPasswordVerified = bcrypt.check_password_hash(self.password, password)
-    #     ret = cls.query.filter_by(fideId=id).first()
-    #     app.logger.info("++++++++++")
-    #     app.logger.info(ret)
-    #     if ret:
-    #         return True
-    #     return False
+    def __repr__(self):
+        return '<DELETED tournameName: {tn}, , deleted_at: {d}>'.format(tn=self.tournamentName, d=self.deleted_at)
+
+
+    @classmethod
+    def delete_expired(cls):
+        expiration_hours = app.config['EXPIRY_PERIOD']
+        limit = datetime.now() - timedelta(hours=expiration_hours)
+        cls.query.filter(cls.deleted_at < limit).delete()
+        db.session.commit()
+
+
+
+        # @classmethod
+        # def doesFideExist(cls, id):
+        #     # isPasswordVerified = bcrypt.check_password_hash(self.password, password)
+        #     ret = cls.query.filter_by(fideId=id).first()
+        #     app.logger.info("++++++++++")
+        #     app.logger.info(ret)
+        #     if ret:
+        #         return True
+        #     return False
 
 
         

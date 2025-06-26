@@ -23,9 +23,16 @@
 
 	
 	<table>
-	<caption class="caption-top {{ 'text-orange-600' if 'Error' in whatHappened else 'text-green-600'}} italic p-2">
-		{{ whatHappened }}
-	</caption>
+	    {% set whatHappenedList = whatHappened.split(' - ') %}
+	    <caption class="caption-top {{ 'text-orange-600' if 'Error' in whatHappened else 'text-green-600'}} italic p-2">
+		{% if whatHappenedList[1] %}
+		    
+		    <span class="font-bold">{{  whatHappenedList[0] }}</span>
+		    {{ whatHappenedList[1] }}
+		{% else %}
+		    {{ whatHappened }}
+		{% endif %}
+	    </caption>
 	    <tbody>
 		<input type="hidden" name="eventId" value={{ eventId }} />
 		<tr>
@@ -105,7 +112,7 @@
 		    </th>
 		    <td class="bg-yellow-200" data-tooltip-target="tooltip-files-allowed">
 			<div class="m-2 font-light">
-			    <input id="formCreateID_value" name="value" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg block w-60 p-2" required>
+			    <input id="formCreateID_value" name="value" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg block w-60 p-2">
 			</div>
 		    </td>
 		</tr>
@@ -157,8 +164,13 @@
 			    <button id="formCreateID_addButton" type="submit" name="button" value="add" class="w-20 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 m-2">Add</button>
 			    
 			    <button id="formCreateID_subgroupButton" type="submit" name="button" value="subgroup" class="w-20 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 m-2">Subgroup creator</button>
-			    
-			    <button id="formCreateID_doneButton" type="submit" name="button" value="done" class="w-20 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 m-2" disabled>Done</button>
+    </form>
+    <!-- a form just to retain "awareness" of user canceled form crestion, so we can say "No Form Created" -->
+    <form  name="dummyForm" action="{{ url_for('event_form_creator') }}" method="post">
+	<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+	<button id="formCreateID_doneButton" type="submit" name="button" value="done" class="w-20 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 m-2">Done</button>
+	<input type="hidden" name="whatHappened" value="{{ whatHappened }}"/>
+    </form>
 			</div>
 
 		    </td>
@@ -171,7 +183,6 @@
 	    </tbody>
 	</table>
 
-    </form>
 
 {% endblock %}
 

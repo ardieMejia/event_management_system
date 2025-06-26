@@ -1,0 +1,10 @@
+
+
+<span>Upload pdf/jpeg/png</span>
+<div class="ml-2">					
+    {% include 'proofOfPayment.j2' %}
+</div>
+<input type="file" name={{ 'subgroup::' + element.subgroupId + '::' + sg_element.fieldName }}  class="bg-yellow-400 file:bg-white file:text-black">
+<input name={{ 'subgroup::' + element.subgroupId + '::' + sg_element.fieldName }} hidden>
+
+

@@ -20,7 +20,19 @@ Events
     <thead>
 	<tr class="bg-yellow-400">
 	    <th class="w-100">
-		<div class="m-3">ID</div>
+		<div data-tooltip-target="tooltip-form-data-ID" class="m-3 justify-items-center">
+		    ID
+		    {% include 'questionMark.j2' %}
+		</div>
+		<div id="tooltip-form-data-ID" role="tooltip" placement="bottom" class="absolute z-10  inline-block border border-1 w-60 px-3 py-2 text-m font-light text-black transition-opacity opacity-0  duration-300 bg-white rounded-lg shadow-xl tooltip">
+		    expired events in 
+		    <span class="italic font-medium">
+			
+			red
+		    </span>
+
+		    
+		</div>
 	    </th>
 	    <th class="w-100">
 		<div class="m-3">Tourname Name</div>
@@ -59,14 +71,76 @@ Events
 		<div class="m-3">Form Answers</div>
 	    </th>
 	    <th>
-		<div class="m-3">Kill Form Data</div>
-
+		<div data-tooltip-target="tooltip-form-data-kill-descendent-button" class="m-3 justify-items-center">		    
+		    <div >
+			Kill Form Data			    
+		    </div>
+		    <div>
+			
+			{% include 'questionMark.j2' %}
+		    </div>
+		    <div id="tooltip-form-data-kill-descendent-button" role="tooltip" placement="bottom" class="absolute z-10  inline-block border border-1 w-60 px-3 py-2 text-m font-light text-black transition-opacity opacity-0  duration-300 bg-white rounded-lg shadow-xl tooltip">
+			Kills all form data of a
+			<span class="italic font-medium">
+			    
+			    specific event
+			</span>
+			, including all participants answers and overwritten submissions
+			
+		    </div>
+		</div>
 	    </th>
+
 	    <th>
 		<div class="m-3">Overwritten Submissions</div>
 
 	    </th>
-	    <th></th>
+	    <th>
+		<div   class="m-2 justify-items-center">
+		    <div data-tooltip-target="tooltip-form-data-softdelete-button" class="flex" >			
+			<div>			    
+			    {% include 'softTrash.j2' %}
+			</div>
+			<div>			    
+			    {% include 'questionMark.j2' %}
+			</div>
+		    </div>
+		    <div id="tooltip-form-data-softdelete-button" role="tooltip"  class="absolute z-10  inline-block border border-1 w-60 px-3 py-2 text-m font-light text-black transition-opacity opacity-0  duration-300 bg-white rounded-lg shadow-xl tooltip pointer-events-none">
+			<span class="italic font-medium">Expires</span>
+			event and
+			
+			<span class="italic font-medium">kills</span>
+			data in related entities containing this
+			<span class="italic font-medium">
+			    
+			    specific event
+			</span>
+
+		    </div>
+		</div>
+	    </th>
+	    <th>
+		<div   class="m-2 justify-items-center">
+		    <div data-tooltip-target="tooltip-form-data-kill-button" class="flex" >			
+			<div>			    
+			    {% include 'hardTrash.j2' %}
+			</div>
+			<div>			    
+			    {% include 'questionMark.j2' %}
+			</div>
+		    </div>
+		    <div id="tooltip-form-data-kill-button" role="tooltip" placement="bottom" class="absolute z-10  inline-block border border-1 w-60 px-3 py-2 text-m font-light text-black transition-opacity opacity-0  duration-300 bg-white rounded-lg shadow-xl tooltip">
+			
+			<span class="italic font-medium">Kills</span>
+			this event and data in related entities containing this
+			<span class="italic font-medium">
+			    
+			    specific event
+			</span>
+			, including all participants answers and overwritten submissions		    
+		    </div>
+		</div>
+	    </th>
 	</tr>
     </thead>
     <tbody>
@@ -75,7 +149,9 @@ Events
 	    
 	    
 	    <td>
-		<div class="m-3">{{ e.id }}</div>
+		<div class="{{ 'text-orange-600 italic' if e.deleted_at }}">
+		    <div class="m-3">{{ e.id }}</div>
+		</div>
 	    </td>
 	    <td>
 		<div class="m-3">{{ e.tournamentName }}</div>
@@ -99,90 +175,113 @@ Events
 		<div class="m-3">{{ e.limitation }}</div>
 	    </td>
 	    <td>
-		<div class="m-3">{{ e.rounds }}</div>
+		<div class="m-3 justify-items-center">
+		    <div> {{ e.rounds }} </div>
+		</div>
 	    </td>
 	    <td>
-		<div class="m-3">{{ e.timeControl }}</div>
+		<div class="m-3 justify-items-center">
+		    <div> {{ e.timeControl }} </div>
+		</div>
 	    </td>
 	    <td>
 		<div class="m-3">{{ e.withdrawalClause }}</div>
 	    </td>
 	    <td>
-		<form  action="{{ url_for('event_form_creator')  }}" method="post" onsubmit="return submitFormCreator();">
-		    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-		    <div class="m-3">
-			<input type="hidden" name="eventId" value={{ e.id }} />
-			
-			<button name="button" value="start_create" type="submit" class="w-20 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">				
-			    Form Creator
-			</button>
-		</div>
-		</form>
-	    </td>
-	    <td>
-		<form action="{{ url_for('event_answers_page')  }}" method="post">
-		    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-		    <div class="m-3">
-			<input type="hidden" name="eventId" value={{ e.id }} />
-			
-			<button name="button" value="start_create" type="submit" class="w-20 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">				
-			    Form Answers
-			</button>
-		    </div>
-		</form>
-	    </td>
-	    <td>
-		<div class="m-3" data-tooltip-target="tooltip-form-data-kill-button{{ e.id }}">
-		    <form action="{{ url_for('kill_form_descendents')  }}" method="post">
+		{% if not e.deleted_at  %}
+		    <form  action="{{ url_for('event_form_creator')  }}" method="post" onsubmit="return submitFormCreator();">
 			<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 			<div class="m-3">
 			    <input type="hidden" name="eventId" value={{ e.id }} />
 			    
-			    <button type="submit" class="w-30 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">				
-				kill form descendents
+			    <button name="button" value="start_create" type="submit" class="w-20 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">				
+				Form Creator
 			    </button>
 			</div>
 		    </form>
-		</div>
-		<div id="tooltip-form-data-kill-button{{ e.id }}" role="tooltip" placement="bottom" class="absolute z-10  inline-block border border-1 w-60 px-3 py-2 text-m font-light text-black transition-opacity opacity-0  duration-300 bg-white rounded-lg shadow-xl tooltip">
-		    Kills all form data of a
-		    <span class="italic font-medium">
-			
-			specific event
-		    </span>
-		    , including all participants answers and overwritten submissions
+		{% endif %}
+	    </td>
+	    <td>
+		{% if not e.deleted_at  %}
 		    
-		</div>
+		    <form action="{{ url_for('event_answers_page')  }}" method="post">
+			<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+			<div class="m-3">
+			    <input type="hidden" name="eventId" value={{ e.id }} />
+			    
+			    <button name="button" value="start_create" type="submit" class="w-20 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">				
+				Form Answers
+			    </button>
+			</div>
+		    </form>
+		{% endif %}
+	    </td>
+	    <td>
+		{% if not e.deleted_at  %}
+		    <div class="m-3" >
+			<form action="{{ url_for('kill_form_descendents')  }}" method="post">
+			    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+			    <div class="m-3">
+				<input type="hidden" name="eventId" value={{ e.id }} />
+				
+				<button type="submit" class="w-30 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 cursor-pointer">				
+				    kill form descendents
+				</button>
+			    </div>
+			</form>
+		    </div>
+		{% endif %}
+
 	    </td>
 
 	    <td>
-		<form action="{{ url_for('event_answers_page_overwritten')  }}" method="post">
-		    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-		    <div class="m-3">
-			<input type="hidden" name="eventId" value={{ e.id }} />
-			
-			<button name="button" value="start_create" type="submit" class="w-25 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">				
-			    overwritten
-			</button>
-		    </div>
-		</form>
+		{% if not e.deleted_at  %}
+		    <form action="{{ url_for('event_answers_page_overwritten')  }}" method="post">
+			<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+			<div class="m-3">
+			    <input type="hidden" name="eventId" value={{ e.id }} />
+			    
+			    <button name="button" value="start_create" type="submit" class="w-25 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">				
+				overwritten
+			    </button>
+			</div>
+		    </form>
+		{% endif %}
 	    </td>
 	    <td>
-		<div class="m-2">
-		    <form action={{ url_for('kill_event', id=e.id )}}  method="get" onsubmit="return MCFeventKillEvent();">
+		{% if not e.deleted_at  %}
+		    <div   class="m-2 justify-items-center">
+			<form action={{ url_for('expire_event', id=e.id )}}  method="get" onsubmit="return MCFeventSoftKillEvent();">
+			    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+			    <button type="submit" class="p-2 cursor-pointer">
+				<a>
+				    {% include 'softTrash.j2' %}
+				</a>			
+			    </button>
+			</form>
+		    </div>
+		{% endif %}
+
+	    </td>
+	    <td>
+		<div   class="m-2 justify-items-center cursor-pointer">
+		    <form action={{ url_for('kill_event')}}  method="post" onsubmit="return MCFeventKillEvent();">
 			<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-			<button type="submit" class="MCFeventKillEvent">
+			<input type="hidden" name="id" value="{{ e.id }}"/>
+			<input type="hidden" name="deleted_at" value="{{ e.deleted_at }}"/>
+			<button type="submit" class="p-2 m-2 cursor-pointer">
 			    
-			    <a>{% include 'trash.j2' %}</a>			
+			    <a>{% include 'hardTrash.j2' %}</a>
 			</button>
 		    </form>
 		</div>
-	    </td>			  
+
+	    </td>
 
 	</tr>
 	{% endfor %}
 	<tr>
-	    <td colspan="14"></td>
+	    <td colspan="15"></td>
 	    <td>
 		<div class="m-3">
 		    <button type="submit" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">

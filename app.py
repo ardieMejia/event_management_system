@@ -45,7 +45,7 @@ csrf = CSRFProtect(app)
 from Models.declarative import EventListing # ===== remove this
 import sqlalchemy as sa
 app.app_context().push()
-from model import Event, Member, File, FormQuestion, EventMember, FormQuestionAnswers, FormQuestionSubgroup, FormQuestionAnswersDeleted
+from model import Event, Member, File, FormQuestion, EventMember, FormQuestionAnswers, FormQuestionSubgroup, FormQuestionAnswersDeleted, EventDeleted
 Session = sessionmaker(bind=db.engine)
 
 
@@ -247,37 +247,39 @@ def member_update_page(mcfId):
 
 @app.route('/create-event', methods = ['POST']) 
 def create_event():
+
+    EventDeleted.delete_expired()
     
-    with session_scope() as session:
-        e = Event(tournamentName=request.form['tournamentName'], startDate=request.form['startDate'], endDate=request.form['endDate'], discipline=request.form['discipline'], type=request.form['type'], eligibility=request.form['eligibility'], limitation=request.form['limitation'], rounds=request.form['rounds'], timeControl=request.form['timeControl'], withdrawalClause=request.form['withdrawalClause'])
-
-    
-        # if e.old_isDataInvalid(p_tournameName=e.tournamentName, p_startDate=e.startDate, p_endDate=e.endDate, p_discipline=e.discipline):
-        #     errorsList = e.old_isDataInvalid(p_tournameName=e.tournamentName, p_startDate=e.startDate, p_endDate=e.endDate, p_discipline=e.discipline)
-        #     return C_templater.custom_render_template(errorTopic="Invalid Input Error", errorsList=errorsList, isTemplate=True)
-
-        errorsList = e.isDataInvalid(p_tournameName=e.tournamentName, p_startDate=e.startDate, p_endDate=e.endDate, p_discipline=e.discipline)
-        if errorsList:
-            # errorsList = e.isDataInvalid(p_tournameName=e.tournamentName, p_startDate=e.startDate, p_endDate=e.endDate, p_discipline=e.discipline)
-            # return C_templater.custom_render_template(errorTopic="Invalid Input Error", errorsList=errorsList, isTemplate=True)
-            errorMessage = " -- "+" -- ".join(errorsList)
-            return redirect(url_for('find_events', whatHappened="Error: "+errorMessage))
-
-
-        e.id = e.set_id()
-        db.session.add(e)
-        # db.session.commit()
+    # with session_scope() as session:
+    e = Event(tournamentName=request.form['tournamentName'], startDate=request.form['startDate'], endDate=request.form['endDate'], discipline=request.form['discipline'], type=request.form['type'], eligibility=request.form['eligibility'], limitation=request.form['limitation'], rounds=request.form['rounds'], timeControl=request.form['timeControl'], withdrawalClause=request.form['withdrawalClause'])
 
     
+    # if e.old_isDataInvalid(p_tournameName=e.tournamentName, p_startDate=e.startDate, p_endDate=e.endDate, p_discipline=e.discipline):
+    #     errorsList = e.old_isDataInvalid(p_tournameName=e.tournamentName, p_startDate=e.startDate, p_endDate=e.endDate, p_discipline=e.discipline)
+    #     return C_templater.custom_render_template(errorTopic="Invalid Input Error", errorsList=errorsList, isTemplate=True)
     
-        try:
-            db.session.commit()
-        except IntegrityError as i:
-            db.session.rollback()
-            return redirect(url_for('find_events', whatHappened="Error: "+i._message()))
+    errorsList = e.isDataInvalid(p_tournameName=e.tournamentName, p_startDate=e.startDate, p_endDate=e.endDate, p_discipline=e.discipline)
+    if errorsList:
+        # errorsList = e.isDataInvalid(p_tournameName=e.tournamentName, p_startDate=e.startDate, p_endDate=e.endDate, p_discipline=e.discipline)
+        # return C_templater.custom_render_template(errorTopic="Invalid Input Error", errorsList=errorsList, isTemplate=True)
+        errorMessage = " -- "+" -- ".join(errorsList)
+        return redirect(url_for('find_events', whatHappened="Error: "+errorMessage))
+
+
+    e.id = e.set_id()
+    db.session.add(e)
+    # db.session.commit()
+
+    
+    
+    try:
+        db.session.commit()
+    except IntegrityError as i:
+        db.session.rollback()
+        return redirect(url_for('find_events', whatHappened="Error: "+i._message()))
         
 
-        return redirect(url_for('find_events'))
+    return redirect(url_for('find_events'))
 
         # return render_template("confirmed-event-created.html", e=e)
 
@@ -317,98 +319,134 @@ def create_member():
 
 
 
-@app.route('/kill-event/<int:id>') 
-def kill_event(id):
-    
+@app.route('/kill-event', methods=['POST']) 
+def kill_event():
+    id = request.form['id']
+    deleted_at = request.form['deleted_at']
+
+    if deleted_at:
+        stmt = sa.delete(EventDeleted).where(EventDeleted.id == id)
+        db.session.execute(stmt)
+        
+        try:
+            db.session.commit()
+            whatHappened = "expired event KILLED"
+        except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
+            db.session.rollback()
+            whatHappened="Error: "+i._message()
+        
+        return redirect(url_for('find_events', whatHappened=whatHappened))
+        
+
     
     stmt = sa.delete(Event).where(Event.id == id)
     db.session.execute(stmt)
-    
-    try:
-        db.session.commit()
-        whatHappened = "events deleted across all members"
-    except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
-        db.session.rollback()
-        whatHappened="Error: "+i._message()
-                                
-                        
-
-    db.session.close()
-
-
-
 
     stmt = sa.delete(EventMember).where(EventMember.eventId == id)
     db.session.execute(stmt)
-    db.session.commit()
-
-    try:
-        db.session.commit()
-        whatHappened = "events deleted across all members"
-    except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
-        db.session.rollback()
-        whatHappened = "something went wrong"
-    db.session.close()
-
 
     stmt = sa.delete(FormQuestion).where(FormQuestion.eventId == id)
     db.session.execute(stmt)
-    db.session.commit()
-
-    try:
-        db.session.commit()
-        whatHappened = "this event and its associated events-members, formquestions deleted"
-    except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
-        db.session.rollback()
-        whatHappened = "something went wrong"
-    db.session.close()
-
     
     stmt = sa.delete(FormQuestionSubgroup).where(FormQuestionSubgroup.eventId == id)
     db.session.execute(stmt)
-    db.session.commit()
-
-    try:
-        db.session.commit()
-        whatHappened = "this event and its associated events-members, formquestions, formquestionssubgroup, deleted"
-    except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
-        db.session.rollback()
-        whatHappened = "something went wrong"
-    db.session.close()
-
     
     stmt = sa.delete(FormQuestionAnswers).where(FormQuestionAnswers.eventId == id)
     db.session.execute(stmt)
-    db.session.commit()
-
-    try:
-        db.session.commit()
-        whatHappened = "this event and its associated events-members, formquestions, formquestionssubgroup, formquestionanswers deleted"
-    except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
-        db.session.rollback()
-        whatHappened = "something went wrong"
-    db.session.close()
-
     
     stmt = sa.delete(FormQuestionAnswersDeleted).where(FormQuestionAnswersDeleted.eventId == id)
     db.session.execute(stmt)
-    db.session.commit()
+    
+    stmt = sa.delete(File).where(File.eventId == id)
+    db.session.execute(stmt)
 
     try:
         db.session.commit()
-        whatHappened = "this event and its associated events-members, formquestions, formquestionssubgroup, formquestionanswers and overwritten answers deleted"
+        whatHappened = "this event and its associated events-members, formquestions, formquestionssubgroup, formquestionanswers, overwritten answers & upload logs KILLED"
     except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
         db.session.rollback()
-        whatHappened = "something went wrong"
-    db.session.close()
+        whatHappened="Error: "+i._message()
+
+
 
     
     query = sa.select(Event)
     es = db.session.scalars(query).all()
-    db.session.close()
+
     
     # return render_template("events.html", es=es, whatHappened="Event successfully killed")
     return redirect(url_for('find_events', whatHappened=whatHappened))
+
+
+
+@app.route('/expire-event/<int:id>') 
+def expire_event(id):
+
+
+    statement = db.select(Event).where(Event.id == id)
+    e = db.session.scalars(statement).first()
+
+    ed = EventDeleted(
+        id = e.id,
+        tournamentName = e.tournamentName,
+        startDate = e.startDate,
+        endDate = e.endDate,
+        discipline = e.discipline,
+        type = e.type,
+        eligibility = e.eligibility,
+        limitation = e.limitation,
+        rounds = e.rounds,
+        timeControl = e.timeControl,
+        withdrawalClause = e.withdrawalClause,
+    )
+    db.session.add(ed)
+    
+    stmt = sa.delete(Event).where(Event.id == id)
+    db.session.execute(stmt)                                   
+    
+
+    stmt = sa.delete(EventMember).where(EventMember.eventId == id)
+    db.session.execute(stmt)
+
+
+    stmt = sa.delete(FormQuestion).where(FormQuestion.eventId == id)
+    db.session.execute(stmt)
+
+
+
+
+    
+    stmt = sa.delete(FormQuestionSubgroup).where(FormQuestionSubgroup.eventId == id)
+    db.session.execute(stmt)
+
+
+    stmt = sa.delete(FormQuestionAnswers).where(FormQuestionAnswers.eventId == id)
+    db.session.execute(stmt)
+
+
+    
+    stmt = sa.delete(FormQuestionAnswersDeleted).where(FormQuestionAnswersDeleted.eventId == id)
+    db.session.execute(stmt)
+    
+    stmt = sa.delete(File).where(File.eventId == id)
+    db.session.execute(stmt)
+
+
+    try:
+        db.session.commit()
+        whatHappened = "event EXPIRED and its associated events-members, formquestions, formquestionssubgroup, formquestionanswers, overwritten answers & upload logs DELETED"
+    except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
+        db.session.rollback()
+        whatHappened="Error: "+i._message()
+        return redirect(url_for('find_events', whatHappened=whatHappened))
+
+    query = sa.select(Event)
+    es = db.session.scalars(query).all()
+
+    
+    # return render_template("events.html", es=es, whatHappened="Event successfully killed")
+    return redirect(url_for('find_events', whatHappened=whatHappened))
+
 
 
 @app.route('/kill-events') 
@@ -528,27 +566,18 @@ def kill_members():
 @app.route('/events') 
 def find_events():
     
-    # e = Event(tournamentName=request.form['tournamentName'], startDate=request.form['startDate'], endDate=request.form['endDate'], discipline=request.form['discipline'])
-    # db.session.add(e)
-    # db.session.commit()
+
 
             
 
     es = None
-    # with session_scope() as session:
-    #     try:
-    #         es = session.query(Event).all()
-    #         # m = sa.select(Event)
-    #         # es = db.session.scalars(query).all()
-    #     except Exception as e:
-    #         session.rollback()
-    #         return f"An error occurred: {str(e)}", 500
-        
+
 
     try:
         es = db.session.query(Event).all()
-        # m = sa.select(Event)
-        # es = db.session.scalars(query).all()
+        eds = db.session.query(EventDeleted).all()
+        es.extend(eds)
+
     except Exception as e:
         db.session.rollback()
         return f"An error occurred: {str(e)}", 500    
@@ -766,7 +795,6 @@ def form_submission():
 
             try:
                 uploadedDocument = request.files[fieldname]
-                app.logger.info(uploadedDocument)
                 isFile = True
             except:
                 pass
@@ -793,15 +821,24 @@ def form_submission():
                 # endcheckboxsubmission
             elif isFile:
                 fullfilePath = ""
-                isSuccess, errorMsg, fullFilePath = upload_document(uploadedDocument, eventId, fieldname)
+                isSuccess, anyUpload, errorMsg, fullFilePath = upload_document(uploadedDocument, eventId, fieldname)
                 if isSuccess:
-                    fqa = FormQuestionAnswers(
-                        mcfId=current_user.mcfId,
-                        fieldName=fieldname,
-                        eventId=eventId,
-                        answerString=fullFilePath,
-                        subgroupId=subgroupId
-                    )
+                    if anyUpload:
+                        fqa = FormQuestionAnswers(
+                            mcfId=current_user.mcfId,
+                            fieldName=fieldname,
+                            eventId=eventId,
+                            answerString=fullFilePath,
+                            subgroupId=subgroupId
+                        )
+                    else:
+                        fqa = FormQuestionAnswers(
+                            mcfId=current_user.mcfId,
+                            fieldName=fieldname,
+                            eventId=eventId,
+                            answerString="-",
+                            subgroupId=subgroupId
+                        )
                 else:
                     return redirect(url_for('member_front', whatHappened="Error: " + errorMsg))
                     # endfilesubmission
@@ -1047,7 +1084,7 @@ def form_template():
     
 
     statement = db.select(FormQuestion).where(FormQuestion.eventId == eventId)
-    frs = db.session.scalars(statement).all()
+    frs = db.session.scalars(statement).all() # frs is form questions of an event
     if not frs:
         return redirect(url_for("member_front", whatHappened="Error: No form for this event yet"))
 
@@ -1115,7 +1152,7 @@ def form_template():
                         "questionstring": frsg_dict["questionString"],
                         "subgroupId": frsg_dict["subgroupId"]
                     }
-                    # endtext_sub
+                    # endtextorfile_sub
             
 
             
@@ -1143,7 +1180,7 @@ def form_template():
     elements = list(a_dict.values())
 
         
-    # ===== Example of return data expected, unique ID is useless in template, only serves as organization
+    # ===== Example of return data expected, unique ID (fieldname + inputtype) is useless in template, only serves as organization
     # elements = {
     #     "genderdropdown" : {
     #         "value": ["M", "F", "Open"], "field": "gender", "type" : "text"
@@ -1208,7 +1245,7 @@ def event_form_subgroup_creator():
                     try:
                         db.session.add(fqs)
                         db.session.commit()
-                        whatHappened = request.form.get("field") + " " + request.form.get("type") + " created"
+                        whatHappened = request.form.get("field") + " - " + request.form.get("type") + " created"
                     except IntegrityError as i:
                         db.session.rollback()
                         whatHappened="Error: "+i._message()
@@ -1229,7 +1266,7 @@ def event_form_subgroup_creator():
                 try:
                     db.session.add(fqs)
                     db.session.commit()
-                    whatHappened = request.form.get("field") + " " + request.form.get("type") + " created"
+                    whatHappened = request.form.get("field") + " - " + request.form.get("type") + " created"
                 except IntegrityError as i:
                     db.session.rollback()
                     whatHappened="Error: "+i._message()
@@ -1240,6 +1277,7 @@ def event_form_subgroup_creator():
         
         if request.form.get("button") == "finishgroup":
             return redirect(url_for('event_form_creator', whatHappened="subgroup done", eventId=eventId))    
+
         
         #endpost
 
@@ -1267,9 +1305,11 @@ def event_form_creator():
         if request.form.get("button") == "start_create":
             tournamentName, whatHappened = kill_form_descendents_by_id(eventId)
             # endstartcreate
-            return redirect(url_for('event_form_creator', whatHappened="Lets get creating1", eventId=eventId))
+            return redirect(url_for('event_form_creator', whatHappened="Lets get started", eventId=eventId))
         elif request.form.get("button") == "add":
             if request.form.get("type") == "dropdown" or request.form.get("type") == "checkbox" or request.form.get("type") == "radio":
+                if not request.form.get("value"):
+                    return redirect(url_for('event_form_creator', whatHappened="Error: value must not be empty", eventId=eventId))
                 values = request.form.get("value").split("::")
                 for value in values:
                     fr = FormQuestion(eventId=eventId,
@@ -1281,14 +1321,16 @@ def event_form_creator():
                     try:
                         db.session.add(fr)
                         db.session.commit()
-                        whatHappened = request.form.get("field") + " " + request.form.get("type") + " created"
+                        whatHappened = request.form.get("field") + " - " + request.form.get("type") + " created"
                     except IntegrityError as i:
                         db.session.rollback()
                         whatHappened="Error: "+i._message()
                         return redirect(url_for('event_form_creator', whatHappened=whatHappened, eventId=eventId))
                 #enddropdownorcheckboxorradio
                 return redirect(url_for('event_form_creator', whatHappened=whatHappened, eventId=eventId))
-            else: 
+            else:
+                if not request.form.get("value"):
+                    return redirect(url_for('event_form_creator', whatHappened="Error: value must not be empty", eventId=eventId))
                 fr = FormQuestion(eventId=eventId,
                                    fieldName=request.form.get("field"),
                                    value="",
@@ -1298,7 +1340,7 @@ def event_form_creator():
                 try:
                     db.session.add(fr)
                     db.session.commit()
-                    whatHappened = request.form.get("field") + " " + request.form.get("type") + " created"
+                    whatHappened = request.form.get("field") + " - " + request.form.get("type") + " created"
                 except IntegrityError as i:
                     db.session.rollback()
                     whatHappened="Error: "+i._message()
@@ -1341,15 +1383,14 @@ def event_form_creator():
 
             
         else:
-            # form_elements = [
-            #     {
-            #         "dropdown" : ["M", "F", "Open"]
-            #     }
-            # ]
+            if request.form.get("button") == "done":
+                if request.form.get("whatHappened") == "Lets get started":
+                    return redirect(url_for('find_events', whatHappened="No Form Created"))
+                
             form_vars = ""
             app.logger.info("endNotDropdown")
             # enddone
-            return redirect(url_for("main_page",whatHappened="form creation loop finished"))
+            return redirect(url_for('find_events', whatHappened="Form creation loop done"))
         # endpost
 
         
@@ -1431,8 +1472,13 @@ def member_front():
             trlists = []
             paymentProofs = []
             m = Member.query.filter_by(mcfId=current_user.mcfId).first()
+            
+            statement = db.select(EventDeleted)
+            eds = db.session.scalars(statement).all()
+            
             query = sa.select(Event)
             es = db.session.scalars(query).all()
+            es.extend(eds)
 
             updatedTournamentId = request.args.get("updatedTournamentId")
             whatHappened = request.args.get("whatHappened")
@@ -1478,6 +1524,15 @@ def member_front():
             whatHappened=""
             if request.form.get("button") == "save":
                 # overwrite only if event non existing in m.events
+
+                statement = db.select(EventDeleted).where(EventDeleted.id == request.form["tournament_name"])
+                ed = db.session.scalars(statement).first()
+
+
+                if ed:                
+                    whatHappened = "Error: This event registration is already closed"
+        
+                    return redirect(url_for('member_front', whatHappened=whatHappened))
 
                 statement = db.select(EventMember).where(EventMember.mcfId == current_user.mcfId, EventMember.eventId == request.form["tournament_name"])
                 res = db.session.execute(statement).first()
@@ -1562,8 +1617,15 @@ def upload_document(uploadFile, eventId, fieldname):
     #     # endemptycheck
     #     return redirect(url_for('member_front', whatHappened="Error: There is no file uploaded", updatedTournamentId="", paymentProofs=paymentProofs))
 
+    isSuccess = True
+    anyUpload = True
+    
 
-    if uploadFile and allowed_user_upload(uploadFile):
+    if not uploadFile:
+        isSuccess = True
+        anyUpload = False
+        return isSuccess, anyUpload, "File upload failed due to wrong filetype or something else", ""        
+    if allowed_user_upload(uploadFile):
         filename = secure_filename(uploadFile.filename)
         fname, ext = os.path.splitext(uploadFile.filename)
         # disk_path = ""  # Path to the persistent disk
@@ -1608,10 +1670,15 @@ def upload_document(uploadFile, eventId, fieldname):
 
         
 
+        isSuccess = True
+        anyUpload = True
+        
         # endfileupload
-        return True, "", os.path.join(folder_path, base_filename)
+        return isSuccess, anyUpload, "", os.path.join(folder_path, base_filename)
     else:
-        return False, "File upload failed due to wrong filetype or something else", ""
+        isSuccess = False
+        anyUpload = False
+        return isSuccess, anyUpload, "File upload failed due to wrong filetype or something else", ""
         
 
 
@@ -2429,8 +2496,8 @@ def an_evt_ans_download_overwritten():
                      as_attachment=True, mimetype="str")
 
 
-@app.route('/a-test1', methods = ["POS", "GET"]) 
-def a_test1():
+@app.route('/get-withdrawal-clause-by-id', methods = ["POS", "GET"]) 
+def get_withdrawal_clause_by_id():
     app.logger.info(request.args.get("eventId"))
 
     statement = db.select(Event).where(Event.id == request.args.get("eventId"))
