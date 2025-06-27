@@ -534,11 +534,10 @@ def kill_member(mcfId):
     stmt = sa.delete(Member).where(Member.mcfId == mcfId)
     db.session.execute(stmt)
     db.session.commit()
-    app.logger.info('========== event ==========')
+
     # app.logger.info(request.form['EVENT ID'])
     # app.logger.info(type(old_event.data.values.tolist()))
-    app.logger.info(mcfId)
-    app.logger.info('========== event ==========')
+
 
     query = sa.select(Member)
     ms = db.session.scalars(query).all()
@@ -585,11 +584,11 @@ def find_events():
     # if not es:
     #     return render_template("events.html")
         
-    app.logger.info('========== event ==========')
+
     # app.logger.info(request.form['EVENT ID'])
     # app.logger.info(type(old_event.data.values.tolist()))
-    app.logger.info('========== event ==========')
-    
+
+
     db.session.close()
 
 
@@ -620,9 +619,7 @@ def find_members():
     statement = db.session.query(db.func.count(Member.mcfId))
     count = db.session.scalars(statement).first() # coz I dont know a better/faster way to count records
 
-    app.logger.info('========== event ==========')
-    app.logger.info(ms_paginate)
-    app.logger.info('========== event ==========')
+
     db.session.close()
     
     # return "wait"
@@ -740,9 +737,9 @@ def form_submission():
         whatHappened = ""
         # app.logger.info("==========")    
         # app.logger.info(dir(request.args) )    
-        app.logger.info(request.form.keys() )
-        app.logger.info(request.form.get("fullname") )
-        app.logger.info(request.form.listvalues())
+        # app.logger.info(request.form.keys() )
+        # app.logger.info(request.form.get("fullname") )
+        # app.logger.info(request.form.listvalues())
 
 
         eventId = request.form['eventId']
@@ -777,19 +774,20 @@ def form_submission():
             return redirect(url_for('member_front', whatHappened=whatHappened))
         # enddeleteandbackupsubmission
 
-        for fieldname,answer in request.form.items():
-            app.logger.info("======")
-            app.logger.info(fieldname)
-            app.logger.info(answer)
-            app.logger.info("======")
+        # for fieldname,answer in request.form.items():
+        #     app.logger.info("======")
+        #     app.logger.info(fieldname)
+        #     app.logger.info(answer)
+        #     app.logger.info("======")
 
 
             # endweirdtest
             
             
         answers = []
-        for fieldname,answer in request.form.items():
+        for longFieldname,answer in request.form.items():
             isFile = None
+            fieldname = longFieldname
             if fieldname == "eventId" or fieldname == "csrf_token":
                 continue
 
@@ -804,10 +802,11 @@ def form_submission():
             else:
                 subgroupId = None
             if "[]" in fieldname:
-                checkboxList = request.form.getlist(fieldname)
-                app.logger.info("********")
+                checkboxList = request.form.getlist(longFieldname)
+                app.logger.info("********===********")
+                app.logger.info(fieldname)
                 app.logger.info(checkboxList)
-                app.logger.info("********")
+                app.logger.info("********===********")
                 # None values are custom, we remove None when users select checkbox values
                 if len(checkboxList) > 1:
                     checkboxList.remove("-")
@@ -900,9 +899,7 @@ def event_answers_page():
 
     eventId = request.form.get('eventId')
 
-    app.logger.info("========")
-    app.logger.info(eventId)
-    app.logger.info("========")
+
 
     
     # tablecolumns    
@@ -949,10 +946,7 @@ def event_answers_page():
 
 
 
-    app.logger.info(
-        
-    membersAnswers
-    )
+
     # ===== Example of sample return expected
     #     # the key is meaningless and unique, like a primary key in DB, not used in the html, 00000 is meant for table column
     # membersAnswers = {
@@ -1023,9 +1017,7 @@ def event_answers_page_overwritten():
 
     for fqa in fqas:
         unique_key = str(fqa.mcfId) + str(eventId)
-        app.logger.info("$$$$$")
-        app.logger.info(fqa.mcfId)
-        app.logger.info("$$$$$")
+
         try:
             membersAnswers[unique_key]["mcfId"] = {
                 "value": fqa.mcfId,
@@ -1050,10 +1042,7 @@ def event_answers_page_overwritten():
 
 
 
-    app.logger.info(
-        
-    membersAnswers
-    )
+
     # ===== Example of sample return expected
     # membersAnswers = {
     #     # the key is meaningless and unique, like a primary key in DB, stupid useless to humans but important
@@ -1131,9 +1120,6 @@ def form_template():
             for frsg_dict in frsgs_list:
                 subFieldtype_key = frsg_dict["fieldName"]+frsg_dict["type"]
                 if frsg_dict["type"] == "dropdown" or frsg_dict["type"] == "checkbox" or frsg_dict["type"] == "radio":
-                    app.logger.info("%%%%%%%")
-                    app.logger.info(frsg_dict["questionString"])
-                    app.logger.info("%%%%%%%")
                     # ===== becoz append is non-destructive, append logic always goes first
                     try:
                         a_dict[fieldtype_key]["subgroup"][subFieldtype_key]["value"].append(frsg_dict["value"])
@@ -1230,9 +1216,7 @@ def event_form_subgroup_creator():
                 if request.form.get("field") == "" or request.form.get("questionstring") == "" or request.form.get("value") == "":
                     return redirect(url_for('event_form_subgroup_creator', whatHappened="Error: input fields cannot be empty", eventId=eventId, subgroupId=subgroupId))
                 values = request.form.get("value").split("::")
-                app.logger.info(values)
-                app.logger.info(values)
-                app.logger.info(values)
+
                 for value in values:
                     fqs = FormQuestionSubgroup(
                         subgroupId=subgroupId,
@@ -1487,7 +1471,6 @@ def member_front():
                 e = db.session.scalars(statement).first()
                 whatHappened = whatHappened + e.tournamentName
 
-
             statement = db.select(EventMember).where(EventMember.mcfId == current_user.mcfId)
             ems = db.session.scalars(statement).all()
 
@@ -1500,18 +1483,21 @@ def member_front():
             
 
                     # trlists.append(e.tournamentName)
-            app.logger.info("%%%%%%%")
-            app.logger.info(trlists)
 
+            statement = db.select(File).where(File.mcfId == current_user.mcfId)
+            fs = db.session.scalars(statement).all()
+
+            app.logger.info("==========")
+            app.logger.info(fs)
+            app.logger.info("==========")
                 
             if not whatHappened:
                 whatHappened = ""
 
-            app.logger.info("********")
-            app.logger.info(whatHappened)
+
 
             # endget
-            return render_template("member-front.html", m=m, tournamentRegistered=trlists, tournamentOptions=es, whatHappened=whatHappened, paymentProofs=paymentProofs)
+            return render_template("member-front.html", m=m, tournamentRegistered=trlists, tournamentOptions=es, whatHappened=whatHappened, paymentProofs=fs)
         else:
             paymentProofs = []
             # app.logger.info("==========")
@@ -1553,10 +1539,7 @@ def member_front():
             # elif request.form.get("button") == "withdraw":
             elif "withdraw" in request.form.get("button"):
                 eventId = request.form.get("button").split("_")[1]
-                app.logger.info(eventId)
-                app.logger.info("********************************************************************************")
-                app.logger.info(eventId)
-                app.logger.info(eventId)
+
 
                 
 
@@ -1626,6 +1609,14 @@ def upload_document(uploadFile, eventId, fieldname):
         anyUpload = False
         return isSuccess, anyUpload, "File upload failed due to wrong filetype or something else", ""        
     if allowed_user_upload(uploadFile):
+        app.logger.info("++++++++--------++++++++")
+        app.logger.info(vars(uploadFile))
+        app.logger.info("++++++++--------++++++++")
+        app.logger.info(dir(uploadFile))
+        app.logger.info(
+            uploadFile.filename
+                        )
+        app.logger.info("++++++++--------++++++++")
         filename = secure_filename(uploadFile.filename)
         fname, ext = os.path.splitext(uploadFile.filename)
         # disk_path = ""  # Path to the persistent disk
@@ -1653,7 +1644,8 @@ def upload_document(uploadFile, eventId, fieldname):
         base_filename = fieldname + "_" + str(datetime.datetime.now().strftime("%Y-%m-%d__%H%M%S"))  + ext
         uploadFile.save(os.path.join(folder_path, base_filename))
 
-        f = File(filename=base_filename,
+        f = File(originalFilename=uploadFile.filename,
+                 filename=base_filename,
                  filepath=folder_path,
                  mcfId=current_user.mcfId,
                  eventId=eventId
@@ -1722,6 +1714,8 @@ def bulk_upload_events_csv():
 
 @app.route('/bulk_upload_members_csv')
 def bulk_upload_members_csv():
+
+
     # ========== we upload CSV using the kinda cool declarative_base, might not be good practice for readability
     duplicatesList= []
     filename="member.csv"
@@ -1756,8 +1750,6 @@ def bulk_upload_members_csv():
 
 
 
-
-        
 
     return render_template("main-page.html", whatHappened=whatHappened, whyHappened=duplicatesList)
 
@@ -1835,10 +1827,10 @@ def processMcfList():
     values=[]
     
     for chunk in df:
-        app.logger.info("==========")
+        # app.logger.info("==========")
         # app.logger.info(type(chunk))
         # app.logger.info(chunk)
-        app.logger.info("==========")
+        # app.logger.info("==========")
         
         for index, row in chunk.iterrows():
 
@@ -1847,17 +1839,17 @@ def processMcfList():
                 continue
 
 
-            app.logger.info("%%%%%")
+            # app.logger.info("%%%%%")
             
-            app.logger.info(                
-            row[mapFrom['yearOfBirth']]
-            )
+            # app.logger.info(                
+            # row[mapFrom['yearOfBirth']]
+            # )
             # app.logger.info(
             #     convert_nan_to_string(
             #         row[mapFrom['yearOfBirth']]
             #     )
             # )
-            app.logger.info("%%%%%")
+            # app.logger.info("%%%%%")
 
             # yearOfBirth = convert_nan_to_string(row[mapFrom['yearOfBirth']])
             dictMemberBeforeSaving = validate_before_saving(
@@ -1888,9 +1880,9 @@ def processMcfList():
             )
             newList.append({"mcfId": row[mapFrom['mcfId']]})
 
-            app.logger.info("==========")
-            app.logger.info(values)
-            app.logger.info("==========")
+            # app.logger.info("==========")
+            # app.logger.info(values)
+            # app.logger.info("==========")
             
 
     if values:
@@ -1901,7 +1893,7 @@ def processMcfList():
             
         except IntegrityError as i:
             db.session.rollback()
-            app.logger.info(i._message())
+            # app.logger.info(i._message())
             # return C_templater.custom_render_template("Data entry error", i._message(), False)
             return C_templater.custom_render_template("DB-API IntegrityError", [i._message()], True)
 
@@ -2086,6 +2078,7 @@ def bulk_process_all_mcf():
 
 
     # fileOversized = isFileOversized("mcf.csv")
+
 
 
     return render_template("main-page.html", whatHappened=whatHappened, skippedList=skippedList, newList=newList)

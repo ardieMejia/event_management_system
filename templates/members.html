@@ -66,14 +66,14 @@
 		    </td>
 		    <td>
 			<div class="m-2">
-			    <button type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none" disabled>
+			    <button type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none cursor-pointer" disabled>
 				<a href={{ url_for('member_update_page', mcfId=m.mcfId )}} onclick="return false;">Update Member</a>						    
 			    </button>
 			</div>
 		    </td>			  
 		    <td>
 			<div class="m-2">
-			    <button type="submit" >
+			    <button type="submit" class="cursor-pointer">
 				
 				<a href={{ url_for('kill_member', mcfId=m.mcfId )}}>{% include 'hardTrash.j2' %}</a>			
 			    </button>
@@ -88,7 +88,7 @@
 		<td>
 		    <div class="m-3">
 			<button type="submit" 
-				class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">
+				      class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900 cursor-pointer">
 
 			    <a href={{ url_for('kill_members')}}>Remove All</a>      
 			</button>
@@ -96,7 +96,7 @@
 		</td>
 		<td>
 		    <div class="m-3">
-			<button type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none">
+			<button type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none cursor-pointer">
 
 			    <a href={{ url_for('create_member')}}>Add Member</a>      
 			</button>
@@ -113,14 +113,14 @@
 	
 	<div class="flex justify-start">		    
 	    <div class="w-20 m-2">
-		<button id="showAll" type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4  border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none">
+		<button id="showAll" type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4  border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none cursor-pointer">
 		    Show All
 		</button>
 
 	    </div>
 	    <div class="w-20 m-2">
 		
-		<button id="Simple" type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4  border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none ">
+		<button id="Simple" type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4  border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none cursor-pointer">
 		    Simple
 		</button>
 	    </div>
@@ -156,7 +156,7 @@
 	    <div class="font-bold w-25">
 		{% if totalCount %}
 		    <form action="{{ url_for('partial_download')  }}" name="partialDownload">
-			<button id="dropdownDefaultButton" data-dropdown-toggle="bulkDownload"  type="button" class="border border-gray  py-2 px-2 ">
+			<button id="dropdownDefaultButton" data-dropdown-toggle="bulkDownload"  type="button" class="border border-gray  py-2 px-2 cursor-pointer">
 			    partial csv
 			</button>
 
