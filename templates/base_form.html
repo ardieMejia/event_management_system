@@ -34,7 +34,6 @@
 	<script>
 
 
-/* bulk_upload_all_files_1 */
 
 
 
@@ -60,7 +59,24 @@ function submitPartDownloadForm(){
     }
 }
 
+	 
 
+
+function submitKillFormDescendents(){
+    const text = `
+Kills all form data, but leaves out:
+ - event-member rel
+ - file upload logs
+	     Continue?`;
+    
+    if (confirm(text) == true){
+	return true;
+    }else{
+	return false;
+    }
+}
+
+	 
 function submitFormCreator(){
     const text = `
 Creating a new form will remove

@@ -34,7 +34,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship# , declarative_ba
 # Flask_Login is not "DB aware", so it needs the DBs/app help in this
 @login.user_loader
 def load_user(id):
-    return db.session.get(Member, int(id))
+    return db.session.get(Member, str(id))
 
 # note for a Core table, we use the sqlalchemy.Column construct,
 # not sqlalchemy.orm.mapped_column
@@ -103,9 +103,10 @@ class Event(db.Model):
 class Member(UserMixin, db.Model):
     __tablename__ = "members"
 
-    mcfId = db.Column(db.BigInteger, primary_key=True)
+    mcfId = db.Column(db.String(80), primary_key=True)
     password = db.Column(db.String(80))
     mcfName = db.Column(db.String(128), index=True)
+    email = db.Column(db.String(128), unique=True, index=True)
     gender = db.Column(db.String(64), index=True)
     yearOfBirth = db.Column(db.String(64), index=True)
     state = db.Column(db.String(64), index=True)
@@ -115,11 +116,12 @@ class Member(UserMixin, db.Model):
     fideId = db.Column(db.Integer)
     fideName = db.Column(db.String(80))
     fideRating = db.Column(db.Integer(), index=True)
+    isAdmin = db.Column(db.Boolean, index=True, default=False)
 
 
     
     def __repr__(self):
-        return '<mcfName {tn}>'.format(tn=self.mcfName, m=self.events)
+        return '<mcfName {n}'.format(n=self.mcfName)
 
     def set_password(self, password):
         self.password = bcrypt.generate_password_hash(password).decode('utf-8')
@@ -189,20 +191,23 @@ class Member(UserMixin, db.Model):
             # "fideRating" : self.fideRating
         }
 
+
+
+
                 
-    def as_dict(self):
-        return {
-            "mcfId" : self.mcfId, 
-            "mcfName" : self.mcfName,
-            "gender" : self.gender,
-            "yearOfBirth" : self.yearOfBirth,
-            "state" : self.state,
-            "nationalRating" : self.nationalRating,
-            "events" : self.events
-            # "fideId" : self.fideId,
-            # "fideName" : self.fideName,
-            # "fideRating" : self.fideRating
-        }
+    # def as_dict(self):
+    #     return {
+    #         "mcfId" : self.mcfId, 
+    #         "mcfName" : self.mcfName,
+    #         "gender" : self.gender,
+    #         "yearOfBirth" : self.yearOfBirth,
+    #         "state" : self.state,
+    #         "nationalRating" : self.nationalRating,
+    #         "events" : self.events
+    #         # "fideId" : self.fideId,
+    #         # "fideName" : self.fideName,
+    #         # "fideRating" : self.fideRating
+    #     }
 
 
 
@@ -211,7 +216,7 @@ class EventMember(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     eventId = db.Column(db.Integer, nullable=False)
-    mcfId = db.Column(db.BigInteger, nullable=False)
+    mcfId = db.Column(db.String(80), nullable=False)
 
     
     def __repr__(self):
@@ -225,7 +230,7 @@ class File(db.Model):
     originalFilename = db.Column(db.String(200), nullable=False)
     filename = db.Column(db.String(200), nullable=False)
     filepath = db.Column(db.String(300), nullable=False)
-    mcfId = db.Column(db.BigInteger, nullable=False)
+    mcfId = db.Column(db.String(80), nullable=False)
     eventId = db.Column(db.Integer, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -316,7 +321,7 @@ class FormQuestionAnswers(db.Model):
     """
     __tablename__ = "form_question_answers"
     id = db.Column(db.Integer, primary_key=True)
-    mcfId = db.Column(db.Integer)
+    mcfId = db.Column(db.String(80))
     fieldName = db.Column(db.String(300), nullable=False) # fieldName?
     # eventId = db.Column(db.String(200), nullable=False)
     eventId = db.Column(db.Integer, nullable=False) 
@@ -342,7 +347,7 @@ class FormQuestionAnswersDeleted(db.Model):
     """
     __tablename__ = "form_question_answers_deleted"
     id = db.Column(db.Integer, primary_key=True)
-    mcfId = db.Column(db.Integer)
+    mcfId = db.Column(db.String(80))
     fieldName = db.Column(db.String(300), nullable=False) # fieldName?
     # eventId = db.Column(db.String(200), nullable=False)
     eventId = db.Column(db.Integer, nullable=False) 
