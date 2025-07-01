@@ -36,4 +36,29 @@ class Config:
     EXPIRY_PERIOD = 1
     if os.environ.get('YOURAPPLICATION_MODE') == "production":
         EXPIRY_PERIOD = os.environ.get('EXPIRY_PERIOD')
+
+
+    ADMIN_ID = "terry"
+    ADMIN_EMAIL = "wan.ardie.mejia@gmail.com"
+    ADMIN_PASSWORD = "password"
+    if os.environ.get('YOURAPPLICATION_MODE') == "production":
+        EXPIRY_PERIOD = os.environ.get('EXPIRY_PERIOD')
+        ADMIN_ID = "terry"
+        ADMIN_EMAIL = "wan_ahmad_ardie@yahoo.com"
+        ADMIN_PASSWORD = "password"
+
+    # # these refer to SMTP settings
+    # app.config['MAIL_PASSWORD'] = "rppfxeiuwqrxjilk"
+
+    MAIL_SERVER = 'smtp.mail.yahoo.com'  # e.g., 'smtp.gmail.com'
+    MAIL_PORT = 587  # or 465 for SSL
+    MAIL_USE_TLS = True  # Set to False if using SSL (port 465)
+    MAIL_USE_SSL = False  # Set to True if using SSL (port 465)
+    MAIL_USERNAME = 'wan_ahmad_ardie@yahoo.com'
+    MAIL_PASSWORD = 'rppfxeiuwqrxjilk'
+    MAIL_DEFAULT_SENDER = 'wan_ahmad_ardie@yahoo.com' # Optional default sender
+
+
+
+
         

@@ -26,6 +26,9 @@ from c_validation_funcs import validate_before_saving
 import uuid
 import filetype
 from flask_wtf.csrf import CSRFProtect
+from functools import wraps
+from flask_mail import Mail, Message
+from itsdangerous import URLSafeTimedSerializer as Serializer
 
 import json
 
@@ -38,6 +41,7 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 bcrypt = Bcrypt(app)
 login = LoginManager(app)
+mail = Mail(app)
 csrf = CSRFProtect(app)
 # app.config['TEMPLATES_AUTO_RELOAD'] = True
 
@@ -62,13 +66,48 @@ import csv
 
 from c_mapper import C_mapper
 
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated:
+            return redirect(url_for('login', whatHappened="Please login with your admin account"))
+        elif not current_user.isAdmin:
+            return redirect(url_for('login', whatHappened="Only admins allowed passed this point"))        
+        return f(*args, **kwargs)
+    return decorated_function
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated:
+            return redirect(url_for('login', whatHappened="Please login"))
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+def create_databases():
+    """Creates databses and injects the main admin account into the user db"""
+    with app.app_context():
+        db.create_all()
+        if not db.session.execute(
+            db.select(Member).filter_by(isAdmin=True)
+        ).scalar_one_or_none():
+            admin = Member(
+                mcfId=app.config["ADMIN_ID"],
+                email=app.config["ADMIN_EMAIL"],
+                isAdmin=True,
+            )
+            admin.set_password(password=app.config["ADMIN_PASSWORD"])
+            db.session.add(admin)
+            db.session.commit()
+            db.close_all_sessions()
 
 with app.app_context():
     # db.drop_all()
     close_all_sessions()
     db.engine.dispose()    
     db.drop_all()
-    db.create_all()
+    create_databases()
     db.session.commit()
 # =======
     
@@ -125,16 +164,10 @@ def isFileOversized(filename):
         return True
     return False
     
-    
-@app.route('/single-member/<int:mcfId>', methods = ['GET']) 
-def single_member(mcfId):
 
 
-    query = sa.select(Member).where(Member.mcfId == mcfId)
-    m = db.session.scalar(query)
-    return render_template("single-member.html", m=m)
-
-@app.route('/single-member-fide/<int:mcfId>', methods = ['GET']) 
+@app.route('/single-member-fide/<mcfId>', methods = ['GET'])
+@login_required
 def single_member_fide(mcfId):
 
     whatHappened = request.args.get("whatHappened")
@@ -146,7 +179,8 @@ def single_member_fide(mcfId):
 # return m
 
 
-@app.route('/update-fide', methods = ['POST']) 
+@app.route('/update-fide', methods = ['POST'])
+@login_required
 def update_fide():
     mcfId = request.args.get("mcfId")
     # query = sa.select(Member).where(Member.mcfId == mcfId)
@@ -194,58 +228,32 @@ def update_fide():
 
 
 @app.route('/event-create')
+@admin_required
 def event_create():
 
     
     return render_template("event-create.html", dl=Event.disciplinesList, tl=Event.typeList, el=Event.eligibilityList, ll=Event.limitationList, rl=Event.roundsList, tcl=Event.timeControlList)
 
-# @app.route('/member-create')
-# def member_create():
-#     app.logger.info('========== member ==========')
-#     app.logger.info('========== member ==========')
-    
-#     return render_template("member-create.html")
 
-
-
-
-@app.route('/test2') 
-def test2():
-    # query = db.select(Member).where(Member.fideId != None)
-    # ms_paginate=db.paginate(query, page=page, per_page=20, error_out=False)
-    # ms = db.session.execute(query).all()
-
-    # app.logger.info(ms)
-
-    # 1746603668
-
-
-
-    return "wait"
-
-
-@app.route('/member-update-page/<int:mcfId>')
+@app.route('/member-update-page/<mcfId>')
+@admin_required
 def member_update_page(mcfId):
 
-    query = sa.select(Member).where(Member.mcfId == mcfId)
-    m = db.session.scalar(query)
+    return redirect(url_for('main_page', whatHappened="Info: This feature has been disabled"))
 
-    query = sa.select(Event)
-    es = db.session.scalars(query).all()
+    # query = sa.select(Member).where(Member.mcfId == mcfId)
+    # m = db.session.scalar(query)
+
+    # query = sa.select(Event)
+    # es = db.session.scalars(query).all()
 
     
-    return render_template("member-update-page.html", m=m, es=es)
+    # return render_template("member-update-page.html", m=m, es=es)
 
 
 
-
-
-
-
-
-
-
-@app.route('/create-event', methods = ['POST']) 
+@app.route('/create-event', methods = ['POST'])
+@admin_required
 def create_event():
 
     EventDeleted.delete_expired()
@@ -285,6 +293,7 @@ def create_event():
 
 
 @app.route('/create-member', methods = ['POST'])
+@admin_required
 def create_member():
     m = Member(
         mcfId=request.form['mcfId'],
@@ -319,7 +328,8 @@ def create_member():
 
 
 
-@app.route('/kill-event', methods=['POST']) 
+@app.route('/kill-event', methods=['POST'])
+@admin_required
 def kill_event():
     id = request.form['id']
     deleted_at = request.form['deleted_at']
@@ -379,7 +389,8 @@ def kill_event():
 
 
 
-@app.route('/expire-event/<int:id>') 
+@app.route('/expire-event/<int:id>')
+@admin_required
 def expire_event(id):
 
 
@@ -449,7 +460,8 @@ def expire_event(id):
 
 
 
-@app.route('/kill-events') 
+@app.route('/kill-events')
+@admin_required
 def kill_events():
 
     whatHappened = ""    
@@ -527,7 +539,8 @@ def kill_events():
     return render_template("events.html", es=es, whatHappened=whatHappened)
 
 
-@app.route('/kill-member/<int:mcfId>') 
+@app.route('/kill-member/<mcfId>')
+@admin_required
 def kill_member(mcfId):
     
     
@@ -545,7 +558,8 @@ def kill_member(mcfId):
     # return "member successfully removed"
     return render_template("members.html", ms=ms, whatHappened="Member successfully killed")
 
-@app.route('/kill-members') 
+@app.route('/kill-members')
+@admin_required
 def kill_members():
     
     
@@ -562,7 +576,8 @@ def kill_members():
 
 
 
-@app.route('/events') 
+@app.route('/events')
+@admin_required
 def find_events():
     
 
@@ -601,7 +616,8 @@ def find_events():
 
 
 
-@app.route('/members') 
+@app.route('/members')
+@admin_required
 def find_members():
 
     page = request.args.get("page", 1, type=int)
@@ -626,7 +642,121 @@ def find_members():
     # ms_dict = [m.__dict__ for m in ms]
     return render_template("members.html", ms=ms_paginate.items, prev_url=prev_url, next_url=next_url, page=page, totalPages=ms_paginate.pages, totalCount=count)
 
-@app.route('/upload-logs', methods = ["GET"]) 
+
+
+@app.route('/event-members/<id>')
+@admin_required
+def event_members(id):
+
+
+    eventId = id
+
+    statement = db.select(EventMember).where(EventMember.eventId == eventId)
+    ems = db.session.scalars(statement).all()
+
+    
+    # ===== trying something radical, list comprehension and in_() operator
+    # ===== in_() works, but it relies on the __repr__(self) function, I dont like it
+    list_of_mcfId = [em.mcfId for em in ems]
+    # app.logger.info(list_of_mcfId)
+    # app.logger.info(ms)
+
+    ms = []
+
+    for mcfId in list_of_mcfId:
+        statement = db.select(Member).where(Member.mcfId == mcfId)
+        m = db.session.scalars(statement).first()
+        ms.append(m)
+
+
+    app.logger.info(ms[0].mcfId)
+    
+
+
+    return render_template("event-members.html", ms=ms, eventId=eventId)
+        
+
+
+# ===== from: https://nrodrig1.medium.com/flask-mail-reset-password-with-token-8088119e015b
+@app.route('/send-reset-email')
+def send_reset_email():
+    s=Serializer(app.config['SECRET_KEY'])
+    
+    # some_id, has no special meaning, mostly internal to TimedJSONWebSignatureSerializer/URLSafeTimedSerializer
+    token = s.dumps({'some_id': current_user.mcfId})
+    # token = user.get_reset_token()
+
+    msg = Message('Password Reset Request',
+                  sender=app.config['MAIL_USERNAME'],
+                  recipients=[app.config["ADMIN_EMAIL"]])
+    msg.body = f"""To reset your password follow this link:
+    {url_for('reset_password', token=token, _external=True)}
+    If you ignore this email no changes will be made
+    """
+
+    try:
+        mail.send(msg)
+        return redirect(url_for("main_page", whatHappened="Info: Password reset link successfully sent"))
+    except Exception as e:
+        return redirect(url_for("main_page", whatHappened=f"Error: {str(e)}"))
+
+    return redirect()
+
+
+
+
+def verify_reset_token():
+    s=Serializer(current_app.config['SECRET_KEY']) #<---HERE
+    try:
+        some_id = s.loads(token, max_age=600)['some_id'] #<---HERE
+    except: #<---HERE
+        return None #<---HERE
+    return Member.query.get(some_id) #<---HERE
+
+
+# @app.route('/reset-password/<token>', methods=['GET','POST'])
+# def reset_password(token):
+@app.route('/reset-password', methods=['GET','POST'])
+def reset_password():
+    if current_user.is_authenticated:
+        return redirect(url_for('main_page'))
+    # token = "what"
+    token = request.form["token"]
+    user = verify_reset_token(token)
+    if user is None:
+        return redirect(url_for('main_page', whatHappened="Invalid token"))
+    if request.method == 'GET':
+        return render_template('reset-password.html', token=token)
+    
+    if request.method == 'POST':
+        user.password = user.request.form["newPassword"]
+        db.session.commit()
+        return redirect(url_for("main_page", whatHappened="Info: Your password has been updated!"))
+
+
+# dont delete this method, for our own documentation
+@app.route('/send-email')
+def send_mail():
+    msg = Message(
+        # ===== if we dont set sender it will use MAIL_DEFAULT_SENDER
+        # sender=app.config['MAIL_USERNAME'],
+        subject="hello i just got sent from Flask",
+        recipients=["wan.ardie.mejia@gmail.com"],
+        body="this is a test body"
+    )
+
+    try:
+        mail.send(msg)
+        return redirect(url_for("main_page", whatHappened="Info: Password reset link successfully sent"))
+    except Exception as e:
+        return redirect(url_for("main_page", whatHappened=f"Error: {str(e)}"))
+
+
+
+
+
+@app.route('/upload-logs', methods = ["GET"])
+@admin_required
 def upload_logs():
 
     # page = request.args.get("page", 1, type=int)
@@ -658,7 +788,8 @@ def upload_logs():
 
 
 
-@app.route('/') 
+@app.route('/')
+@admin_required
 def main_page():
     whatHappened = request.args.get('whatHappened')
     if not whatHappened:
@@ -668,9 +799,13 @@ def main_page():
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
+    logout_user()
     if request.method == 'POST':
         if current_user.is_authenticated:
-            return redirect(url_for('main_page'))
+            if current_user.isAdmin:
+                return redirect(url_for('main_page'))
+            else:
+                return redirect(url_for('member_front'))
 
         mcfId = request.form['mcfId']
         password = request.form['password']
@@ -690,29 +825,13 @@ def login():
             return render_template("login.html", whatHappened = "Ooops, wrong password")
         else:
             login_user(m)
-            query = sa.select(Event)
-            es = []
-            es = db.session.scalars(query).all()
-
-            
-            
-
-
-            statement = db.select(EventMember).where(EventMember.mcfId == current_user.mcfId)
-            ems = db.session.execute(statement).all()
-
-
-
-            # if m.getEvents() != "":
-            #     for e in m.getEvents():            
-            #         statement = db.select(Event).where(Event.id == e)
-            #         e = db.session.scalars(statement).first()
-            #         tr.append(e.tournamentName)
-
-            return redirect(url_for('member_front'))
+            if current_user.isAdmin:
+                return redirect(url_for('main_page'))
+            else:
+                return redirect(url_for('member_front'))
             
 
-            # endpost
+        # endpost
     else:
         whatHappened = request.args.get("whatHappened")
         # endget
@@ -732,138 +851,145 @@ def handle_bad_request(e):
 
 
 @app.route('/form-submission', methods = ['POST'])
+@login_required
 def form_submission():
-    if current_user.is_authenticated:
-        whatHappened = ""
-        # app.logger.info("==========")    
-        # app.logger.info(dir(request.args) )    
-        # app.logger.info(request.form.keys() )
-        # app.logger.info(request.form.get("fullname") )
-        # app.logger.info(request.form.listvalues())
+    whatHappened = ""
+    mcfId = current_user.mcfId
+    statement = db.select(Member).where(Member.mcfId == mcfId)
+    m = db.session.scalars(statement).first()
+    if m.isAdmin:
+        return redirect(url_for('member_front', whatHappened="Info: admin ans not reg. to avoid spoiling ans data"))
+
+        
+    # app.logger.info("==========")    
+    # app.logger.info(dir(request.args) )    
+    # app.logger.info(request.form.keys() )
+    # app.logger.info(request.form.get("fullname") )
+    # app.logger.info(request.form.listvalues())
 
 
-        eventId = request.form['eventId']
+    eventId = request.form['eventId']
 
 
-        # deleteandbackupsubmission
-        statement = db.select(FormQuestionAnswers).where(FormQuestionAnswers.mcfId == current_user.mcfId, FormQuestionAnswers.eventId == eventId)
-        old_fqas = db.session.scalars(statement).all()
+    # deleteandbackupsubmission
+    statement = db.select(FormQuestionAnswers).where(FormQuestionAnswers.mcfId == current_user.mcfId, FormQuestionAnswers.eventId == eventId)
+    old_fqas = db.session.scalars(statement).all()
 
-        old_answers = []
-        for old_fqa in old_fqas:
-            fqad = FormQuestionAnswersDeleted(
-                mcfId=old_fqa.mcfId,
-                fieldName=old_fqa.fieldName,
-                eventId=old_fqa.eventId,
-                answerString=old_fqa.answerString,
-                subgroupId=old_fqa.subgroupId
+    old_answers = []
+    for old_fqa in old_fqas:
+        fqad = FormQuestionAnswersDeleted(
+            mcfId=old_fqa.mcfId,
+            fieldName=old_fqa.fieldName,
+            eventId=old_fqa.eventId,
+            answerString=old_fqa.answerString,
+            subgroupId=old_fqa.subgroupId
+        )
+
+        old_answers.append(fqad)
+
+    db.session.add_all(old_answers)
+
+    statement = sa.delete(FormQuestionAnswers).where(FormQuestionAnswers.mcfId == current_user.mcfId, FormQuestionAnswers.eventId == eventId)
+    db.session.execute(statement)
+    try:
+        db.session.commit()
+        whatHappened = "answers successfully recorded"
+    except IntegrityError as i:
+        db.session.rollback()
+        whatHappened="Error: "+i._message()
+        return redirect(url_for('member_front', whatHappened=whatHappened))
+    # enddeleteandbackupsubmission
+
+    # for fieldname,answer in request.form.items():
+    #     app.logger.info("======")
+    #     app.logger.info(fieldname)
+    #     app.logger.info(answer)
+    #     app.logger.info("======")
+
+
+    # endweirdtest
+            
+            
+    answers = []
+    for longFieldname,answer in request.form.items():
+        isFile = None
+        fieldname = longFieldname
+        if fieldname == "eventId" or fieldname == "csrf_token":
+            continue
+
+        try:
+            uploadedDocument = request.files[fieldname]
+            isFile = True
+        except:
+            pass
+
+        if "subgroup" in fieldname:
+            ignore, subgroupId, fieldname = fieldname.split("::")
+        else:
+            subgroupId = None
+        if "[]" in fieldname:
+            checkboxList = request.form.getlist(longFieldname)
+            app.logger.info("********===********")
+            app.logger.info(fieldname)
+            app.logger.info(checkboxList)
+            app.logger.info("********===********")
+            # None values are custom, we remove None when users select checkbox values
+            if len(checkboxList) > 1:
+                checkboxList.remove("-")
+            fqa = FormQuestionAnswers(
+                mcfId=current_user.mcfId,
+                fieldName=fieldname.split("[]")[0],
+                eventId=eventId,
+                answerString= ",".join(checkboxList),
+                subgroupId=subgroupId
             )
-
-            old_answers.append(fqad)
-
-        db.session.add_all(old_answers)
-
-        statement = sa.delete(FormQuestionAnswers).where(FormQuestionAnswers.mcfId == current_user.mcfId, FormQuestionAnswers.eventId == eventId)
-        db.session.execute(statement)
-        try:
-            db.session.commit()
-            whatHappened = "answers successfully recorded"
-        except IntegrityError as i:
-            db.session.rollback()
-            whatHappened="Error: "+i._message()
-            return redirect(url_for('member_front', whatHappened=whatHappened))
-        # enddeleteandbackupsubmission
-
-        # for fieldname,answer in request.form.items():
-        #     app.logger.info("======")
-        #     app.logger.info(fieldname)
-        #     app.logger.info(answer)
-        #     app.logger.info("======")
-
-
-            # endweirdtest
-            
-            
-        answers = []
-        for longFieldname,answer in request.form.items():
-            isFile = None
-            fieldname = longFieldname
-            if fieldname == "eventId" or fieldname == "csrf_token":
-                continue
-
-            try:
-                uploadedDocument = request.files[fieldname]
-                isFile = True
-            except:
-                pass
-
-            if "subgroup" in fieldname:
-                ignore, subgroupId, fieldname = fieldname.split("::")
-            else:
-                subgroupId = None
-            if "[]" in fieldname:
-                checkboxList = request.form.getlist(longFieldname)
-                app.logger.info("********===********")
-                app.logger.info(fieldname)
-                app.logger.info(checkboxList)
-                app.logger.info("********===********")
-                # None values are custom, we remove None when users select checkbox values
-                if len(checkboxList) > 1:
-                    checkboxList.remove("-")
-                fqa = FormQuestionAnswers(
-                    mcfId=current_user.mcfId,
-                    fieldName=fieldname.split("[]")[0],
-                    eventId=eventId,
-                    answerString= ",".join(checkboxList),
-                    subgroupId=subgroupId
-                )
-                # endcheckboxsubmission
-            elif isFile:
-                fullfilePath = ""
-                isSuccess, anyUpload, errorMsg, fullFilePath = upload_document(uploadedDocument, eventId, fieldname)
-                if isSuccess:
-                    if anyUpload:
-                        fqa = FormQuestionAnswers(
-                            mcfId=current_user.mcfId,
-                            fieldName=fieldname,
-                            eventId=eventId,
-                            answerString=fullFilePath,
-                            subgroupId=subgroupId
-                        )
-                    else:
-                        fqa = FormQuestionAnswers(
-                            mcfId=current_user.mcfId,
-                            fieldName=fieldname,
-                            eventId=eventId,
-                            answerString="-",
-                            subgroupId=subgroupId
-                        )
+            # endcheckboxsubmission
+        elif isFile:
+            fullfilePath = ""
+            isSuccess, anyUpload, errorMsg, fullFilePath = upload_document(uploadedDocument, eventId, fieldname)
+            if isSuccess:
+                if anyUpload:
+                    fqa = FormQuestionAnswers(
+                        mcfId=current_user.mcfId,
+                        fieldName=fieldname,
+                        eventId=eventId,
+                        answerString=fullFilePath,
+                        subgroupId=subgroupId
+                    )
                 else:
-                    return redirect(url_for('member_front', whatHappened="Error: " + errorMsg))
-                    # endfilesubmission
+                    fqa = FormQuestionAnswers(
+                        mcfId=current_user.mcfId,
+                        fieldName=fieldname,
+                        eventId=eventId,
+                        answerString="-",
+                        subgroupId=subgroupId
+                    )
             else:
-                fqa = FormQuestionAnswers(
-                    mcfId=current_user.mcfId,
-                    fieldName=fieldname,
-                    eventId=eventId,
-                    answerString=answer,
-                    subgroupId=subgroupId
-                )
-                # endnormalsubmission
+                return redirect(url_for('member_front', whatHappened="Error: " + errorMsg))
+                # endfilesubmission
+        else:
+            fqa = FormQuestionAnswers(
+                mcfId=current_user.mcfId,
+                fieldName=fieldname,
+                eventId=eventId,
+                answerString=answer,
+                subgroupId=subgroupId
+            )
+            # endnormalsubmission
 
 
+
+        answers.append(fqa)
             
-            answers.append(fqa)
-            
-        db.session.add_all(answers)
+    db.session.add_all(answers)
     
-        try:
-            db.session.commit()
-            whatHappened = "answers successfully recorded"
-        except IntegrityError as i:
-            db.session.rollback()
-            whatHappened="Error: "+i._message()
-            return redirect(url_for('member_front', whatHappened=whatHappened))
+    try:
+        db.session.commit()
+        whatHappened = "answers successfully recorded"
+    except IntegrityError as i:
+        db.session.rollback()
+        whatHappened="Error: "+i._message()
+        return redirect(url_for('member_front', whatHappened=whatHappened))
         # endforloopanswers
 
         # return "nothing here"
@@ -893,6 +1019,7 @@ def form_submission():
 
 
 @app.route('/event-answers-page', methods = ['POST'])
+@admin_required
 def event_answers_page():
     whatHappened = ""
     membersAnswers = {}
@@ -906,7 +1033,7 @@ def event_answers_page():
     statement = db.select(FormQuestionAnswers).where(FormQuestionAnswers.eventId == eventId)
     res_first = db.session.scalars(statement).first()
     if not res_first:
-        return render_template('event-answers-page.html', membersAnswers={}, whatHappened="no entries yet")
+        return render_template('event-answers-page.html', membersAnswers={}, whatHappened="no entries yet", eventId=eventId)
         
     mcfId = res_first.mcfId
     
@@ -940,7 +1067,10 @@ def event_answers_page():
 
         except:
             membersAnswers[unique_key] = {}
-            membersAnswers[unique_key]["mcfId"] = fqa.mcfId
+            membersAnswers[unique_key]["mcfId"] = {
+                "value": fqa.mcfId,
+                "subgroupId": None
+            }
             membersAnswers[unique_key][fqa.fieldName] = {"value": fqa.answerString, "subgroupId": fqa.subgroupId}
 
 
@@ -969,11 +1099,13 @@ def event_answers_page():
     #          ...
     #     }
     # }    
-    
+
+    app.logger.info(membersAnswers)
     return render_template('event-answers-page.html', membersAnswers=membersAnswers, eventId=eventId, whatHappened=whatHappened)
 
 
 @app.route('/event-answers-page-overwritten', methods = ['POST'])
+@admin_required
 def event_answers_page_overwritten():
     whatHappened = ""
     membersAnswers = {}
@@ -985,7 +1117,7 @@ def event_answers_page_overwritten():
     statement = db.select(FormQuestionAnswersDeleted).where(FormQuestionAnswersDeleted.eventId == eventId)
     res_first = db.session.scalars(statement).first()
     if not res_first:
-        return render_template('event-answers-page-overwritten.html', membersAnswers={}, whatHappened="no entries yet")
+        return render_template('event-answers-page-overwritten.html', membersAnswers={}, whatHappened="no entries yet", eventId=eventId)
         
     mcfId = res_first.mcfId
     
@@ -1065,6 +1197,7 @@ def event_answers_page_overwritten():
 
         
 @app.route('/form-template', methods = ['GET'])
+@login_required
 def form_template():
 
 
@@ -1197,6 +1330,7 @@ def form_template():
 
 # ===== there are no other ways get to event-form-subgroup-creator
 @app.route('/event-form-subgroup-creator', methods = ['GET', 'POST'])
+@admin_required
 def event_form_subgroup_creator():
     if request.method == 'GET':
         whatHappened = request.args.get("whatHappened")
@@ -1270,6 +1404,7 @@ def event_form_subgroup_creator():
 
 
 @app.route('/event-form-creator', methods = ['POST', 'GET'])
+@admin_required
 def event_form_creator():
     if request.method == 'GET': # ========== we need delete, or modify this, we never the GET for this API
 
@@ -1429,6 +1564,7 @@ def kill_form_descendents_by_id(eventId):
 
     
 @app.route('/kill-form-descendents', methods = ["POST"])
+@admin_required
 def kill_form_descendents():
     
     whatHappened = ""
@@ -1450,6 +1586,7 @@ def kill_form_descendents():
     
     
 @app.route('/member-front', methods=['GET', 'POST'])
+@login_required
 def member_front():
     if current_user.is_authenticated:
         if request.method == 'GET':
@@ -1687,6 +1824,7 @@ def logout():
 
 
 @app.route('/bulk-upload-events-csv')
+@admin_required
 def bulk_upload_events_csv():
     # ========== we upload CSV using the kinda cool declarative_base, might not be good practice for readability
     with open(r'./input/event.csv', newline='') as csvfile:
@@ -1713,6 +1851,7 @@ def bulk_upload_events_csv():
 
 
 @app.route('/bulk_upload_members_csv')
+@admin_required
 def bulk_upload_members_csv():
 
 
@@ -1756,6 +1895,7 @@ def bulk_upload_members_csv():
 
 
 @app.route('/bulk_upload_fide_csv')
+@admin_required
 def bulk_upload_fide_csv():
     # ========== we upload CSV using the kinda cool declarative_base, might not be good practice for readability
 
@@ -2061,6 +2201,7 @@ def updateFrlList():
 
 
 @app.route('/bulk-process-all-mcf')
+@admin_required
 def bulk_process_all_mcf():
 
 
@@ -2085,6 +2226,7 @@ def bulk_process_all_mcf():
 
 
 @app.route('/bulk-process-all-frl')
+@admin_required
 def bulk_process_all_frl():
     if isFileUploaded("frl.csv"):
         if isFileOversized("frl.csv"):
@@ -2103,6 +2245,7 @@ def bulk_process_all_frl():
 
 
 @app.route('/bulk-update-all-mcf')
+@admin_required
 def bulk_update_all_mcf():
     # if not os.path.isfile("./storage/mcf.csv"):
     #     return C_templater.custom_render_template(errorTopic="Invalid Upload Name", errorsList=["files must be a csv and contain \"mcf\" in its filename"], isTemplate=True)
@@ -2158,8 +2301,9 @@ def allowed_bulk_frl_upload(filename):
 
     
 
-@app.route('/bulk-upload-all-files_1', methods=['POST'])
-def bulk_upload_all_files_1():
+@app.route('/bulk-upload-all-files-mcf', methods=['POST'])
+@admin_required
+def bulk_upload_all_files_mcf():
 
 
         
@@ -2184,8 +2328,9 @@ def bulk_upload_all_files_1():
 
 
     
-@app.route('/bulk-upload-all-files_2', methods=['POST'])
-def bulk_upload_all_files_2():
+@app.route('/bulk-upload-all-files-frl', methods=['POST'])
+@admin_required
+def bulk_upload_all_files_frl():
         
     file2 = request.files['file2']
 
@@ -2205,35 +2350,10 @@ def bulk_upload_all_files_2():
         whatHappened = "CSV filename must contain frl.   Eg: my-frl-Q4.csv"
         return redirect(url_for('main_page', whatHappened=whatHappened))
 
-@app.route('/display-files-uploaded', methods = ["GET"]) 
-def display_files_uploaded():
-    # ========== IMPORTANT FOR LATER
-    # datetime.date.today().strftime("%d/%m/%Y")
-    # ========== IMPORTANT FOR LATER
-    fs = db.session.query(File).all()
-    # return jsonify(fs)
-    app.logger.info(type(fs[0]))
-    a_dict = []
-    for f in fs:
-        a_dict.append({
-            "filename": f.filename,
-            "filepath": f.filepath,
-            "created_at": f.created_at.strftime("%d/%m/%Y")            
-        })
-    return jsonify(a_dict
-        # [i.serialize for i in ]
-                   )
 
-    
-
-    
-
-
-@app.route('/partial-download', methods = ["POST"]) 
+@app.route('/partial-download', methods = ["POST"])
+@admin_required
 def partial_download():
-
-
-
     
     downloadOffset = request.args.get("downloadOffset", type=int)
 
@@ -2258,10 +2378,10 @@ def partial_download():
     
     return send_file(output, download_name="Download" + str(datetime.date.today()) + "_Partial" + str(downloadOffset) + ".csv", as_attachment=True, mimetype="str") # not sure if mimetype is necessary, can try removing
 
-    # return "nothing burger"
 
 
-@app.route('/an-evt-ans-download') 
+@app.route('/an-evt-ans-download')
+@admin_required
 def an_evt_ans_download():
 
 
@@ -2313,19 +2433,6 @@ def an_evt_ans_download():
     correct_columns = list(membersAnswers[key_1st])
 
 
-    # df = pd.DataFrame()
-    # rec = []
-    # for m in ms_paginate.items:
-    #     rec.append(m.as_dict_for_file("mcf.csv"))
-    #     # rec.append(m.as_dict())
-        
-    # df = df.from_dict(rec)
-
-    # output = BytesIO()
-    # df.to_csv(output, index=False)
-    # output.seek(0)
-
-
     # ===== Example of sample return expected
     # membersAnswers = {
     #     # the key is meaningless and unique, like a primary key in DB, stupid useless to humans but important
@@ -2371,7 +2478,96 @@ def an_evt_ans_download():
                      ".csv",
                      as_attachment=True, mimetype="str")
 
-@app.route('/an-evt-ans-download-overwritten') 
+
+
+
+@app.route('/an-evt-mmbrs-download')
+@admin_required
+def an_evt_mmbrs_download():
+
+
+    whatHappened = ""
+    eventMembers = {}
+
+    eventId = request.args['eventId']
+
+
+    statement = db.select(EventMember).where(EventMember.eventId == eventId)
+    ems = db.session.scalars(statement).all()
+
+    list_of_mcfId = [em.mcfId for em in ems]
+
+    ms = []
+
+
+    
+    for mcfId in list_of_mcfId:
+        statement = db.select(Member).where(Member.mcfId == mcfId)
+        m = db.session.scalars(statement).first()
+        ms.append(m)
+
+    app.logger.info(ms[0].mcfName)
+
+
+    statement = db.select(Event).where(Event.id == eventId)
+    e = db.session.scalars(statement).first()
+    eventName = "_".join(e.tournamentName .split(" "))    
+    
+
+    
+
+    for m in ms:
+        eventMembers[m.mcfId] = {}
+        eventMembers[m.mcfId]["mcfId"] = m.mcfId
+        eventMembers[m.mcfId]["mcfName"] = m.mcfName
+        eventMembers[m.mcfId]["email"] = m.email
+        eventMembers[m.mcfId]["gender"] = m.gender
+        eventMembers[m.mcfId]["yearOfBirth"] = m.yearOfBirth
+        eventMembers[m.mcfId]["state"] = m.state
+        eventMembers[m.mcfId]["nationalRating"] = m.nationalRating
+        eventMembers[m.mcfId]["fideId"] = m.fideId
+        eventMembers[m.mcfId]["fideName"] = m.fideName
+        eventMembers[m.mcfId]["fideRating"] = m.fideRating
+
+
+
+    app.logger.info("==========++")
+    app.logger.info(eventMembers)
+    app.logger.info("==========++")
+    key_1st = next(iter(eventMembers))
+    correct_columns = list(eventMembers[key_1st])
+
+    df = pd.DataFrame(eventMembers)
+
+    output = BytesIO()
+
+    # ===== basically reordering internal or 2nd dimension, not the most readable one liner
+    df.transpose()[correct_columns].to_csv(output, index=False)
+
+    app.logger.info("==========++")
+    app.logger.info(df)
+    app.logger.info(correct_columns)
+    app.logger.info("==========++")
+    app.logger.info(df)
+    output.seek(0)
+    
+
+
+
+    return send_file(output, download_name=
+                     "Download_event_members_" +
+                     str(datetime.date.today()) +
+                     # "_Partial" +
+                     # str(downloadOffset) +
+                     "_" +
+                     eventName +
+                     ".csv",
+                     as_attachment=True, mimetype="str")
+
+
+
+@app.route('/an-evt-ans-download-overwritten')
+@admin_required
 def an_evt_ans_download_overwritten():
 
 
@@ -2489,7 +2685,8 @@ def an_evt_ans_download_overwritten():
                      as_attachment=True, mimetype="str")
 
 
-@app.route('/get-withdrawal-clause-by-id', methods = ["POS", "GET"]) 
+@app.route('/get-withdrawal-clause-by-id', methods = ["POS", "GET"])
+@login_required
 def get_withdrawal_clause_by_id():
     app.logger.info(request.args.get("eventId"))
 

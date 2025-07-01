@@ -33,7 +33,7 @@
 		</div></th>
 		<td>
 		    
-		    <form action="{{ url_for('bulk_upload_all_files_1')  }}" method="post" enctype="multipart/form-data" data-tooltip-target="tooltip-files-allowed">
+		    <form action="{{ url_for('bulk_upload_all_files_mcf')  }}" method="post" enctype="multipart/form-data" data-tooltip-target="tooltip-files-allowed">
 			<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 			<div class="m-2 mb-5">
 			    <label class="block m-2 text-sm font-medium text-gray-900 dark:text-white" for="file1">Upload MCF file</label>
@@ -48,7 +48,7 @@
 		    	    <tr class="borders border-yellow-400  border-2">
 		<th class="bg-yellow-400">FRL files</th>
 		<td>
-		    <form action="{{ url_for('bulk_upload_all_files_2')  }}" method="post" enctype="multipart/form-data" data-tooltip-target="tooltip-files-allowed">
+		    <form action="{{ url_for('bulk_upload_all_files_frl')  }}" method="post" enctype="multipart/form-data" data-tooltip-target="tooltip-files-allowed">
 			<div  class="m-2 mb-5">
 			    <label class="block m-2 text-sm font-medium text-gray-900 dark:text-white" for="file2">Upload FRL file</label>
 			    <input  type="file" name="file2" class="border border-gray-500">
@@ -133,6 +133,31 @@
 		    </div>
 		</td>
 	    </tr>
+	    <!-- ============================== -->
+	    <tr class="borders border-yellow-200  border-2">
+		<th class="bg-yellow-200 p-4">Test email</th>
+		<td class="bg-yellow-200">
+		    <div class="m-3">
+			<a href="{{ url_for('send_mail') }}" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Click here</a>
+
+			
+			
+		    </div>
+		</td>
+	    </tr>
+	    <!-- ============================== -->
+	    <tr class="borders border-yellow-200  border-2">
+		<th class="bg-yellow-200 p-4">Reset admin password</th>
+		<td class="bg-yellow-200">
+		    <div class="m-3">
+			<a href="{{ url_for('send_reset_email') }}" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Click here</a>
+
+			
+			
+		    </div>
+		</td>
+	    </tr>
+	    <!-- ============================== -->
 
 	    <tr class="borders border-yellow-200  border-2">
 		<th class="bg-yellow-200">Kill All Form Elements (questions, subgroup and answers)</th>
