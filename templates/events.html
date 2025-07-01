@@ -64,7 +64,7 @@ Events
 	    <th>
 		<div class="m-3">Withdrawal Clause</div>
 	    </th>
-	    <th>
+	    <th class="w-20 p-4 border-x-2 border-yellow-600 bg-yellow-200 font-light">
 		<div class="m-3">Form Creator</div>
 	    </th>
 	    <th>
@@ -86,7 +86,10 @@ Events
 			    specific event
 			</span>
 			, including all participants answers and overwritten submissions
-			
+			<div class="text-xs">
+			    (leaves out event-member rel)
+			</div>
+							    
 		    </div>
 		</div>
 	    </th>
@@ -94,6 +97,25 @@ Events
 	    <th>
 		<div class="m-3">Overwritten Submissions</div>
 
+	    </th>
+	    <th>
+		<div class="px-6 grid place-content-center">
+		    
+		    <div data-tooltip-target="tooltip-form-data-members-button"> 
+			
+			
+			<div class="m-3">
+			    {%  include 'eventMembers.j2' %}
+			</div>
+			<div class="m-3">			    
+			    {% include 'questionMark.j2' %}
+			    
+			</div>
+			<div id="tooltip-form-data-members-button" role="tooltip" placement="bottom" class="absolute z-10  inline-block border border-1 w-60 px-3 py-2 text-m font-light text-black transition-opacity opacity-0  duration-300 bg-white rounded-lg shadow-xl tooltip">
+			    Members of events
+			</div>
+		    </div>
+		</div>
 	    </th>
 	    <th>
 		<div   class="m-2 justify-items-center">
@@ -187,7 +209,8 @@ Events
 	    <td>
 		<div class="m-3">{{ e.withdrawalClause }}</div>
 	    </td>
-	    <td>
+	    
+	    <td class="w-20 p-4 border-x-2 border-yellow-600 bg-yellow-200 font-light">
 		{% if not e.deleted_at  %}
 		    <form  action="{{ url_for('event_form_creator')  }}" method="post" onsubmit="return submitFormCreator();">
 			<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
@@ -219,7 +242,7 @@ Events
 	    <td>
 		{% if not e.deleted_at  %}
 		    <div class="m-3" >
-			<form action="{{ url_for('kill_form_descendents')  }}" method="post">
+			<form action="{{ url_for('kill_form_descendents')  }}" method="post" onsubmit="return submitKillFormDescendents();">
 			    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 			    <div class="m-3">
 				<input type="hidden" name="eventId" value={{ e.id }} />
@@ -247,6 +270,17 @@ Events
 			</div>
 		    </form>
 		{% endif %}
+	    </td>
+	    <td>		    
+		<div class="m-3 justify-items-center">
+	    	    <button type="submit" class="p-2 cursor-pointer">
+			<a href="{{ url_for('event_members', id=e.id)  }}">
+			    <div class="m-3">
+				{%  include 'eventMembers.j2' %}
+			    </div>
+			</a>			
+		    </button>
+		</div>
 	    </td>
 	    <td>
 		{% if not e.deleted_at  %}
@@ -281,7 +315,7 @@ Events
 	</tr>
 	{% endfor %}
 	<tr>
-	    <td colspan="15"></td>
+	    <td colspan="16"></td>
 	    <td>
 		<div class="m-3">
 		    <button type="submit" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900 cursor-pointer">
