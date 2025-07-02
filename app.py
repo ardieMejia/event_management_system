@@ -29,13 +29,31 @@ from flask_wtf.csrf import CSRFProtect
 from functools import wraps
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer as Serializer
+import sys
+from logging.config import dictConfig
 
 import json
 
 
-
+dictConfig({
+    "version": 1,
+    "formatters": {
+        "default": {
+            "format": "[%(asctime)s] %(levelname)s in %(module)s: %(message)s",
+        }
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "stream": "ext://sys.stdout", # Or ext://sys.stderr
+            "formatter": "default",
+        }
+    },
+    "root": {"level": "INFO", "handlers": ["console"]}, # Set root level to INFO
+})
 
 app = Flask(__name__)   # Flask constructor
+app.logger.setLevel(logging.DEBUG) # Or DEBUG more verbose than INFO
 app.config.from_object(Config)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
@@ -193,7 +211,6 @@ def update_fide():
     m.fideId = request.form['fideId']
     m.fideName = request.form['fideName']
     m.fideRating = request.form['fideRating']
-    app.logger.info(m.fideId)
     # TODO: do something about this one
 
     errorsList = m.isDataInvalid(p_fideId=m.fideId, p_fideRating=m.fideRating)
@@ -669,7 +686,7 @@ def event_members(id):
         ms.append(m)
 
 
-    app.logger.info(ms[0].mcfId)
+
     
 
 
@@ -935,10 +952,6 @@ def form_submission():
             subgroupId = None
         if "[]" in fieldname:
             checkboxList = request.form.getlist(longFieldname)
-            app.logger.info("********===********")
-            app.logger.info(fieldname)
-            app.logger.info(checkboxList)
-            app.logger.info("********===********")
             # None values are custom, we remove None when users select checkbox values
             if len(checkboxList) > 1:
                 checkboxList.remove("-")
@@ -1481,7 +1494,6 @@ def event_form_creator():
                 return redirect(url_for('event_form_creator', whatHappened="Error: subgroup name must not be empty", eventId=eventId))
 
                             
-            app.logger.info(subgroupName)
             
             subgroupId=uuid.uuid4()
             fq = FormQuestion(eventId=eventId,
@@ -1513,7 +1525,7 @@ def event_form_creator():
                     return redirect(url_for('find_events', whatHappened="No Form Created"))
                 
             form_vars = ""
-            app.logger.info("endNotDropdown")
+
             # enddone
             return redirect(url_for('find_events', whatHappened="Form creation loop done"))
         # endpost
@@ -1630,9 +1642,7 @@ def member_front():
             statement = db.select(File).where(File.mcfId == current_user.mcfId)
             fs = db.session.scalars(statement).all()
 
-            app.logger.info("==========")
-            app.logger.info(fs)
-            app.logger.info("==========")
+
                 
             if not whatHappened:
                 whatHappened = ""
@@ -1752,14 +1762,6 @@ def upload_document(uploadFile, eventId, fieldname):
         anyUpload = False
         return isSuccess, anyUpload, "File upload failed due to wrong filetype or something else", ""        
     if allowed_user_upload(uploadFile):
-        app.logger.info("++++++++--------++++++++")
-        app.logger.info(vars(uploadFile))
-        app.logger.info("++++++++--------++++++++")
-        app.logger.info(dir(uploadFile))
-        app.logger.info(
-            uploadFile.filename
-                        )
-        app.logger.info("++++++++--------++++++++")
         filename = secure_filename(uploadFile.filename)
         fname, ext = os.path.splitext(uploadFile.filename)
         # disk_path = ""  # Path to the persistent disk
@@ -2092,10 +2094,8 @@ def processFrlList():
 
     except IntegrityError as i:
         db.session.rollback()
-        app.logger.info(i._message())
         whatHappened = "Something went wrong"
-        # return C_templater.custom_render_template("Data entry error", i._message(), False)
-        # return C_templater.custom_render_template("DB-API IntegrityError", [i._message()], True)
+
 
     if not whatHappened and not skippedList:
         whatHappened = "PERFECT upload"
@@ -2138,10 +2138,8 @@ def updateMcfList():
     # ========== right now skippedList stores ID, which means we can be flexible on how to use it later for more feedback
     skippedList = []
     for index,row in df.iterrows():
-        app.logger.info("==========")
         # app.logger.info(type(chunk))
         # app.logger.info(chunk)
-        app.logger.info("==========")
         values=[]
         
 
@@ -2320,8 +2318,6 @@ def bulk_upload_all_files_mcf():
         return render_template("main-page.html", whatHappened="There is no file uploaded", whyHappened=[])
 
 
-    app.logger.info("==========")
-    app.logger.info(allowed_bulk_mcf_upload(file1.filename))
     if file1 \
        and allowed_bulk_mcf_upload(file1.filename):
         filename1 = secure_filename(file1.filename)
@@ -2344,8 +2340,7 @@ def bulk_upload_all_files_frl():
         return render_template("main-page.html", whatHappened="There is no file uploaded")
 
 
-    app.logger.info("==========")
-    app.logger.info(allowed_bulk_frl_upload(file2.filename))
+
     if file2 \
        and allowed_bulk_frl_upload(file2.filename):
         filename2 = secure_filename(file2.filename)
@@ -2400,11 +2395,7 @@ def an_evt_ans_download():
 
     eventId = request.args['eventId']
 
-    app.logger.info("++++++++++")
-    app.logger.info(eventId
-                    )
-    
-    app.logger.info("++++++++++")
+
     
 
 
@@ -2419,9 +2410,6 @@ def an_evt_ans_download():
 
     for fqa in fqas:
         unique_key = str(fqa.mcfId) + str(eventId)
-        app.logger.info("$$$$$")
-        app.logger.info(fqa.mcfId)
-        app.logger.info("$$$$$")
         try:
             membersAnswers[unique_key]["mcfId"] = fqa.mcfId
                 # "subgroupId": None
@@ -2458,15 +2446,9 @@ def an_evt_ans_download():
     df = pd.DataFrame(membersAnswers)
 
     output = BytesIO()
-    app.logger.info("==========++")
-    app.logger.info(membersAnswers)
-    app.logger.info("==========++")
-    app.logger.info(df)
     # ===== basically reordering internal or 2nd dimension, not the most readable one liner
     df.transpose()[correct_columns].to_csv(output, index=False)
     # df.transpose().to_csv(output, index=False)
-    app.logger.info("==========++")
-    app.logger.info(df)
     output.seek(0)
     
 
@@ -2537,9 +2519,7 @@ def an_evt_mmbrs_download():
 
 
 
-    app.logger.info("==========++")
-    app.logger.info(eventMembers)
-    app.logger.info("==========++")
+
     key_1st = next(iter(eventMembers))
     correct_columns = list(eventMembers[key_1st])
 
@@ -2550,11 +2530,7 @@ def an_evt_mmbrs_download():
     # ===== basically reordering internal or 2nd dimension, not the most readable one liner
     df.transpose()[correct_columns].to_csv(output, index=False)
 
-    app.logger.info("==========++")
-    app.logger.info(df)
-    app.logger.info(correct_columns)
-    app.logger.info("==========++")
-    app.logger.info(df)
+
     output.seek(0)
     
 
@@ -2586,12 +2562,7 @@ def an_evt_ans_download_overwritten():
 
     eventId = request.args['eventId']
 
-    app.logger.info("++++++++++")
-    app.logger.info(eventId
-                    )
-    
-    app.logger.info("++++++++++")
-    
+
 
 
     statement = db.select(Event).where(Event.id == eventId)
@@ -2668,11 +2639,6 @@ def an_evt_ans_download_overwritten():
     # ===== basically reordering internal or 2nd dimension, not the most readable one liner
     df.transpose()[correct_columns].to_csv(output, index=False)
     # df = df[correct_columns]x
-    app.logger.info("==========++")
-    app.logger.info(df)
-    app.logger.info(correct_columns)
-    app.logger.info("==========++")
-    app.logger.info(df)
     output.seek(0)
     
 
@@ -2694,7 +2660,6 @@ def an_evt_ans_download_overwritten():
 @app.route('/get-withdrawal-clause-by-id', methods = ["POS", "GET"])
 @login_required
 def get_withdrawal_clause_by_id():
-    app.logger.info(request.args.get("eventId"))
 
     statement = db.select(Event).where(Event.id == request.args.get("eventId"))
     e = db.session.scalars(statement).first()
