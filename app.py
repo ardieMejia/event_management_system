@@ -729,6 +729,9 @@ def verify_reset_token(token):
     s=Serializer(app.config['SECRET_KEY'])
     try:
         some_id = s.loads(token, max_age=1500)['some_id']
+        app.logger.info("=====")
+        app.logger.info(f"some_id {some_id}")
+        app.logger.info("=====")
     except:
         return None
     return Member.query.get(some_id)
@@ -756,7 +759,9 @@ def reset_password():
         return render_template('reset-password.html', token=token)
     
     if request.method == 'POST':
-        user.password = user.request.form["newPassword"]
+        token = request.form["token"]
+        user = verify_reset_token(token)
+        user.password = request.form["newPassword"]
         db.session.commit()
         return redirect(url_for("main_page", whatHappened="Info: Your password has been updated!"))
 
