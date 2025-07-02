@@ -66,6 +66,10 @@ csrf = CSRFProtect(app)
 def teardown_request(response_or_exc):
     db.session.remove()
 
+@app.teardown_appcontext
+def teardown_appcontext(response_or_exc):
+    db.session.remove()
+
 # app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 
