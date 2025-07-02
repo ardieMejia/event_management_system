@@ -701,6 +701,9 @@ def send_reset_email():
     
     # some_id, has no special meaning, mostly internal to TimedJSONWebSignatureSerializer/URLSafeTimedSerializer
     token = s.dumps({'some_id': current_user.mcfId})
+    app.logger.info("=====")
+    app.logger.info(f"token created: {token}")
+    app.logger.info("=====")
     # token = user.get_reset_token()
 
     msg = Message('Password Reset Request',
@@ -724,7 +727,7 @@ def send_reset_email():
 
 def verify_reset_token(token):
     app.logger.info("=====")
-    app.logger.info("verify_reset_token function")
+    app.logger.info(f"verify_reset_token with token received: {token}")
     app.logger.info("=====")
     s=Serializer(app.config['SECRET_KEY'])
     try:
@@ -761,7 +764,8 @@ def reset_password():
     if request.method == 'POST':
         token = request.form["token"]
         user = verify_reset_token(token)
-        user.password = request.form["newPassword"]
+        user.set_password(password = request.form["newPassword"])
+        # user.password = request.form["newPassword"]
         db.session.commit()
         return redirect(url_for("main_page", whatHappened="Info: Your password has been updated!"))
 
