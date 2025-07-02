@@ -726,12 +726,12 @@ def verify_reset_token(token):
     app.logger.info("=====")
     app.logger.info("verify_reset_token function")
     app.logger.info("=====")
-    s=Serializer(app.config['SECRET_KEY']) #<---HERE
+    s=Serializer(app.config['SECRET_KEY'])
     try:
-        some_id = s.loads(token, max_age=1500)['some_id'] #<---HERE
-    except: #<---HERE
-        return None #<---HERE
-    return Member.query.get(some_id) #<---HERE
+        some_id = s.loads(token, max_age=1500)['some_id']
+    except:
+        return None
+    return Member.query.get(some_id)
 
 
 # @app.route('/reset-password/<token>', methods=['GET','POST'])
@@ -743,11 +743,14 @@ def reset_password():
     app.logger.info("=====")
 
     if request.method == 'GET':
-        app.logger.info("=====")
-        app.logger.info("getting token")
-        app.logger.info("=====")
         token = request.args.get("token")
+        app.logger.info("=====")
+        app.logger.info(f"token received: {token}")
+        app.logger.info("=====")
         user = verify_reset_token(token)
+        app.logger.info("=====")
+        app.logger.info(f"user passed: {user}")
+        app.logger.info("=====")
         if user is None:
             return redirect(url_for('main_page', whatHappened="Invalid token"))
         return render_template('reset-password.html', token=token)
