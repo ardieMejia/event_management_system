@@ -61,6 +61,11 @@ bcrypt = Bcrypt(app)
 login = LoginManager(app)
 mail = Mail(app)
 csrf = CSRFProtect(app)
+
+@app.teardown_request
+def teardown_request(response_or_exc):
+    db.session.remove()
+
 # app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 
