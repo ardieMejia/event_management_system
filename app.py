@@ -705,10 +705,13 @@ def send_reset_email():
 
 
 
-def verify_reset_token():
+def verify_reset_token(token):
+    app.logger.info("=====")
+    app.logger.info("verify_reset_token function")
+    app.logger.info("=====")
     s=Serializer(current_app.config['SECRET_KEY']) #<---HERE
     try:
-        some_id = s.loads(token, max_age=600)['some_id'] #<---HERE
+        some_id = s.loads(token, max_age=1500)['some_id'] #<---HERE
     except: #<---HERE
         return None #<---HERE
     return Member.query.get(some_id) #<---HERE
@@ -718,8 +721,11 @@ def verify_reset_token():
 # def reset_password(token):
 @app.route('/reset-password', methods=['GET','POST'])
 def reset_password():
-    if current_user.is_authenticated:
-        return redirect(url_for('main_page'))
+    app.logger.info("=====")
+    app.logger.info("reset_pasword")
+    app.logger.info("=====")
+    # if current_user.is_authenticated:
+    #     return redirect(url_for('main_page'))
     # token = "what"
     token = request.form["token"]
     user = verify_reset_token(token)
