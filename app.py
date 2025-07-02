@@ -746,7 +746,7 @@ def reset_password():
         app.logger.info("=====")
         app.logger.info("getting token")
         app.logger.info("=====")
-        token = request.args.get["token"]
+        token = request.args.get("token")
         user = verify_reset_token(token)
         if user is None:
             return redirect(url_for('main_page', whatHappened="Invalid token"))
