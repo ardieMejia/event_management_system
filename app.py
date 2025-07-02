@@ -726,7 +726,7 @@ def verify_reset_token(token):
     app.logger.info("=====")
     app.logger.info("verify_reset_token function")
     app.logger.info("=====")
-    s=Serializer(current_app.config['SECRET_KEY']) #<---HERE
+    s=Serializer(app.config['SECRET_KEY']) #<---HERE
     try:
         some_id = s.loads(token, max_age=1500)['some_id'] #<---HERE
     except: #<---HERE
