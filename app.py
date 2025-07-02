@@ -741,14 +741,15 @@ def reset_password():
     app.logger.info("=====")
     app.logger.info("reset_pasword")
     app.logger.info("=====")
-    # if current_user.is_authenticated:
-    #     return redirect(url_for('main_page'))
-    # token = "what"
-    token = request.form["token"]
-    user = verify_reset_token(token)
-    if user is None:
-        return redirect(url_for('main_page', whatHappened="Invalid token"))
+
     if request.method == 'GET':
+        app.logger.info("=====")
+        app.logger.info("getting token")
+        app.logger.info("=====")
+        token = request.args.get["token"]
+        user = verify_reset_token(token)
+        if user is None:
+            return redirect(url_for('main_page', whatHappened="Invalid token"))
         return render_template('reset-password.html', token=token)
     
     if request.method == 'POST':
