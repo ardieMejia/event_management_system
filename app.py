@@ -844,7 +844,7 @@ def main_page():
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
-    logout_user()
+    # logout_user()
     if request.method == 'POST':
         if current_user.is_authenticated:
             if current_user.isAdmin:
