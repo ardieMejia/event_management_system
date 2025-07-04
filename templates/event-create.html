@@ -13,78 +13,226 @@
 {% block form %}
     <!-- <h2>Create an event</h2> -->
 
-
+    <br>
+    <br>
+    <br>
 
     <form id="event-form" action="{{ url_for('create_event') }}" method="post">
 	<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-	<!-- <label for="MEMBER ID">MEMBER ID</label><br> -->
+	<caption class="caption-top text-orange-600 italic p-2">
+	    {{ whatHappened }}
+	</caption>
+	<table>
+	    <tbody>
+		<tr>
+		    <th class="font-light bg-yellow-200 p-2 text-right">
+			
+			<label for="tournamentName">Tournament Name</label>
+		    </th>
+		    <td class="bg-yellow-200 p-1" colspan="6">
+			<input  type="text" id="tournamentName" name="tournamentName" name="field" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg block w-100 p-2"   required/>
+			
+
+		    </td>
+		</tr>
+		<tr>
+		    <th class="font-light bg-yellow-200 p-2 text-right">
+			<label for="startDate">Start Date</label>
+		    </th>
+		    <td class="bg-yellow-200 p-1" colspan="6">
+
+			<input  type="date" id="startDate" name="startDate"  class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg block w-30 p-2"   required/>
+			
+
+		    </td>
+		</tr>
+		<tr>
+		    <th class="font-light bg-yellow-200 p-2 text-right">
+			<label for="endDate">End Date</label>
+		    </th>
+		    <td class="bg-yellow-200 p-1" colspan="6">
+
+
+			<input type="date" id="endDate" name="endDate"   class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg block w-30 p-2"   required/>
+			
+
+		    </td>
+		</tr>
+		<tr>
+		    <th class="font-light bg-yellow-200 p-2 text-right">
+			<label for="discipline">Discipline</label>
+		    </th>
+		    <td class="bg-yellow-200 p-1" colspan="6">
+
+
+
+			
+			<select name="discipline" id="discipline" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-30 p-2.5">
+			    {% for d in dl %}
+				<option value={{ d }}>{{ d }}</option>
+			    {% endfor %}
+			</select>
+
+		    </td>
+		</tr>
+		<tr>
+		    <th class="font-light bg-yellow-200 p-2 text-right">
+			<label for="type">Type</label>
+		    </th>
+		    <td class="bg-yellow-200 p-1" colspan="6">
+
+
+
+			
+			<select name="type" id="type" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-30 p-2.5">
+			    {% for t in tl %}
+				<option value={{ t }}>{{ t }}</option>
+			    {% endfor %}
+			</select>
+
+
+		    </td>
+		</tr>
+		<tr>
+
+		    <th class="font-light bg-yellow-200 p-2 text-right">
+			<label for="eligibility">Eligibility</label>
+		    </th>
+
+		    <td class="bg-yellow-200 p-1" colspan="6">
+
+
+
+			
+			<select name="eligibility" id="eligibility" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-30 p-2.5">
+			    {% for e in el %}
+				<option value={{ e }}>{{ e }}</option>
+			    {% endfor %}
+			</select>
+
+
+
+		    </td>
+		</tr>
+		<tr>
+		    <th class="font-light bg-yellow-200 p-2 text-right">
+			<label for="limitation">Limitation</label>
+		    </th>
+		    <td class="bg-yellow-200 p-1" colspan="6">
+
+
+
+			
+
+			<select name="limitation" id="limitation" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-40 p-2.5">
+			    {% for l in ll %}
+				<option value={{ l }}>{{ l }}</option>
+			    {% endfor %}
+			</select>
+
+
+
+		    </td>
+		</tr>
+		<tr>
+		    <th class="font-light bg-yellow-200 p-2 text-right">
+			<label for="rounds">Rounds</label>
+		    </th>
+		    <td class="bg-yellow-200 p-1" colspan="6">
+
+
+
+			
+
+
+			<select name="rounds" id="rounds" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-30 p-2.5">
+			    {% for r in rl %}
+				<option value={{ r }}>{{ r }}</option>
+			    {% endfor %}
+			</select>
+
+
+
+		    </td>
+		</tr>
+		<tr>
+		    <th class="font-light bg-yellow-200 p-2 text-right">
+			<label for="timeControl">Time Control</label>
+		    </th>
+		    <td class="bg-yellow-200 p-1" colspan="6">
+
+
+
+			
+
+
+
+
+			<select name="timeControl" id="timeControl" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-40 p-2.5">
+			    {% for tc in tcl %}
+				<option value={{ tc }}>{{ tc }}</option>
+			    {% endfor %}
+			</select>
+
+
+		    </td>
+		</tr>
+		<tr>
+		    <th class="font-light bg-yellow-200 p-2 text-right">
+			<label class="block" for="withdrawalClause">Withdrawal Clause</label>
+		    </th>
+		    <td class="bg-yellow-200 p-1" colspan="6">
+
+			<textarea   id="withdrawalClause" name="withdrawalClause" rows="4" class="block p-2.5 w-150 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500" placeholder="Eg: A 70% refund policy applies for withdrawal from this event." required></textarea>
+
+
+
+
+		    </td>
+		</tr>
+		<tr>
+		    <th class="font-light bg-yellow-200 p-2 text-right">
+
+		    </th>
+		    <td class="bg-yellow-200 p-1" colspan="5">
+
+			
+			
+
+
+		    </td>
+		    <td class="bg-yellow-200 w-20 p-1">
+			<div class="m-2">
+			    
+			    <button type="submit" class="w-30 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Save to database</button>		    
+			</div>
+		    </td>
+		</tr>
+
+
+	    </tbody>
+	</table>
+
+    </form>
+
+
+    <!-- <label for="MEMBER ID">MEMBER ID</label><br> -->
     <!-- <input type="text" id="MEMBER ID" name="MEMBER ID" value=""><br> -->
-    <label for="tournamentName">Tournament Name</label>
-    <input type="text" id="tournamentName" name="tournamentName" value=""><br>
-    
-    <label for="startDate">Start Date</label>
-    <input type="date" id="startDate" name="startDate" value=""><br>
-    
-    <label for="endDate">End Date</label>
-    <input type="date" id="endDate" name="endDate" value=""><br>
-    
-    <label for="discipline">Discipline</label>
-    <select name="discipline" id="discipline">
-	{% for d in dl %}
-	    <option value={{ d }}>{{ d }}</option>
-	{% endfor %}
-    </select>
-    <br>
-    <label for="type">Type</label>
-    <select name="type" id="type">
-	{% for t in tl %}
-	    <option value={{ t }}>{{ t }}</option>
-	{% endfor %}
-    </select>
-    <br>
-    <label for="eligibility">Eligibility</label>
-    <select name="eligibility" id="eligibility">
-	{% for e in el %}
-	    <option value={{ e }}>{{ e }}</option>
-	{% endfor %}
-    </select>
-    <br>
-    <label for="limitation">Limitation</label>
-    <select name="limitation" id="limitation">
-	{% for l in ll %}
-	    <option value={{ l }}>{{ l }}</option>
-	{% endfor %}
-    </select>
-    <br>
-    <label for="rounds">Rounds</label>
-    <select name="rounds" id="rounds">
-	{% for r in rl %}
-	    <option value={{ r }}>{{ r }}</option>
-	{% endfor %}
-    </select>
-    <br>
-    <label for="timeControl">Time Control</label>
-    <select name="timeControl" id="timeControl">
-	{% for tc in tcl %}
-	    <option value={{ tc }}>{{ tc }}</option>
-	{% endfor %}
-    </select>
-    <br>
-    <label for="withdrawalClause">Withdrawal Clause</label>
-    <input type="text" id="withdrawalClause" name="withdrawalClause" value=""><br>
-    <br>
-    
-    
-    
-    <!-- <input type="hidden" id="EVENT ID" name="EVENT ID" value=""><br> -->
-    
-    
-    
-    <!-- <label for="mylist">EVENTS</label> -->
 
     
     
-    <input type="submit" value="Save to Database">
-</form>
+
+
+
+
+    <br>
+    <br>
+    
+    
+    
+
+    
+    
+    </form>
 {% endblock %}
 
