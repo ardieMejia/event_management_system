@@ -237,6 +237,21 @@ class File(db.Model):
     def __repr__(self):
         return f"File('{self.originalFilename}', '{self.filename}', '{self.filepath}')"
 
+    
+class Withdrawal(db.Model):
+    __tablename__ = "withdrawals"
+    id = db.Column(db.Integer, primary_key=True)
+    mcfId = db.Column(db.String(80))
+    mcfName = db.Column(db.String(128), index=True)
+    email = db.Column(db.String(128), unique=True, index=True)
+    eventId = db.Column(db.Integer, index=True)
+    tournamentName = db.Column(db.String(128), index=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+    def __repr__(self):
+        return f"Withdrawal('{self.mcfId}', '{self.mcfName}', '{self.tournamentName}', '{self.created_at}')"
+
 
 class FormQuestion(db.Model):
     __tablename__ = "form_questions"
