@@ -122,7 +122,6 @@ def create_databases():
             db.close_all_sessions()
 
 with app.app_context():
-    # db.drop_all()
     close_all_sessions()
     db.engine.dispose()    
     db.drop_all()
@@ -209,6 +208,8 @@ def update_fide():
 
     statement = db.select(Member).where(Member.mcfId == mcfId)
     m = db.session.scalars(statement).first()
+    if m.isAdmin:
+        return redirect(url_for("member_front", whatHappened="Info: admin ans not saved to avoid spoiling ans data"))
     m.fideId = request.form['fideId']
     m.fideName = request.form['fideName']
     m.fideRating = request.form['fideRating']
@@ -229,7 +230,8 @@ def update_fide():
     except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
         db.session.rollback()
         # return C_templater.custom_render_template(errorTopic="DB-API IntegrityError", errorsList=[i._message], isTemplate=True)
-        whatHappened = "something went wrong"
+        whatHappened = "IntegrityError: Something went wrong (most likely FIDE already exists)"
+        app.logger.info(f"IntegrityError: {str(i)}")
         
     except DataError as d:
         db.session.rollback()
@@ -329,7 +331,7 @@ def create_member():
         db.session.commit()
     except IntegrityError as i:
         db.session.rollback()
-        return redirect(url_for('find_members', whatHappened="Error: "+i._message()))
+        return redirect(url_for('find_members', whatHappened=f"IntegrityError: {i}"))
         # return C_templater.custom_render_template(errorTopic="DB-API IntegrityError", errorsList=[i._message], isTemplate=True)
     # example of final form ===== return c_templater("Data entry error", "tournament name duplicate", "error.html")
         
@@ -361,7 +363,7 @@ def kill_event():
             whatHappened = "expired event KILLED"
         except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
             db.session.rollback()
-            whatHappened="Error: "+i._message()
+            whatHappened=f"IntegrityError: {i}"
         
         return redirect(url_for('find_events', whatHappened=whatHappened))
         
@@ -466,7 +468,7 @@ def expire_event(id):
         whatHappened = "event EXPIRED and its associated events-members, formquestions, formquestionssubgroup, formquestionanswers, overwritten answers & upload logs DELETED"
     except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
         db.session.rollback()
-        whatHappened="Error: "+i._message()
+        whatHappened=f"IntegrityError: {i}"
         return redirect(url_for('find_events', whatHappened=whatHappened))
 
     query = sa.select(Event)
@@ -493,7 +495,7 @@ def kill_events():
         whatHappened = "all events deleted, "
     except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
         db.session.rollback()
-        whatHappened = "something went wrong, contact the web app dev"
+        whatHappened = f"IntegrityError: {i}"
 
         
     stmt = sa.delete(EventMember)
@@ -504,7 +506,7 @@ def kill_events():
         whatHappened = "all member-events relations deleted"
     except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
         db.session.rollback()
-        whatHappened = "something went wrong, contact the web app dev"
+        whatHappened = f"IntegrityError: {i}"
 
     stmt = sa.delete(FormQuestion)
     db.session.execute(stmt)
@@ -514,7 +516,7 @@ def kill_events():
         whatHappened = "all member-events rel, formquestion deleted"
     except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
         db.session.rollback()
-        whatHappened = "something went wrong, contact the web app dev"
+        whatHappened = f"IntegrityError: {i}"
 
         
     stmt = sa.delete(FormQuestionSubgroup)
@@ -525,7 +527,7 @@ def kill_events():
         whatHappened = "all member-events rel, formquestion, formquestionsubgroup deleted"
     except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
         db.session.rollback()
-        whatHappened = "something went wrong, contact the web app dev"
+        whatHappened = f"IntegrityError: {i}"
 
     stmt = sa.delete(FormQuestionAnswers)
     db.session.execute(stmt)
@@ -535,7 +537,7 @@ def kill_events():
         whatHappened = "all member-events rel, formquestion, formquestionsubgroup, answers deleted"
     except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
         db.session.rollback()
-        whatHappened = "something went wrong, contact the web app dev"
+        whatHappened = f"IntegrityError: {i}"
 
     stmt = sa.delete(FormQuestionAnswersDeleted)
     db.session.execute(stmt)
@@ -545,7 +547,7 @@ def kill_events():
         whatHappened = "all member-events rel, formquestion, formquestionsubgroup, answers & overwritten answers deleted"
     except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
         db.session.rollback()
-        whatHappened = "something went wrong, contact the web app dev"
+        whatHappened = f"IntegrityError: {i}"
 
     
     query = sa.select(Event)
@@ -570,27 +572,28 @@ def kill_member(mcfId):
     # app.logger.info(type(old_event.data.values.tolist()))
 
 
-    query = sa.select(Member)
+    query = sa.select(Member).where(Member.isAdmin == False)
     ms = db.session.scalars(query).all()
 
     # return "member successfully removed"
-    return render_template("members.html", ms=ms, whatHappened="Member successfully killed")
+    # return render_template("members.html", ms=ms, whatHappened="Member successfully killed")
+    return redirect(url_for("find_members", ms=ms, whatHappened="Member successfully killed"))
 
 @app.route('/kill-members')
 @admin_required
 def kill_members():
     
     
-    stmt = sa.delete(Member)
+    stmt = sa.delete(Member).where(Member.isAdmin == False)
     db.session.execute(stmt)
     db.session.commit()
 
 
-    query = sa.select(Member)
+    query = sa.select(Member).where(Member.isAdmin == False)
     ms = db.session.scalars(query).all()
 
     # return "member successfully removed"
-    return render_template("members.html", ms=ms, whatHappened="All killed")
+    return redirect(url_for("find_members", ms=ms, whatHappened="All killed"))
 
 
 
@@ -639,8 +642,12 @@ def find_events():
 def find_members():
 
     page = request.args.get("page", 1, type=int)
+    whatHappened = ""
+    if request.args.get("whatHappened"):
+        whatHappened = request.args.get("whatHappened")
     
-    query = sa.select(Member).order_by(Member.mcfName)
+    
+    query = sa.select(Member).where(Member.isAdmin == False).order_by(Member.mcfName)
     ms_paginate=db.paginate(query, page=page, per_page=20, error_out=False)
     # ms = db.session.scalars(query).all()
 
@@ -658,7 +665,7 @@ def find_members():
     
     # return "wait"
     # ms_dict = [m.__dict__ for m in ms]
-    return render_template("members.html", ms=ms_paginate.items, prev_url=prev_url, next_url=next_url, page=page, totalPages=ms_paginate.pages, totalCount=count)
+    return render_template("members.html", ms=ms_paginate.items, prev_url=prev_url, next_url=next_url, page=page, totalPages=ms_paginate.pages, totalCount=count, whatHappened=whatHappened)
 
 
 
@@ -671,6 +678,10 @@ def event_members(id):
 
     statement = db.select(EventMember).where(EventMember.eventId == eventId)
     ems = db.session.scalars(statement).all()
+
+    statement = db.select(Event).where(Event.id == eventId)
+    e = db.session.scalars(statement).first()
+    # endgeteventname
 
     
     # ===== trying something radical, list comprehension and in_() operator
@@ -691,7 +702,7 @@ def event_members(id):
     
 
 
-    return render_template("event-members.html", ms=ms, eventId=eventId)
+    return render_template("event-members.html", ms=ms, eventName=e.tournamentName, eventId=eventId)
         
 
 
@@ -732,7 +743,7 @@ def verify_reset_token(token):
     app.logger.info("=====")
     s=Serializer(app.config['SECRET_KEY'])
     try:
-        some_id = s.loads(token, max_age=1500)['some_id']
+        some_id = s.loads(token, max_age=app.config["TOKEN_MAX_AGE"])['some_id']
         app.logger.info("=====")
         app.logger.info(f"some_id {some_id}")
         app.logger.info("=====")
@@ -814,7 +825,53 @@ def upload_logs():
 
     
 
-    return render_template("upload-logs.html", fs=fs)                    
+    return render_template("upload-logs.html", fs=fs)
+
+
+@app.route('/upload-logs-by-event/<int:id>', methods = ["GET"])
+@admin_required
+def upload_logs_by_event(id):
+
+    
+    eventId = id
+
+
+    if request.args.get("whatHappened"):
+        return render_template("upload-logs-by-event.html", whatHappened=request.args.get("whatHappened"))
+
+
+    statement = db.select(File).where(File.eventId == eventId)
+    fs = db.session.scalars(statement).all()
+    whatHappened = ""
+    if not fs:
+        whatHappened = "No entries yet"
+    
+
+    return render_template("upload-logs-by-event.html", fs=fs, whatHappened=whatHappened)
+
+
+@app.route('/kill-upload-log-by-event', methods = ["POST"])
+@admin_required
+def kill_upload_log_by_event():
+
+    eventId = request.form["id"]
+
+
+
+    statement = sa.delete(File).where(File.eventId == eventId)
+    db.session.execute(statement)
+
+
+    try:
+        db.session.commit()
+        whatHappened = "Logs emptied"
+    except:
+        db.session.rollback()
+        whatHappened = "something went wrong"
+
+    return redirect(url_for("upload_logs_by_event", id=eventId, whatHappened=whatHappened))
+
+
 
 
 
@@ -895,7 +952,7 @@ def form_submission():
     statement = db.select(Member).where(Member.mcfId == mcfId)
     m = db.session.scalars(statement).first()
     if m.isAdmin:
-        return redirect(url_for('member_front', whatHappened="Info: admin ans not reg. to avoid spoiling ans data"))
+        return redirect(url_for('member_front', whatHappened="Info: admin ans not saved to avoid spoiling ans data"))
 
         
     # app.logger.info("==========")    
@@ -933,7 +990,7 @@ def form_submission():
         whatHappened = "answers successfully recorded"
     except IntegrityError as i:
         db.session.rollback()
-        whatHappened="Error: "+i._message()
+        whatHappened=f"IntegrityError: {i}"
         return redirect(url_for('member_front', whatHappened=whatHappened))
     # enddeleteandbackupsubmission
 
@@ -1021,7 +1078,7 @@ def form_submission():
         whatHappened = "answers successfully recorded"
     except IntegrityError as i:
         db.session.rollback()
-        whatHappened="Error: "+i._message()
+        whatHappened=f"IntegrityError: {i}"
         return redirect(url_for('member_front', whatHappened=whatHappened))
         # endforloopanswers
 
@@ -1060,13 +1117,17 @@ def event_answers_page():
     eventId = request.form.get('eventId')
 
 
-
+    statement = db.select(Event).where(Event.id == eventId)
+    e = db.session.scalars(statement).first()
+    app.logger.info(e)
+    # endgeteventname
+    
     
     # tablecolumns    
     statement = db.select(FormQuestionAnswers).where(FormQuestionAnswers.eventId == eventId)
     res_first = db.session.scalars(statement).first()
     if not res_first:
-        return render_template('event-answers-page.html', membersAnswers={}, whatHappened="no entries yet", eventId=eventId)
+        return render_template('event-answers-page.html', membersAnswers={}, whatHappened="no entries yet", eventId=eventId, eventName=e.tournamentName)
         
     mcfId = res_first.mcfId
     
@@ -1134,7 +1195,7 @@ def event_answers_page():
     # }    
 
     app.logger.info(membersAnswers)
-    return render_template('event-answers-page.html', membersAnswers=membersAnswers, eventId=eventId, whatHappened=whatHappened)
+    return render_template('event-answers-page.html', membersAnswers=membersAnswers, eventId=eventId, eventName=e.tournamentName, whatHappened=whatHappened)
 
 
 @app.route('/event-answers-page-overwritten', methods = ['POST'])
@@ -1145,12 +1206,17 @@ def event_answers_page_overwritten():
 
     eventId = request.form.get('eventId')
 
+    statement = db.select(Event).where(Event.id == eventId)
+    e = db.session.scalars(statement).first()
+    app.logger.info(e)
+    # endgeteventname
+
     
     # tablecolumns    
     statement = db.select(FormQuestionAnswersDeleted).where(FormQuestionAnswersDeleted.eventId == eventId)
     res_first = db.session.scalars(statement).first()
     if not res_first:
-        return render_template('event-answers-page-overwritten.html', membersAnswers={}, whatHappened="no entries yet", eventId=eventId)
+        return render_template('event-answers-page-overwritten.html', membersAnswers={}, whatHappened="no entries yet", eventName=e.tournamentName, eventId=eventId)
         
     mcfId = res_first.mcfId
     
@@ -1225,7 +1291,7 @@ def event_answers_page_overwritten():
     #     }
     # }    
     
-    return render_template('event-answers-page-overwritten.html', membersAnswers=membersAnswers, eventId=eventId, whatHappened=whatHappened)
+    return render_template('event-answers-page-overwritten.html', membersAnswers=membersAnswers, eventId=eventId, eventName=e.tournamentName, whatHappened=whatHappened)
 
 
         
@@ -1399,7 +1465,7 @@ def event_form_subgroup_creator():
                         whatHappened = request.form.get("field") + " - " + request.form.get("type") + " created"
                     except IntegrityError as i:
                         db.session.rollback()
-                        whatHappened="Error: "+i._message()
+                        whatHappened=f"IntegrityError: {i}"
                         return redirect(url_for('event_form_subgroup_creator', whatHappened=whatHappened, eventId=eventId, subgroupId=subgroupId))
                 #enddropdownorrradio
                 return redirect(url_for('event_form_subgroup_creator', whatHappened=whatHappened, eventId=eventId, subgroupId=subgroupId))
@@ -1420,7 +1486,7 @@ def event_form_subgroup_creator():
                     whatHappened = request.form.get("field") + " - " + request.form.get("type") + " created"
                 except IntegrityError as i:
                     db.session.rollback()
-                    whatHappened="Error: "+i._message()
+                    whatHappened=f"IntegrityError: {i}"
                     return redirect(url_for('event_form_subgroup_creator', whatHappened=whatHappened, eventId=eventId, subgroupId=subgroupId))
                 #endtextorfile                        
             #endaddbutton
@@ -1476,7 +1542,7 @@ def event_form_creator():
                         whatHappened = request.form.get("field") + " - " + request.form.get("type") + " created"
                     except IntegrityError as i:
                         db.session.rollback()
-                        whatHappened="Error: "+i._message()
+                        whatHappened=f"IntegrityError: {i}"
                         return redirect(url_for('event_form_creator', whatHappened=whatHappened, eventId=eventId))
                 #enddropdownorcheckboxorradio
                 return redirect(url_for('event_form_creator', whatHappened=whatHappened, eventId=eventId))
@@ -1495,7 +1561,7 @@ def event_form_creator():
                     whatHappened = request.form.get("field") + " - " + request.form.get("type") + " created"
                 except IntegrityError as i:
                     db.session.rollback()
-                    whatHappened="Error: "+i._message()
+                    whatHappened=f"IntegrityError: {i}"
                     return redirect(url_for('event_form_creator', whatHappened=whatHappened, eventId=eventId))
                 # endtextorfile
                 #endadd
@@ -1524,7 +1590,7 @@ def event_form_creator():
                 db.session.commit()
             except IntegrityError as i:
                 db.session.rollback()
-                whatHappened="Error: "+i._message()
+                whatHappened=f"IntegrityError: {i}"
                 return redirect(url_for('event_form_creator', whatHappened=whatHappened, eventId=eventId))
 
             
@@ -1699,7 +1765,7 @@ def member_front():
                     whatHappened="Saved: "
                 except IntegrityError as i: 
                     db.session.rollback()
-                    whatHappened="Error: "+i._message()
+                    whatHappened=f"IntegrityError: {i}"
 
                     
                     # endsavebutton
@@ -1725,7 +1791,7 @@ def member_front():
                     db.session.commit()
                 except IntegrityError as i:
                     db.session.rollback()
-                    whatHappened="Error: "+i._message()
+                    whatHappened=f"IntegrityError: {i}"
 
 
 
@@ -1860,7 +1926,7 @@ def bulk_upload_events_csv():
                 db.session.commit()
             except IntegrityError as i:
                 db.session.rollback()
-                whatHappened="Error: "+i._message()
+                whatHappened=f"IntegrityError: {i}"
                 return render_template("main-page.html", whatHappened=whatHappened)
 
 
@@ -1900,7 +1966,7 @@ def bulk_upload_members_csv():
 
         except IntegrityError as i:
             db.session.rollback()
-            whatHappened="Error: "+i._message()
+            whatHappened=f"IntegrityError: {i}"
             return render_template("main-page.html", whatHappened=whatHappened)
         
 
@@ -1947,7 +2013,7 @@ def bulk_upload_fide_csv():
         try:
             db.session.commit()
         except IntegrityError as i:
-            whatHappened="Error: "+i._message()
+            whatHappened=f"IntegrityError: {i}"
             return render_template("main-page.html", whatHappened="")
         
             # query = sa.select(Member).where(Member.mcfId == row[''])
@@ -1959,7 +2025,7 @@ def bulk_upload_fide_csv():
             db.session.commit()
         except IntegrityError as i:
             db.session.rollback()
-            whatHappened="Error: "+i._message()
+            whatHappened=f"IntegrityError: {i}"
             return render_template("main-page.html", whatHappened=whatHappened)
 
     # if not duplicatesList:            
@@ -2057,7 +2123,9 @@ def processMcfList():
             db.session.rollback()
             # app.logger.info(i._message())
             # return C_templater.custom_render_template("Data entry error", i._message(), False)
-            return C_templater.custom_render_template("DB-API IntegrityError", [i._message()], True)
+            # return redirect(url_for("main"))
+            # return C_templater.custom_render_template("DB-API IntegrityError", [i._message()], True)
+            return f"IntegrityError: {i}", [], []
 
 
     if not skippedList:            
@@ -2108,7 +2176,7 @@ def processFrlList():
 
     except IntegrityError as i:
         db.session.rollback()
-        whatHappened = "Something went wrong"
+        whatHappened = f"IntegrityError: {i}"
 
 
     if not whatHappened and not skippedList:
@@ -2372,8 +2440,13 @@ def partial_download():
     
     downloadOffset = request.args.get("downloadOffset", type=int)
 
-    query = sa.select(Member).order_by(Member.mcfName)
+    query = sa.select(Member).where(Member.isAdmin == False).order_by(Member.mcfName)
     ms_paginate=db.paginate(query, page=downloadOffset, per_page=500, error_out=False)
+    app.logger.info(ms_paginate)
+    app.logger.info(ms_paginate)
+    app.logger.info(ms_paginate.items)
+    if not ms_paginate.items:
+        return redirect(url_for("find_members", whatHappened = "no Members to download"))
 
 
     var1 = ms_paginate.items[0]
