@@ -113,7 +113,7 @@ class Member(UserMixin, db.Model):
     nationalRating = db.Column(db.String(64), index=True)
     # events = db.relationship('Event', secondary=event_member, back_populates='members')
     # events = db.Column(db.String(300), index=True)
-    fideId = db.Column(db.Integer)
+    fideId = db.Column(db.Integer, unique=True, nullable=True)
     fideName = db.Column(db.String(80))
     fideRating = db.Column(db.Integer(), index=True)
     isAdmin = db.Column(db.Boolean, index=True, default=False)
@@ -140,7 +140,7 @@ class Member(UserMixin, db.Model):
         # for those confused
         # the basic shape
         # <statement-to-try> if <return-if-true> else <return-if-else>
-        return int(num) if num and num.isdigit() else 0
+        return int(num) if num and num.isdigit() else None
         
 
 
