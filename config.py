@@ -32,8 +32,7 @@ class Config:
     if os.environ.get('YOURAPPLICATION_MODE') == "production":
         UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER')
         
-    EXPIRY_PERIOD = 730 # 730 hours is 1 month
-    EXPIRY_PERIOD = 1
+    EXPIRY_PERIOD = 1 # 730 hours is 1 month
     if os.environ.get('YOURAPPLICATION_MODE') == "production":
         EXPIRY_PERIOD = os.environ.get('EXPIRY_PERIOD')
 
@@ -42,10 +41,16 @@ class Config:
     ADMIN_EMAIL = "wan.ardie.mejia@gmail.com"
     ADMIN_PASSWORD = "password"
     if os.environ.get('YOURAPPLICATION_MODE') == "production":
-        EXPIRY_PERIOD = os.environ.get('EXPIRY_PERIOD')
         ADMIN_ID = "terry"
         ADMIN_EMAIL = "wan_ahmad_ardie@yahoo.com"
         ADMIN_PASSWORD = "password"
+
+        
+
+    TOKEN_MAX_AGE = 1200 # 1200 is 20 min, 10800 is 3 hours
+    if os.environ.get('YOURAPPLICATION_MODE') == "production":
+        TOKEN_MAX_AGE = os.environ.get('TOKEN_MAX_AGE')        
+        
 
     # # these refer to SMTP settings
     # app.config['MAIL_PASSWORD'] = "rppfxeiuwqrxjilk"

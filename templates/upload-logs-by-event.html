@@ -1,0 +1,100 @@
+{% extends "base_form_h.html" %}
+
+
+
+
+{% block heading_1 %}
+    Upload logs
+{% endblock %}
+
+
+{%  block form %}
+
+    <br>
+
+
+    <table  class="table-auto border border-yellow-400 border-2">
+	<caption class="caption-top {{ 'text-orange-600' if 'Error' in whatHappened else 'text-green-600'}} italic p-2">
+	    {{ whatHappened }}
+	</caption>
+	<thead>
+	    <tr class="bg-yellow-400">
+		<th class="w-100">
+		    <div class="m-3">ID</div>
+		</th>
+		<th class="w-100">
+		    <div class="m-3">File Name</div>
+		</th>
+		<th>
+		    <div class="m-3">File Path</div>
+		</th>
+		<th>
+		    <div class="m-3">MCF ID</div>
+		</th>
+		<th>
+		    <div class="m-3">Created At</div>
+		</th>
+	    </tr>
+	</thead>
+	<tbody>
+	    {% for f in fs %}
+		<tr class="border border-yellow-400 border-2">
+		    
+
+		    
+		    <td>
+			<div class="m-3">{{ f.id }}</div>
+		    </td>
+		    <td>
+			<div class="m-3">{{ f.filename }}</div>
+		    </td>
+		    <td>
+			<div class="m-3">{{ f.filepath }}</div>
+		    </td>
+		    <td>
+			<div class="m-3">{{ f.mcfId }}</div>
+		    </td>
+		    <td>
+			<div class="m-3">{{ f.created_at }}</div>
+		    </td>
+
+
+
+
+
+		    
+
+		</tr>
+	    {% endfor %}
+	    <tr>
+		<td colspan="4"></td>
+		<td>
+		    {%  set f = fs | first %}
+		    {% if f %}
+		    <div data-tooltip-target="tooltip-form-data-kill-log" class="m-3">
+			<form action={{ url_for('kill_upload_log_by_event')}}  method="post" onsubmit="return MCFeventKillEventLog();">
+			    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+			    <input type="hidden" name="id" value="{{ f.eventId }}"/>
+
+			    <button type="submit" class="p-2 m-2 cursor-pointer">
+				
+				<a>{% include 'hardTrash.j2' %}</a>
+			    </button>
+			</form>
+
+		    </div>
+		    <div id="tooltip-form-data-kill-log" role="tooltip" placement="bottom" class="absolute z-10  inline-block border border-1 w-60 px-3 py-2 text-m font-light text-black transition-opacity opacity-0  duration-300 bg-white rounded-lg shadow-xl tooltip">
+			kills log of this event
+		    </div>
+		    {% endif %}
+		</td>
+	    </tr>
+	
+	</tbody>
+    </table>
+
+
+
+{% endblock %}
+
+

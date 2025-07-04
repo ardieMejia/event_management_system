@@ -165,12 +165,20 @@
 			    
 			    <button id="formCreateID_subgroupButton" type="submit" name="button" value="subgroup" class="w-20 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 m-2 cursor-pointer">Subgroup creator</button>
     </form>
-    <!-- a form just to retain "awareness" of user canceled form crestion, so we can say "No Form Created" -->
-    <form  name="dummyForm" action="{{ url_for('event_form_creator') }}" method="post">
-	<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-	<button id="formCreateID_doneButton" type="submit" name="button" value="done" class="w-20 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 m-2 cursor-pointer">Done</button>
-	<input type="hidden" name="whatHappened" value="{{ whatHappened }}"/>
-    </form>
+    <div data-tooltip-target="tooltip-done">
+	
+	<form  action="{{ url_for('event_form_creator') }}" method="post">
+	    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+	    <button id="formCreateID_doneButton" type="submit" name="button" value="done" class="w-20 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 m-2 cursor-pointer">Done</button>
+	    <input type="hidden" name="whatHappened" value="{{ whatHappened }}"/>
+	</form>
+    </div>
+    <div id="tooltip-done" role="tooltip" placement="bottom" class="absolute z-10  inline-block border border-1 w-60 px-3 py-2 text-m font-medium text-black transition-opacity opacity-0  duration-300 bg-white rounded-lg shadow-xl tooltip text-left">
+	<div class="font-light">
+Finish form without saving current input
+	</div>
+
+    </div>
 			</div>
 
 		    </td>

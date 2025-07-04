@@ -118,6 +118,15 @@ Events
 		</div>
 	    </th>
 	    <th>
+		<div class="px-6 grid place-content-center">		    
+		    <div data-tooltip-target="tooltip-form-data-members-button"> 
+			<div class="m-3">
+			    Logs
+			</div>
+		    </div>
+		</div>
+	    </th>
+	    <th>
 		<div   class="m-2 justify-items-center">
 		    <div data-tooltip-target="tooltip-form-data-softdelete-button" class="flex" >			
 			<div>			    
@@ -282,6 +291,17 @@ Events
 		    </button>
 		</div>
 	    </td>
+	    <td>		    
+		<div class="m-3 justify-items-center">
+	    	    <button type="submit" class="p-2 cursor-pointer">
+			<a href="{{ url_for('upload_logs_by_event', id=e.id)  }}">
+			    <div class="m-3">
+				Logs
+			    </div>
+			</a>			
+		    </button>
+		</div>
+	    </td>
 	    <td>
 		{% if not e.deleted_at  %}
 		    <div   class="m-2 justify-items-center">
@@ -315,7 +335,7 @@ Events
 	</tr>
 	{% endfor %}
 	<tr>
-	    <td colspan="16"></td>
+	    <td colspan="17"></td>
 	    <td>
 		<div class="m-3">
 		    <button type="submit" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900 cursor-pointer">

@@ -92,37 +92,54 @@ all form derived data of specific event:
     }
 }
 
-    function MCFeventKillEvent(){
+function MCFeventKillEvent(){
 
-	const text = `
+    const text = `
 Hard deleting will also remove
 this event data in related entities
 
 Continue?`;
-	
-	if (confirm(text) == true){
-	    return true;
-	}else{
-	    return false;
-	}
+    
+    if (confirm(text) == true){
+	return true;
+    }else{
+	return false;
     }
+}
 
-    function MCFeventSoftKillEvent(){
+function MCFeventKillEventLog(){
 
-	const text = `
+    const text = `
+Hard deleting logs of this
+specific event
+
+Continue?`;
+    
+    if (confirm(text) == true){
+	return true;
+    }else{
+	return false;
+    }
+}
+
+
+
+function MCFeventSoftKillEvent(){
+    
+    const text = `
 Expiring an event also
 deletes data in related entities
 it stays expires for 1 month then
 auto deletes
 
 Continue?`;
-	
-	if (confirm(text) == true){
-	    return true;
-	}else{
-	    return false;
+    
+    if (confirm(text) == true){
+	return true;
+    }else{
+	return false;
 	}
-    }
+}
 
 
 function confirmWithAJAX(message, callback){
@@ -152,28 +169,61 @@ function confirmWithAJAX(message, callback){
 $(document).ready(function(){
     /* alert("asd"); */
     var creatorForm = $("#formCreator");
+
     
+    var addQuestionButton = $("#formCreateID_addButton");
     // removeClass("border-none").addClass("border-3").addClass("border-red-600");  
 
 
-    creatorForm.on("submit", function(event){
+    // creatorForm.on("submit", function(event){
+    addQuestionButton.click(function(e){
 	event.preventDefault();
 	fieldstringVal = creatorForm.find('#formCreateID_field').val();
 	valuestringVal = creatorForm.find('#formCreateID_value').val();
+	continueSubmit1 = false
+	continueSubmit2 = false
 
 
-
-	if (typeof fieldstringVal !== 'undefined'){
-	    if (fieldstringVal.includes(" ")){
+	if (typeof fieldstringVal !== 'undefined' && fieldstringVal !== ""){
+	    if(fieldstringVal.includes(" ")){
+		// alert("field cant contain space, make it memorable")
 		$('#field').removeClass("border-none").addClass("border-3").addClass("border-red-600");
-		$('#formCreatorInputInvalid').html("<p>field cannot contain spaces</p>").removeAttr("hidden");
-	    }else if (valuestringVal === ""){
-		$('#field').removeClass("border-none").addClass("border-3").addClass("border-red-600");
-		$('#formCreatorInputInvalid').html("<p>value cannot be empty</p>").removeAttr("hidden");
-	    }else{		
-		$(this).unbind("submit")
+		$('#formCreatorInputInvalid').html(" <p>field name should not contain spaces.</p> ").removeAttr("hidden");		     
+	    }else{
+		// $(this).unbind("submit")
+		continueSubmit1 = true
 	    }
+	}else{
+	    $('#field').removeClass("border-none").addClass("border-3").addClass("border-red-600");
+	    $('#formCreatorInputInvalid').html(" <p>field name cannot be empty</p> ").removeAttr("hidden");		     
 	}
+	
+	if (typeof valuestringVal == 'undefined' || valuestringVal == ""){
+	    $('#field').removeClass("border-none").addClass("border-3").addClass("border-red-600");
+	    $('#formCreatorInputInvalid').html(" <p>values cannot be empty</p> ").removeAttr("hidden");	   
+	}else{
+	    continueSubmit2 = true
+	}
+
+	
+	if (continueSubmit1 && continueSubmit2){
+	    addQuestionButton.unbind("click")
+	    addQuestionButton.click();	    
+	}
+	
+
+
+	// if (typeof fieldstringVal !== 'undefined'){
+	//     if (fieldstringVal.includes(" ")){
+	// 	$('#field').removeClass("border-none").addClass("border-3").addClass("border-red-600");
+	// 	$('#formCreatorInputInvalid').html("<p>field cannot contain spaces</p>").removeAttr("hidden");
+	//     }else if (valuestringVal === ""){
+	// 	$('#field').removeClass("border-none").addClass("border-3").addClass("border-red-600");
+	// 	$('#formCreatorInputInvalid').html("<p>value cannot be empty</p>").removeAttr("hidden");
+	//     }else{		
+	// 	$(this).unbind("submit")
+	//     }
+	// }
 
     });
 
@@ -242,7 +292,7 @@ $(window).on('load', function() {
     console.log(choiceCount)
     if (choiceCount == 0){
 	/* $('#memberEventForm button').hide()		  */
-	$('#eventDeleteButton').hide();
+	// $('#eventDeleteButton').hide();
 	$('#eventSaveButton').hide();
 	// $('#fillFormButton').hide();
 	
