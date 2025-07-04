@@ -119,10 +119,26 @@ Events
 	    </th>
 	    <th>
 		<div class="px-6 grid place-content-center">		    
-		    <div data-tooltip-target="tooltip-form-data-members-button"> 
+		    <div > 
 			<div class="m-3">
 			    Logs
 			</div>
+		    </div>
+		</div>
+	    </th>
+	    <th>
+		<div class="px-6 grid place-content-center">		    
+		    <div data-tooltip-target="tooltip-withdrawal-logs-button"> 
+			<div class="m-3">
+			    W Logs
+			</div>
+			<div class="m-3">			    
+			    {% include 'questionMark.j2' %}
+			    
+			</div>
+		    </div>
+		    <div id="tooltip-withdrawal-logs-button" role="tooltip" placement="bottom" class="absolute z-10  inline-block border border-1 w-60 px-3 py-2 text-m font-light text-black transition-opacity opacity-0  duration-300 bg-white rounded-lg shadow-xl tooltip">
+			Withdrawal logs
 		    </div>
 		</div>
 	    </th>
@@ -185,7 +201,7 @@ Events
 		</div>
 	    </td>
 	    <td>
-		<div class="m-3">{{ e.tournamentName }}</div>
+		<div class="m-3 text-sm">{{ e.tournamentName }}</div>
 	    </td>
 	    <td>
 		<div class="m-3">{{ e.startDate }}</div>
@@ -216,10 +232,10 @@ Events
 		</div>
 	    </td>
 	    <td>
-		<div class="m-3">{{ e.withdrawalClause }}</div>
+		<div class="m-3 text-sm">{{ e.withdrawalClause }}</div>
 	    </td>
 	    
-	    <td class="w-20 p-4 border-x-2 border-yellow-600 bg-yellow-200 font-light">
+	    <td class="w-20 p-2 border-x-2 border-yellow-600 bg-yellow-200 font-light">
 		{% if not e.deleted_at  %}
 		    <form  action="{{ url_for('event_form_creator')  }}" method="post" onsubmit="return submitFormCreator();">
 			<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
@@ -302,6 +318,17 @@ Events
 		    </button>
 		</div>
 	    </td>
+	    <td>		    
+		<div class="m-3 justify-items-center">
+	    	    <button type="submit" class="p-2 cursor-pointer">
+			<a href="{{ url_for('withdrawal_logs_by_event', id=e.id)  }}">
+			    <div class="m-3">
+				W Logs
+			    </div>
+			</a>			
+		    </button>
+		</div>
+	    </td>
 	    <td>
 		{% if not e.deleted_at  %}
 		    <div   class="m-2 justify-items-center">
@@ -335,7 +362,7 @@ Events
 	</tr>
 	{% endfor %}
 	<tr>
-	    <td colspan="17"></td>
+	    <td colspan="18"></td>
 	    <td>
 		<div class="m-3">
 		    <button type="submit" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900 cursor-pointer">

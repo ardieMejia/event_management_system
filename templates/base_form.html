@@ -122,6 +122,21 @@ Continue?`;
     }
 }
 
+function MCFeventKillEventWLog(){
+
+    const text = `
+Hard deleting withdrawal logs of this
+specific event
+
+Continue?`;
+    
+    if (confirm(text) == true){
+	return true;
+    }else{
+	return false;
+    }
+}
+
 
 
 function MCFeventSoftKillEvent(){

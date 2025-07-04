@@ -14,7 +14,9 @@
 
 
     <table  class="table-auto border border-yellow-400 border-2">
-	<caption class="caption-top {{ 'text-orange-600' if 'Error' in whatHappened else 'text-green-600'}} italic p-2">
+	<caption class="caption-top {{ 'text-orange-600' if "Error" in whatHappened else
+				    ('text-blue-600' if "Info" in whatHappened else'text-green-600') 					
+				    }} italic p-2">	    
 	    {{ whatHappened }}
 	</caption>
 	<thead>

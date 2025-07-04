@@ -31,6 +31,8 @@ from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer as Serializer
 import sys
 from logging.config import dictConfig
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 import json
 
@@ -62,13 +64,20 @@ login = LoginManager(app)
 mail = Mail(app)
 csrf = CSRFProtect(app)
 
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["200 per day", "50 per hour"],
+    storage_uri="memory://",
+)
+
 # app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 
 from Models.declarative import EventListing # ===== remove this
 import sqlalchemy as sa
 app.app_context().push()
-from model import Event, Member, File, FormQuestion, EventMember, FormQuestionAnswers, FormQuestionSubgroup, FormQuestionAnswersDeleted, EventDeleted
+from model import Event, Member, File, FormQuestion, EventMember, FormQuestionAnswers, FormQuestionSubgroup, FormQuestionAnswersDeleted, EventDeleted, Withdrawal
 Session = sessionmaker(bind=db.engine)
 
 
@@ -392,7 +401,7 @@ def kill_event():
 
     try:
         db.session.commit()
-        whatHappened = "this event and its associated events-members, formquestions, formquestionssubgroup, formquestionanswers, overwritten answers & upload logs KILLED"
+        whatHappened = "Success: This event and its associated events-members, formquestions, formquestionssubgroup, formquestionanswers, overwritten answers & upload logs KILLED"
     except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
         db.session.rollback()
         whatHappened="Error: "+i._message()
@@ -807,23 +816,11 @@ def send_mail():
 @admin_required
 def upload_logs():
 
-    # page = request.args.get("page", 1, type=int)
-    
-    # query = sa.select(Member).order_by(Member.mcfName)
-    # ms_paginate=db.paginate(query, page=page, per_page=20, error_out=False)
-    # ms = db.session.scalars(query).all()
-
-    # prev_url = "a_page/page=23"
-    # prev_url = url_for("find_members", page=ms_paginate.prev_num)
-    # next_url = url_for("find_members", page=ms_paginate.next_num)
-
-
-    # https://stackoverflow.com/questions/14754994/why-is-sqlalchemy-count-much-slower-than-the-raw-query
     statement = db.select(File)
     fs = db.session.scalars(statement).all() # coz I dont know a better/faster way to count records
-
-
-    
+    whatHappened = ""
+    if not fs:
+        whatHappened = "Info: No entries yet"
 
     return render_template("upload-logs.html", fs=fs)
 
@@ -835,20 +832,76 @@ def upload_logs_by_event(id):
     
     eventId = id
 
-
     if request.args.get("whatHappened"):
         return render_template("upload-logs-by-event.html", whatHappened=request.args.get("whatHappened"))
-
 
     statement = db.select(File).where(File.eventId == eventId)
     fs = db.session.scalars(statement).all()
     whatHappened = ""
     if not fs:
-        whatHappened = "No entries yet"
-    
+        whatHappened = "Info: No entries yet"
 
     return render_template("upload-logs-by-event.html", fs=fs, whatHappened=whatHappened)
 
+
+
+
+@app.route('/withdrawal-logs', methods = ["GET"])
+@admin_required
+def withdrawal_logs():
+
+    statement = db.select(Withdrawal)
+    ws = db.session.scalars(statement).all() # coz I dont know a better/faster way to count records
+    whatHappened = ""
+    if not ws:
+        whatHappened = "Info: No entries yet"
+
+    return render_template("withdrawal-logs.html", ws=ws)
+
+
+
+
+
+@app.route('/withdrawal-logs-by-event/<int:id>', methods = ["GET"])
+@admin_required
+def withdrawal_logs_by_event(id):
+
+    
+    eventId = id
+
+    if request.args.get("whatHappened"):
+        return render_template("withdrawal-logs-by-event.html", whatHappened=request.args.get("whatHappened"))
+
+    statement = db.select(Withdrawal).where(Withdrawal.eventId == eventId)
+    ws = db.session.scalars(statement).all()
+    whatHappened = ""
+    if not ws:
+        whatHappened = "Info: No entries yet"
+
+    return render_template("withdrawal-logs-by-event.html", ws=ws, whatHappened=whatHappened)
+
+
+
+@app.route('/kill-withdrawal-log-by-event', methods = ["POST"])
+@admin_required
+def kill_withdrawal_log_by_event():
+
+    eventId = request.form["id"]
+
+
+
+    statement = sa.delete(Withdrawal).where(Withdrawal.eventId == eventId)
+    db.session.execute(statement)
+
+
+    try:
+        db.session.commit()
+        whatHappened = "Logs emptied"
+    except:
+        db.session.rollback()
+        whatHappened = "something went wrong"
+
+    return redirect(url_for("withdrawal_logs_by_event", id=eventId, whatHappened=whatHappened))
 
 @app.route('/kill-upload-log-by-event', methods = ["POST"])
 @admin_required
@@ -891,7 +944,7 @@ def main_page():
     return render_template("main-page.html", whatHappened=whatHappened)
 
 
-@app.route('/login', methods=['POST', 'GET'])
+@app.route('/login', methods=['POST', 'GET'])   
 def login():
     # logout_user()
     if request.method == 'POST':
@@ -1732,7 +1785,6 @@ def member_front():
             # endget
             return render_template("member-front.html", m=m, tournamentRegistered=trlists, tournamentOptions=es, whatHappened=whatHappened, paymentProofs=fs)
         else:
-            paymentProofs = []
             # app.logger.info("==========")
             # app.logger.info(request.form.get("mcfId"))
             # app.logger.info(request.form)
@@ -1742,9 +1794,10 @@ def member_front():
             
             whatHappened=""
             if request.form.get("button") == "save":
+                updatedTournamentId = request.form["tournament_name"]
                 # overwrite only if event non existing in m.events
 
-                statement = db.select(EventDeleted).where(EventDeleted.id == request.form["tournament_name"])
+                statement = db.select(EventDeleted).where(EventDeleted.id == updatedTournamentId)
                 ed = db.session.scalars(statement).first()
 
 
@@ -1753,12 +1806,12 @@ def member_front():
         
                     return redirect(url_for('member_front', whatHappened=whatHappened))
 
-                statement = db.select(EventMember).where(EventMember.mcfId == current_user.mcfId, EventMember.eventId == request.form["tournament_name"])
+                statement = db.select(EventMember).where(EventMember.mcfId == current_user.mcfId, EventMember.eventId == updatedTournamentId)
                 res = db.session.execute(statement).first()
                 # app.logger.info("eeeeeeee")
                 # app.logger.info(request.form["tournament_name"])
                 if not res:
-                    em = EventMember(mcfId=current_user.mcfId, eventId=request.form["tournament_name"])
+                    em = EventMember(mcfId=current_user.mcfId, eventId=updatedTournamentId)
                     db.session.add(em)
                 try:
                     db.session.commit()
@@ -1771,7 +1824,7 @@ def member_front():
                     # endsavebutton
             # elif request.form.get("button") == "withdraw":
             elif "withdraw" in request.form.get("button"):
-                eventId = request.form.get("button").split("_")[1]
+                updatedTournamentId = request.form.get("button").split("_")[1]
 
 
                 
@@ -1779,12 +1832,19 @@ def member_front():
                 # return redirect(url_for('member_front', whatHappened="just a test", paymentProofs=""))
 
                 # em = EventMember(mcfId=current_user.mcfId, eventId=request.form["tournament_name"])
-                statement = sa.delete(EventMember).where(EventMember.mcfId == current_user.mcfId, EventMember.eventId == eventId)
+                statement = sa.delete(EventMember).where(EventMember.mcfId == current_user.mcfId, EventMember.eventId == updatedTournamentId)
                 db.session.execute(statement)
+                #endkilleventmemberrel
 
                 
-                statement = db.select(Event).where(Event.id == eventId)
+                statement = db.select(Member).where(Member.mcfId == current_user.mcfId)
+                m = db.session.scalars(statement).first()
+                statement = db.select(Event).where(Event.id == updatedTournamentId)
                 e = db.session.scalars(statement).first()
+                w = Withdrawal(mcfId=current_user.mcfId, mcfName=m.mcfName, email=m.email, eventId=updatedTournamentId, tournamentName=e.tournamentName)
+                db.session.add(w)
+                #endwithdrawlog
+                
                 whatHappened = "Successully withdrawn from "
 
                 try:
@@ -1796,14 +1856,14 @@ def member_front():
 
 
                 
-                # enddeletebutton
+                # endwithdrawbutton
             elif "fillForm" in request.form.get("button"):
-                eventId = request.form.get("button").split("_")[1]
+                updatedTournamentId = request.form.get("button").split("_")[1]
 
 
                 
                 # endfillform
-                return redirect(url_for('form_template', eventId=eventId))
+                return redirect(url_for('form_template', eventId=updatedTournamentId))
 
 
                 
@@ -1816,7 +1876,7 @@ def member_front():
             db.session.close()
 
             # endpost
-            return redirect(url_for('member_front', whatHappened=whatHappened, updatedTournamentId=request.form.get("tournament_name"), paymentProofs=paymentProofs))
+            return redirect(url_for('member_front', whatHappened=whatHappened, updatedTournamentId=updatedTournamentId ))
 
     else:
         # endnotauthenticated
@@ -1906,6 +1966,7 @@ def upload_document(uploadFile, eventId, fieldname):
 
 
 @app.route('/logout')
+@login_required
 def logout():
     logout_user()
     return redirect(url_for('main_page'))
