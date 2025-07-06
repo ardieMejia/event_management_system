@@ -702,7 +702,7 @@ def event_members(id):
     ms = []
 
     for mcfId in list_of_mcfId:
-        statement = db.select(Member).where(Member.mcfId == mcfId)
+        statement = db.select(Member).where(Member.mcfId == mcfId, Member.isAdmin == False)
         m = db.session.scalars(statement).first()
         ms.append(m)
 
@@ -947,12 +947,12 @@ def main_page():
 @app.route('/login', methods=['POST', 'GET'])   
 def login():
     # logout_user()
+    if current_user.is_authenticated:
+        if current_user.isAdmin:
+            return redirect(url_for('main_page'))
+        else:
+            return redirect(url_for('member_front'))
     if request.method == 'POST':
-        if current_user.is_authenticated:
-            if current_user.isAdmin:
-                return redirect(url_for('main_page'))
-            else:
-                return redirect(url_for('member_front'))
 
         mcfId = request.form['mcfId']
         password = request.form['password']
