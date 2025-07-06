@@ -64,6 +64,14 @@ login = LoginManager(app)
 mail = Mail(app)
 csrf = CSRFProtect(app)
 
+@app.teardown_request
+def teardown_request(response_or_exc):
+    db.session.remove()
+
+@app.teardown_appcontext
+def teardown_appcontext(response_or_exc):
+    db.session.remove()
+
 limiter = Limiter(
     get_remote_address,
     app=app,
@@ -751,6 +759,13 @@ def verify_reset_token(token):
     app.logger.info(f"verify_reset_token with token received: {token}")
     app.logger.info("=====")
     s=Serializer(app.config['SECRET_KEY'])
+    app.logger.info("=====")
+    app.logger.info(f"Serializer instance: {s}")
+    app.logger.info("=====")
+    some_id = s.loads(token, salt="reset_pass", max_age=app.config["TOKEN_MAX_AGE"])['some_id']
+    app.logger.info("=====")
+    app.logger.info(f"some_id: {some_id}")
+    app.logger.info("=====")
     try:
         some_id = s.loads(token, salt="reset_pass", max_age=app.config["TOKEN_MAX_AGE"])['some_id']
         app.logger.info("=====")
