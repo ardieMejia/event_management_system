@@ -155,8 +155,9 @@ National Interstate Chess Championship
 ** DONE remind Terry that the way event expiry is setup, you MUST backup/download users form answers, before expiring the event, coz all related entities are deleted for real. The only difference between DELETED and EXPIRED event is EXPIRED event is stored in its own table, and user gets a soft warning, when attempting to register. Show the flow of expiring an event. Which is triggered upon creation of event. show the message the user gets.
 ** NOT present, but rather reminder that soft-deleted events essentially serve special purpose in the business logic.
 ** DONE user gets feedback from file uploads, just a bit of feedback for user, if he uploads 4 files he'll know.
-** added member_events and download page, coz I forgot
+** DONE added member_events and download page, coz I forgot
 ** Becoz I insisted on password reset feature for admin, I struggled with it for a while, coz I couldnt set up a email server locally (local host), so I push and test repeatedly, that took quite a while. 
+** Show him the process to create app password
 ** Also, stupidly, I didnt realize I could suspend server between uploads. So it just sat there consuming seconds, and Render charges by the second. Kinda lucky for me, sometime last month it auto-suspended due to errors, saving my seconds. So I wasted around RM 200 just for that, but now im disabling most of the time, so Im paying much less per month.
 ** I set a request limiter (Flask-Limiter), limits to 200 requests per day, 50 per hour. Can be adjusted. Basically, a hard limit on request, basic security, in case someone attempts multiple automated requests/logins to the site. (Yes, I dont know remember the proper terminology for it, but its basic easy security)
 ** Added withdrawal logs, which I forgot completely. becoz before this members, get delted from events without logging it.

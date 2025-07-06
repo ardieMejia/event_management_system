@@ -38,12 +38,12 @@ class Config:
 
 
     ADMIN_ID = "terry"
-    ADMIN_EMAIL = "wan.ardie.mejia@gmail.com"
+    ADMIN_EMAIL = "wan_ahmad_ardie@yahoo.com"
     ADMIN_PASSWORD = "password"
     if os.environ.get('YOURAPPLICATION_MODE') == "production":
-        ADMIN_ID = "terry"
-        ADMIN_EMAIL = "wan_ahmad_ardie@yahoo.com"
-        ADMIN_PASSWORD = "password"
+        ADMIN_ID = os.environ.get('ADMIN_ID')
+        ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL')
+        ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD')
 
         
 
