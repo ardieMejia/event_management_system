@@ -721,7 +721,7 @@ def send_reset_email():
     s=Serializer(app.config['SECRET_KEY'])
     
     # some_id, has no special meaning, mostly internal to TimedJSONWebSignatureSerializer/URLSafeTimedSerializer
-    token = s.dumps({'some_id': current_user.mcfId})
+    token = s.dumps({'some_id': current_user.mcfId}, salt="reset_pass")
     app.logger.info("=====")
     app.logger.info(f"token created: {token}")
     app.logger.info("=====")
@@ -752,7 +752,7 @@ def verify_reset_token(token):
     app.logger.info("=====")
     s=Serializer(app.config['SECRET_KEY'])
     try:
-        some_id = s.loads(token, max_age=app.config["TOKEN_MAX_AGE"])['some_id']
+        some_id = s.loads(token, salt="reset_pass", max_age=app.config["TOKEN_MAX_AGE"])['some_id']
         app.logger.info("=====")
         app.logger.info(f"some_id {some_id}")
         app.logger.info("=====")
