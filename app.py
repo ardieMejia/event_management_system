@@ -762,12 +762,8 @@ def verify_reset_token(token):
     app.logger.info("=====")
     app.logger.info(f"Serializer instance: {s}")
     app.logger.info("=====")
-    some_id = s.loads(token, salt="reset_pass", max_age=app.config["TOKEN_MAX_AGE"])['some_id']
-    app.logger.info("=====")
-    app.logger.info(f"some_id: {some_id}")
-    app.logger.info("=====")
     try:
-        some_id = s.loads(token, salt="reset_pass", max_age=app.config["TOKEN_MAX_AGE"])['some_id']
+        some_id = s.loads(token, salt="reset_pass", max_age=int(app.config["TOKEN_MAX_AGE"]))['some_id']
         app.logger.info("=====")
         app.logger.info(f"some_id {some_id}")
         app.logger.info("=====")
