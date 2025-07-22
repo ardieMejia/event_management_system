@@ -115,6 +115,8 @@ National Interstate Chess Championship
 | Q1 event | gender      | F                               | dropdown |
 | Q1 event | gender      | Open                            | dropdown |
 | Q1 event | description | "a KL based event for under 18" | text     |
+* Run with:
+** flask run --debug --extra-files $(extra_f)
 * Form questions:
 ** National Youth Chess Championship 2024
 ** hold harmless agreement
@@ -156,11 +158,11 @@ National Interstate Chess Championship
 ** NOT present, but rather reminder that soft-deleted events essentially serve special purpose in the business logic.
 ** DONE user gets feedback from file uploads, just a bit of feedback for user, if he uploads 4 files he'll know.
 ** DONE added member_events and download page, coz I forgot
-** Becoz I insisted on password reset feature for admin, I struggled with it for a while, coz I couldnt set up a email server locally (local host), so I push and test repeatedly, that took quite a while. 
-** Show him the process to create app password
+** DONE Becoz I insisted on password reset feature for admin, I struggled with it for a while, coz I couldnt set up a email server locally (local host), so I push and test repeatedly, that took quite a while. 
+** DONE Show him the process to create app password
 ** Also, stupidly, I didnt realize I could suspend server between uploads. So it just sat there consuming seconds, and Render charges by the second. Kinda lucky for me, sometime last month it auto-suspended due to errors, saving my seconds. So I wasted around RM 200 just for that, but now im disabling most of the time, so Im paying much less per month.
-** I set a request limiter (Flask-Limiter), limits to 200 requests per day, 50 per hour. Can be adjusted. Basically, a hard limit on request, basic security, in case someone attempts multiple automated requests/logins to the site. (Yes, I dont know remember the proper terminology for it, but its basic easy security)
-** Added withdrawal logs, which I forgot completely. becoz before this members, get delted from events without logging it.
+** DONE I set a request limiter (Flask-Limiter), limits to 200 requests per day, 50 per hour. Can be adjusted. Basically, a hard limit on request, basic security, in case someone attempts multiple automated requests/logins to the site. (Yes, I dont know remember the proper terminology for it, but its basic easy security)
+** DONE Added withdrawal logs, which I forgot completely. becoz before this members, get delted from events without logging it.
 * Some limitations:
 ** FIDE is uniquely constrained at DB level, can be changed later if want to
 ** subgroupsof questions cannot be tied to each answer, the logic is now to be complicated. It can only be tied to a question
