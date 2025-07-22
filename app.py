@@ -64,13 +64,13 @@ login = LoginManager(app)
 mail = Mail(app)
 csrf = CSRFProtect(app)
 
-# @app.teardown_request
-# def teardown_request(response_or_exc):
-#     db.session.remove()
+@app.teardown_request
+def teardown_request(response_or_exc):
+    db.session.remove()
 
-# @app.teardown_appcontext
-# def teardown_appcontext(response_or_exc):
-#     db.session.remove()
+@app.teardown_appcontext
+def teardown_appcontext(response_or_exc):
+    db.session.remove()
 
 limiter = Limiter(
     get_remote_address,
