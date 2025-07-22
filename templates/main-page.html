@@ -15,7 +15,7 @@
 
     <br>
     <table id="event_details" class="table-auto border border-yellow-400">
-	<caption class="caption-top {{ 'text-purple-600' if whyHappened else 'text-green-600' }} italic p-2">
+	<caption class="caption-top {{ 'text-red-600' if ("Error" or "killed") in whatHappened else 'text-green-600' }} italic p-2">
 	    {{ whatHappened }}
 	</caption>
 	<tbody>
@@ -23,31 +23,42 @@
 	    
 	    
 
-	    
+		
 	    <tr class="borders border-yellow-400  border-2">
-		<th class="bg-yellow-400 italic text-orange-600">Upload TRUE files</th>
+		<th class="bg-yellow-400"><div class="p-4 justify-items-center">
+		    MCF files
+		    <div class="p-2">
+			<img src="{{ url_for('static', filename='mcf-logo-v2.png') }}" class="h-8" alt="MCF Logo" />
+		    </div>
+		</div></th>
 		<td>
 		    
-		    <form action="{{ url_for('bulk_upload_all_files_1')  }}" method="post" enctype="multipart/form-data" data-tooltip-target="tooltip-files-allowed">
+		    <form action="{{ url_for('bulk_upload_all_files_mcf')  }}" method="post" enctype="multipart/form-data" data-tooltip-target="tooltip-files-allowed">
+			<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 			<div class="m-2 mb-5">
 			    <label class="block m-2 text-sm font-medium text-gray-900 dark:text-white" for="file1">Upload MCF file</label>
 			    <input  type="file" name="file1" class="border border-gray-500">
 			</div>
 			<div class="m-3">
 			    
-			    <button type="submit" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Upload</button>
+			    <button type="submit" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 cursor-pointer">Upload</button>
 			</div>
 		    </form>
-		    <form action="{{ url_for('bulk_upload_all_files_2')  }}" method="post" enctype="multipart/form-data" data-tooltip-target="tooltip-files-allowed">
+		</td>
+		    	    <tr class="borders border-yellow-400  border-2">
+		<th class="bg-yellow-400">FRL files</th>
+		<td>
+		    <form action="{{ url_for('bulk_upload_all_files_frl')  }}" method="post" enctype="multipart/form-data" data-tooltip-target="tooltip-files-allowed">
 			<div  class="m-2 mb-5">
 			    <label class="block m-2 text-sm font-medium text-gray-900 dark:text-white" for="file2">Upload FRL file</label>
 			    <input  type="file" name="file2" class="border border-gray-500">
 			</div>
 			<div class="m-3">
 			    
-			    <button type="submit" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Upload</button>
+			    <button type="submit" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 cursor-pointer">Upload</button>
 			</div>
 		    </form>
+		</td>
 
 		    <div id="tooltip-files-allowed" role="tooltip" placement="bottom" class="absolute z-10  inline-block border border-1 w-60 px-3 py-2 text-m font-medium text-black transition-opacity opacity-0  duration-300 bg-white rounded-lg shadow-xl tooltip">
 			Upload file must be named *mcf*.csv or *frl*.csv (Eg: mcf_9201.csv OR mcf.csv). Mapping of column names are fixed. If you have custom headers, inform the Web Admin
@@ -60,7 +71,12 @@
 	    </tr>
 
 	    <tr class="borders border-yellow-400  border-2">
-		<th class="bg-yellow-400 italic text-orange-600">Insert</th>
+		<th class="bg-yellow-400">
+		    <div class="p-2 justify-items-center">
+		    Insert
+			<img src="{{ url_for('static', filename='mcf-logo-v2.png') }}" class="h-8" alt="MCF Logo" />
+		    </div>
+		</th>
 		<td>
 		    <div class="m-3">
 
@@ -74,7 +90,7 @@
 		</td>
 	    </tr>
 	    <tr class="borders border-yellow-400  border-2">
-		<th class="bg-yellow-400 italic text-orange-600">Insert</th>
+		<th class="bg-yellow-400">Insert</th>
 		<td>
 		    <div class="m-3">
 
@@ -89,7 +105,7 @@
 	    </tr>
 
 	    <tr class="borders border-yellow-400  border-2">
-		<th class="bg-yellow-400 italic text-orange-600">Update</th>
+		<th class="bg-yellow-400">Update</th>
 		<td>
 		    <div class="m-3">
 
@@ -106,49 +122,84 @@
 		</td>
 	    </tr>
 
-	    
-
-	    
-
-	    
-	    
-	    
-	    
-	    <tr class="borders border-yellow-400  border-2">
-		<td class="bg-yellow-400"></td>
-		<td>
+	    <tr class="borders border-yellow-200  border-2">
+		<th class="bg-yellow-200 p-4">Upload log</th>
+		<td class="bg-yellow-200">
 		    <div class="m-3">
-			<button type="submit" class="w-full rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none">Submit</button>
+			<a href="{{ url_for('upload_logs') }}" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Click here</a>
+
+			
+			
 		    </div>
 		</td>
 	    </tr>
+	    <tr class="borders border-yellow-200  border-2">
+		<th class="bg-yellow-200 p-4">Withdrawal log</th>
+		<td class="bg-yellow-200">
+		    <div class="m-3">
+			<a href="{{ url_for('withdrawal_logs') }}" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Click here</a>
+
+			
+			
+		    </div>
+		</td>
+	    </tr>
+	    <!-- ============================== -->
+	    <tr class="borders border-yellow-200  border-2">
+		<th class="bg-yellow-200 p-4">Test email</th>
+		<td class="bg-yellow-200">
+		    <div class="m-3">
+			<a href="{{ url_for('send_mail') }}" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Click here</a>
+
+			
+			
+		    </div>
+		</td>
+	    </tr>
+	    <!-- ============================== -->
+	    <tr class="borders border-yellow-200  border-2">
+		<th class="bg-yellow-200 p-4">Reset admin password</th>
+		<td class="bg-yellow-200">
+		    <div class="m-3">
+			<a href="{{ url_for('send_reset_email') }}" class="w-1/2 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Click here</a>
+
+			
+			
+		    </div>
+		</td>
+	    </tr>
+	    <!-- ============================== -->
+
+	    <tr class="borders border-yellow-200  border-2">
+		<th class="bg-yellow-200">Kill All Form Elements (questions, subgroup and answers)</th>
+		<td class="bg-yellow-200">
+		    <div class="m-3">
+
+
+			
+			
+		    </div>
+		    <button type="submit" class="p-4 cursor-pointer">				
+			<a href={{ url_for('kill_form_descendents')}} onclick="return false;">{% include 'hardTrash.j2' %}</a>
+		    </button>
+		</td>
+	    </tr>
+
+
+	    
+	    
+
+	    
+
+	    
+	    
+	    
+	    
+
 
 	    <tr class="borders border-yellow-400  border-2">
 		<td colspan="2">
 		    <div class="m-3">
-			{% if skippedList %}
-
-			    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-				<table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-				    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-					<tr>
-					    <th scope="col" class="px-6 py-3">
-						Total records skipped
-					    </th>
-					</tr>
-				    </thead>
-				    <tbody>
-					<tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700 border-gray-200">
-					    
-					    <td class="px-6 py-4">
-						{{ skippedList|length }}
-					    </td>
-					</tr>
-				    </tbody>
-				</table>
-			    </div>
-
-			{% endif %}
 			{% if newList %}
 
 			    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
@@ -218,7 +269,30 @@
 			    </div>
 
 			{% endif %}
-						
+			{% if skippedList %}
+			    
+			    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+				<table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+				    <thead class="text-xs text-orange-600 uppercase bg-gray-50">
+					<tr>
+					    <th scope="col" class="px-6 py-3">
+						Total Skipped Records
+					    </th>
+					</tr>
+				    </thead>
+				    <tbody>
+					<tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700 border-gray-200">
+					    
+					    <td class="px-6 py-4">
+						{{ skippedList|length }}
+					    </td>
+					</tr>
+				    </tbody>
+				</table>
+			    </div>
+
+			{% endif %}
+			
 
 
 
@@ -229,6 +303,7 @@
 	    
 	</tbody>
     </table>
+
 
 
 

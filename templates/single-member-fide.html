@@ -5,75 +5,130 @@
 
 
 {% block heading_1 %}
-Registration
+    Registration
 {% endblock %}
 
 {% block form %}
 
 
-<br>
+    <br>
 
-<!-- ==================== -->
-
-
-
-<h2 class="text-red-600 text-3xl font-bold underline">
-    Please provide FIDE details
-</h2>
-<br>
-
-<form name="FIDEform" action="{{ url_for('update_fide', mcfId=m.mcfId ) }}" method="post">
-
-
-    <table class="border border-yellow-400 border-2 w-full">
-	<tbody>
-	    <tr class="bg-yellow-400">
-		<th class="border border-yellow-400  border-1">
-		    <div class="m-4 mb-1 ml-1 text-left">
-			<label for="fideId" class="block text-gray-900 text-sm">FIDE ID</label>
-			<input id="fideId" name="fideId" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
-		    </div>
-		</th>
-	    </tr>
-
-	    
-
-
-	    
-	    <tr class="bg-yellow-400">
-		<th class="border border-yellow-400  border-1">
-		    <div class="m-4 mb-1 ml-1 text-left">
-			<label for="fideName" class="block text-gray-900 text-sm">FIDE Name</label>
-			<input id="fideName" name="fideName" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
-		    </div>
-		</th>
-	    </tr>
-	    
-
-	    
-	    <tr class="bg-yellow-400">
-		<th class="border border-yellow-400  border-1">
-		    <div class="m-4 mb-1 ml-1 text-left">
-			<label for="fideRating" class="block text-gray-900 text-sm">FIDE Rating</label>
-			<input id="fideRating" name="fideRating" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
-		    </div>
-		</th>
-	    </tr>
-	    
-	    
-
-	    
-	</tbody>
-    </table>
+    <!-- ==================== -->
 
 
 
-    <button type="submit" class="m-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Submit</button>
-</form>
+    <h2 class="text-red-600 text-3xl font-bold underline">
+	Please provide FIDE details
+    </h2>
+    <br>
 
-<br>
-<br>
-<br>
+    <form name="FIDEform" action="{{ url_for('update_fide', mcfId=m.mcfId ) }}" method="post">
+	<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+
+	<table class="border border-yellow-400 border-2 w-100">
+	    <caption class="caption-top {{ 'text-green-600' if "saved" in whatHappened else 'text-red-600'}}  italic p-2">
+		{{ whatHappened }}
+	    </caption>
+	    <tbody>
+
+		<tr class="bg-yellow-400">
+		    <th class="border border-yellow-400  border-1" colspan="2">
+			<div  class="pt-2 pl-4 pr-4 text-left">
+			    <label for="fideId" class="block text-gray-900 text-sm">FIDE ID</label>
+			</div>
+		    </th>
+		</tr>
+		<tr class="bg-yellow-400">
+		    
+		    <td colspan="2">
+			<div class="pb-2 pl-4 pr-4">			
+			    <input id="fideId" name="fideId" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-60 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
+			</div>
+		    </td>
+		</tr>
+
+		
+
+		
+
+		
+		
+		
+		<tr class="bg-yellow-400">
+		    <th class="border border-yellow-400  border-1" colspan="2">
+			<div  class="pt-2 pl-4 pr-4 text-left">
+			    <label for="fideName" class="block text-gray-900 text-sm">FIDE Name</label>
+			</div>
+		    </th>
+		</tr>
+		    <tr class="bg-yellow-400">
+			
+			<td colspan="2">
+			    <div class="pb-2 pl-4 pr-4">			
+				<input id="fideName" name="fideName" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-60 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
+			    </div>
+			</td>
+		    </tr>
+		    
+		    
+		    
+		    
+		    
+
+		    <tr class="bg-yellow-400">
+			<th class="border border-yellow-400  border-1" colspan="2">
+			    <div  class="pt-2 pl-4 pr-4 text-left">
+				<label for="fideRating" class="block text-gray-900 text-sm">FIDE Rating</label>
+			    </div>
+			</th>
+		    </tr>
+		    <tr class="bg-yellow-400">
+			
+			<td colspan="2">
+			    <div class="pb-2 pl-4 pr-4">			
+				<input id="fideRating" name="fideRating" class="bg-gray-50 border-none text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-60 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
+			    </div>
+			</td>
+		    </tr>
+
+
+		<tr>
+
+		    <td class="bg-yellow-400" colspan="2">
+
+			<div class="flex justify-start">
+			    <div  class="py-2 pl-4 pr-4">
+			    <button type="submit" name="button" value="delete" class="w-30 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Submit</button>
+			</div>
+
+
+			
+		    <div   class="py-2 pl-4 pr-4">
+			<button type="submit" name="button" value="delete" class="w-30 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">
+			    <a href="{{ url_for('logout')}}">
+			    Cancel
+			    </a>						    
+			</button>
+			</div>
+			</div>
+		    </td>
+
+		</tr>	
+
+
+		
+	    </tbody>
+	</table>
+
+
+
+
+    </form>
+
+    <br>
+    <br>
+    <br>
 
 
 {% endblock %}

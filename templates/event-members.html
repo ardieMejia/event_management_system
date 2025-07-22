@@ -1,0 +1,123 @@
+{% extends "base_form_h.html" %}
+
+
+
+
+{% block heading_1 %}
+    Members of {{  eventName }}
+{% endblock %}
+
+
+{%  block form %}
+
+    <br>
+
+
+    <table  class="table-auto border border-yellow-400 border-2">
+	<caption class="caption-top {{ 'text-orange-600' if 'Error' in whatHappened else 'text-green-600'}} italic p-2">
+	    {{ whatHappened }}
+	</caption>
+	<thead>
+	    <tr class="bg-yellow-400">
+		<th class="w-100">
+		    <div class="m-3">MCF ID</div>
+		</th>
+		<th class="w-100">
+		    <div class="m-3">MCF Name</div>
+		</th>
+		<th class="w-100">
+		    <div class="m-3">Email</div>
+		</th>
+		<th>
+		    <div class="m-3">Gender</div>
+		</th>
+		<th>
+		    <div class="m-3">Year of Birth</div>
+		</th>
+		<th>
+		    <div class="m-3">State</div>
+		</th>
+		<th>
+		    <div class="m-3">National Rating</div>
+		</th>
+		<th>
+		    <div class="m-3">FIDE ID</div>
+		</th>
+		<th>
+		    <div class="m-3">FIDE Name</div>
+		</th>
+		<th>
+		    <div class="m-3">FIDE Rating</div>
+		</th>
+	    </tr>
+	</thead>
+	<tbody>
+	    {% for m in ms %}
+		<tr class="border border-yellow-400 border-2">
+		    
+
+		    
+		    <td>
+			<div class="m-3">{{ m.mcfId }}</div>
+		    </td>
+		    <td>
+			<div class="m-3">{{ m.mcfName }}</div>
+		    </td>
+		    <td>
+			<div class="m-3">{{ m.email }}</div>
+		    </td>
+		    <td>
+			<div class="m-3">{{ m.gender }}</div>
+		    </td>
+		    <td>
+			<div class="m-3">{{ m.yearOfBirth }}</div>
+		    </td>
+		    <td>
+			<div class="m-3">{{ m.state }}</div>
+		    </td>
+		    <td>
+			<div class="m-3">{{ m.nationalRating }}</div>
+		    </td>
+		    <td>
+			<div class="m-3">{{ m.fideId }}</div>
+		    </td>
+		    <td>
+			<div class="m-3">{{ m.fideName }}</div>
+		    </td>
+		    <td>
+			<div class="m-3">{{ m.fideRating }}</div>
+		    </td>
+
+
+
+
+
+
+
+		    
+
+		</tr>
+	    {% endfor %}
+
+	</tbody>
+    </table>
+
+
+    <br>
+
+    <div class="grid grid-col-3 p-3">
+	<div class="items-center p-3">
+	    <div class="font-bold w-25">
+		<form action="{{ url_for('an_evt_mmbrs_download')  }}" >
+		    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+		    <button type="submit" class="border border-gray  py-2 px-2 ">
+			Download
+		    </button>
+		    <input type="hidden" name="eventId" value={{ eventId }} />
+		</form>
+	    </div>
+	</div>	    
+    </div>
+{% endblock %}
+
+

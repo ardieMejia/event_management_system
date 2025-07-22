@@ -8,8 +8,9 @@
 	<link rel="manifest" href="%PUBLIC_URL%/manifest.json">
 	<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 	<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-	<link href="custom.css" rel="stylesheet">
-	<link href="{{ url_for('static', filename='custom.css') }}" rel="stylesheet">
+	<script src="https://code.jquery.com/ui/1.14.1/jquery-ui.js"></script>
+	<!-- <link href="custom.css" rel="stylesheet"> -->
+	<link href="{{ url_for('static', filename='custom.css') }}" rel="stylesheet"/>
 
 	<link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
 	<title>MCF: Event Registration Page</title>
@@ -37,7 +38,418 @@
 
 
 
+/* function initialise() {
+   myFunction();
+   anotherFunction();
+   } */
+
+
+
+// NOTE-TO-SELF: from a syntax POV, jquery onready consuses, where function has no ()
+/* $(document).ready(initialise); */
+
 	 
+
+
+function submitPartDownloadForm(){
+    var selValue = document.getElementById("downloadOffset").value;
+    console.log(selValue)
+    if (selValue != -1){
+	document.partialDownload.submit();
+    }
+}
+
+	 
+
+
+function submitKillFormDescendents(){
+    const text = `
+Kills all form data, but leaves out:
+ - event-member rel
+ - file upload logs
+	     Continue?`;
+    
+    if (confirm(text) == true){
+	return true;
+    }else{
+	return false;
+    }
+}
+
+	 
+function submitFormCreator(){
+    const text = `
+Creating a new form will remove
+all form derived data of specific event:
+ - all members answers of that event
+ - all form questions of that event
+	     Continue?`;
+    
+    if (confirm(text) == true){
+	return true;
+    }else{
+	return false;
+    }
+}
+
+function MCFeventKillEvent(){
+
+    const text = `
+Hard deleting will also remove
+this event data in related entities
+
+Continue?`;
+    
+    if (confirm(text) == true){
+	return true;
+    }else{
+	return false;
+    }
+}
+
+function MCFeventKillEventLog(){
+
+    const text = `
+Hard deleting logs of this
+specific event
+
+Continue?`;
+    
+    if (confirm(text) == true){
+	return true;
+    }else{
+	return false;
+    }
+}
+
+function MCFeventKillEventWLog(){
+
+    const text = `
+Hard deleting withdrawal logs of this
+specific event
+
+Continue?`;
+    
+    if (confirm(text) == true){
+	return true;
+    }else{
+	return false;
+    }
+}
+
+
+
+function MCFeventSoftKillEvent(){
+    
+    const text = `
+Expiring an event also
+deletes data in related entities
+it stays expires for 1 month then
+auto deletes
+
+Continue?`;
+    
+    if (confirm(text) == true){
+	return true;
+    }else{
+	return false;
+	}
+}
+
+
+function confirmWithAJAX(message, callback){
+
+    var dialog = $('<div>').dialog({
+        modal: true,
+        title: 'Confirmation',
+        buttons: {
+          'OK': function() {
+            var inputValue = input.val();
+            $(this).dialog('close');
+            callback(true, inputValue); // Pass true and input value on OK
+          },
+          'Cancel': function() {
+            $(this).dialog('close');
+            callback(false); // Pass false on Cancel
+          }
+        }
+    });
+	
+
+}
+
+
+
+
+$(document).ready(function(){
+    /* alert("asd"); */
+    var creatorForm = $("#formCreator");
+
+    
+    var addQuestionButton = $("#formCreateID_addButton");
+    // removeClass("border-none").addClass("border-3").addClass("border-red-600");  
+
+
+    // creatorForm.on("submit", function(event){
+    addQuestionButton.click(function(e){
+	event.preventDefault();
+	fieldstringVal = creatorForm.find('#formCreateID_field').val();
+	valuestringVal = creatorForm.find('#formCreateID_value').val();
+	continueSubmit1 = false
+	continueSubmit2 = false
+
+
+	if (typeof fieldstringVal !== 'undefined' && fieldstringVal !== ""){
+	    if(fieldstringVal.includes(" ")){
+		// alert("field cant contain space, make it memorable")
+		$('#field').removeClass("border-none").addClass("border-3").addClass("border-red-600");
+		$('#formCreatorInputInvalid').html(" <p>field name should not contain spaces.</p> ").removeAttr("hidden");		     
+	    }else{
+		// $(this).unbind("submit")
+		continueSubmit1 = true
+	    }
+	}else{
+	    $('#field').removeClass("border-none").addClass("border-3").addClass("border-red-600");
+	    $('#formCreatorInputInvalid').html(" <p>field name cannot be empty</p> ").removeAttr("hidden");		     
+	}
+	
+	if (typeof valuestringVal == 'undefined' || valuestringVal == ""){
+	    $('#field').removeClass("border-none").addClass("border-3").addClass("border-red-600");
+	    $('#formCreatorInputInvalid').html(" <p>values cannot be empty</p> ").removeAttr("hidden");	   
+	}else{
+	    continueSubmit2 = true
+	}
+
+	
+	if (continueSubmit1 && continueSubmit2){
+	    addQuestionButton.unbind("click")
+	    addQuestionButton.click();	    
+	}
+	
+
+
+	// if (typeof fieldstringVal !== 'undefined'){
+	//     if (fieldstringVal.includes(" ")){
+	// 	$('#field').removeClass("border-none").addClass("border-3").addClass("border-red-600");
+	// 	$('#formCreatorInputInvalid').html("<p>field cannot contain spaces</p>").removeAttr("hidden");
+	//     }else if (valuestringVal === ""){
+	// 	$('#field').removeClass("border-none").addClass("border-3").addClass("border-red-600");
+	// 	$('#formCreatorInputInvalid').html("<p>value cannot be empty</p>").removeAttr("hidden");
+	//     }else{		
+	// 	$(this).unbind("submit")
+	//     }
+	// }
+
+    });
+
+
+
+    var leadingQuestionButton = $("#formCreateID_subgroupButton");
+
+    leadingQuestionButton.click(function(e){
+	e.preventDefault()
+	stringVal = creatorForm.find('#formCreateID_subgroupName').val();
+	console.log("val"+ stringVal)
+	console.log(stringVal === "")
+	if (typeof stringVal !== 'undefined' && stringVal !== ""){
+	    if(stringVal.includes(" ")){
+		// alert("field cant contain space, make it memorable")
+		$('#field').removeClass("border-none").addClass("border-3").addClass("border-red-600");
+		$('#formCreatorInputInvalid').html(" <p>subgroup name should not contain spaces.</p> ").removeAttr("hidden");		     
+	    }else{
+		// $(this).unbind("submit")
+		leadingQuestionButton.unbind("click")
+		leadingQuestionButton.click();
+	    }
+	}else{
+	    $('#field').removeClass("border-none").addClass("border-3").addClass("border-red-600");
+	    $('#formCreatorInputInvalid').html(" <p>subgroup name cannot be empty</p> ").removeAttr("hidden");		     
+	}
+	// ----- leadingquestionbuttonend
+    });
+
+    
+
+    
+    
+    var subCreatorForm = $("#subFormCreator");
+    
+    // removeClass("border-none").addClass("border-3").addClass("border-red-600");  
+    
+    subCreatorForm.on("submit", function(event){
+	event.preventDefault();
+	stringVal = subCreatorForm.find('#subFormCreateID_field').val();
+	if (typeof stringVal !== 'undefined'){
+	    if(stringVal.includes(" ")){
+		// alert("field cant contain space, make it memorable")
+		$('#field').removeClass("border-none").addClass("border-3").addClass("border-red-600");
+		$('#subFormCreatorInputInvalid').html(" <p>field should not contain spaces.</p> ").removeAttr("hidden");		     
+		// id="subFormcreatorinputinvalid"
+	    }else{
+		$(this).unbind("submit")
+	    }
+	}
+	
+    });
+    
+
+
+
+
+
+
+});
+
+
+
+$(window).on('load', function() {
+    var choiceCount = $( "#tournament_name option" ).length
+    console.log(choiceCount)
+    if (choiceCount == 0){
+	/* $('#memberEventForm button').hide()		  */
+	// $('#eventDeleteButton').hide();
+	$('#eventSaveButton').hide();
+	// $('#fillFormButton').hide();
+	
+	
+	
+	
+	/* if (frm.email.type === 'text') {
+	   frm.onsubmit = function () {
+	   if (/\s/.test(frm.email.value)) {
+	   // Tell your user the field is invalid here, e.g.
+	   frm.email.className = 'invalid';
+	   
+	   // Prevent form submission
+	   return false;
+	   }
+	   }
+	   } */
+	
+    }
+    
+    
+    
+    // $('input[type=radio]')
+    $("input[type='radio'][id^='subgroup']") .click(function() {
+	console.log($(this).val())
+	var subgroupId = $(this).data('action-subgroup-id');
+	if($(this).val() === "Yes"){
+	    $("#" + subgroupId).show();	    
+	}else{
+	    $("#" + subgroupId).hide();	    
+	}
+	
+	// console.log('Subgroup ID:', subgroupId);
+    });
+
+
+
+
+
+    $('#formCreateID_subgroupName').prop('disabled', true);
+    $('#formCreateID_subgroupButton').prop('disabled', true);
+
+    $('#formCreateID_type').on('change', function(){
+	if (this.value == "subgroup radio"){	    
+	    $('#formCreateID_subgroupName').prop('disabled', false)
+	    $('#formCreateID_addButton').prop('disabled', true)
+	    $('#formCreator #formCreateID_value').hide()
+	    $('#formCreateID_subgroupButton').prop('disabled', false);
+	}else{
+	    $('#formCreateID_subgroupName').prop('disabled', true)
+	    $('#formCreateID_addButton').prop('disabled', false)
+	    $('#formCreator #formCreateID_value').show()
+	    $('#formCreateID_subgroupButton').prop('disabled', true);
+	}
+    });
+
+
+    let preventDefaultFlag = true;
+    let wDrawString = "";
+    $("[id^='eventDeleteButton']").click(function(e){
+	preventDefaultFlag = true
+	e.preventDefault();
+	console.log($(this).val().split("_")[1])
+	let eventId = $(this).val().split("_")[1]
+	let thisId = $(this).prop("id")
+	console.log(thisId)
+	
+	function getClause(){	    
+	    return $.ajax({
+		// type: 'POST',
+		url: '/get-withdrawal-clause-by-id', // Replace 'my_view' with your URL name
+		data: {"eventId": eventId
+		       // "1750070176"
+		      },
+		/* data: {"eventId": $('#tournament_name').val()}, */
+		// dataType: 'text',
+	    });
+	 }
+	function handleClause(data){
+	    if (data == null || data === ""){
+		console.log("here we go")
+		console.log(thisId)
+		$('#'+thisId).unbind("click")
+		$('#'+thisId).click(); /* trigger click of button, our days long struggle was this simple, we dont know this */
+	    }else{
+		$('#confirmWithdrawalText').html(data)
+		$('#confirmWithdrawal').show()
+		my_confirm(function(continueClick) {
+		    if (continueClick){		    
+			$('#'+thisId).unbind("click")
+			$('#'+thisId).click(); /* trigger click of button, our days long struggle was this simple, we dont know this */
+		    }else{
+			
+		    }
+		});
+		
+	    }
+	}
+	getClause().done(handleClause)	
+	
+    });
+    
+
+
+    function my_confirm(confirmCallback, cancelCallback) {
+	// your confirm dialog	
+	$(document).on( 'click', '#confirmWithdrawal #confirmWithdrawalButton', function() {
+	    // if(typeof confirmCallback === 'function') {
+	    //     confirmCallback();
+	    // }
+	console.log("clicked confirm");
+	    $('#confirmWithdrawal').hide();
+	    confirmCallback(true);
+	});
+	$(document).on( 'click', '#confirmWithdrawal #cancelWithdrawalButton', function() {
+	    // if(typeof confirmCallback === 'function') {
+	    //     confirmCallback();
+	    // }
+	console.log("clicked confirm");
+	    $('#confirmWithdrawal').hide();
+	    confirmCallback(false);
+	});
+	     /* cancelWithdrawalButton */
+    }    
+    
+
+    
+
+
+	
+
+    
+    
+	     
+    
+}); 
+
+
+
+
+
+
 
 	</script>
 

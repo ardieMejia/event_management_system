@@ -34,8 +34,9 @@ class C_mapper:
                             # "password":"ID_No", 
                             "gender":"Sex", 
                             "yearOfBirth":"birthday", 
-                            "state":"FED", 
+                            "state":"Clubnumber", 
                             "nationalRating":"rtg_nat", 
+                            "events":"Custom_events", 
                             "fideId":"fide_no"
                         },
                         # ========== sample FRL

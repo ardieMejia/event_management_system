@@ -10,7 +10,7 @@ import sqlalchemy as sa
 import sqlalchemy.orm as so
 from app import db, bcrypt, app, login
 from flask_login import UserMixin
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
 from c_mapper import C_mapper
 # from sqlalchemy import Column, Table, ForeignKey, Integer, String
@@ -34,7 +34,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship# , declarative_ba
 # Flask_Login is not "DB aware", so it needs the DBs/app help in this
 @login.user_loader
 def load_user(id):
-    return db.session.get(Member, int(id))
+    return db.session.get(Member, str(id))
 
 # note for a Core table, we use the sqlalchemy.Column construct,
 # not sqlalchemy.orm.mapped_column
@@ -47,12 +47,27 @@ def load_user(id):
 class Event(db.Model):
     __tablename__ = "events"
     disciplinesList = ["Standard", "Rapid", "Blitz"]
+    typeList = ["Individual", "Team"]
+    eligibilityList = ["Open"]
+    limitationList = ["Above 1400", "Below 1800", "Below 2000", "Below 2400", "No Rating Limit"]
+                  
+    roundsList = ["6 Rounds", "7 Rounds", "9 Rounds", "6/8 Rounds"]
+    timeControlList = ["3 mins + 2 secs", "15 mins + 10 secs", "10 mins + 30 secs", "90 mins + 30 secs"]
+
+                  
 
     id = db.Column(db.Integer, primary_key=True)
-    tournamentName = db.Column(db.String(128), index=True)
+    tournamentName = db.Column(db.String(128), index=True, unique=True)
     startDate = db.Column(db.String(64), index=True)
     endDate = db.Column(db.String(64), index=True)
     discipline = db.Column(db.String(64), index=True)
+    type = db.Column(db.String(64), index=True)
+    eligibility = db.Column(db.String(64), index=True)
+    limitation = db.Column(db.String(64), index=True)
+    rounds = db.Column(db.String(64), index=True)
+    timeControl = db.Column(db.String(64), index=True)
+    withdrawalClause = db.Column(db.String(300), index=True)
+    
     # members = db.relationship('Member', back_ref='event')
 
     def set_id(self):
@@ -66,6 +81,7 @@ class Event(db.Model):
     def __repr__(self):
         return '<tournament name {tn}>'.format(tn=self.tournamentName)
 
+    
     def isDataInvalid(self, p_tournameName, p_startDate, p_endDate, p_discipline):
         errorsList = []
         if not p_tournameName:
@@ -87,23 +103,25 @@ class Event(db.Model):
 class Member(UserMixin, db.Model):
     __tablename__ = "members"
 
-    mcfId = db.Column(db.Integer, primary_key=True)
+    mcfId = db.Column(db.String(80), primary_key=True)
     password = db.Column(db.String(80))
     mcfName = db.Column(db.String(128), index=True)
+    email = db.Column(db.String(128), unique=True, index=True)
     gender = db.Column(db.String(64), index=True)
     yearOfBirth = db.Column(db.String(64), index=True)
     state = db.Column(db.String(64), index=True)
     nationalRating = db.Column(db.String(64), index=True)
     # events = db.relationship('Event', secondary=event_member, back_populates='members')
-    events = db.Column(db.String(300), index=True)
-    fideId = db.Column(db.Integer)
+    # events = db.Column(db.String(300), index=True)
+    fideId = db.Column(db.Integer, unique=True, nullable=True)
     fideName = db.Column(db.String(80))
     fideRating = db.Column(db.Integer(), index=True)
+    isAdmin = db.Column(db.Boolean, index=True, default=False)
 
 
     
     def __repr__(self):
-        return '<mcfName {tn}>'.format(tn=self.mcfName, m=self.events)
+        return '<mcfName {n}'.format(n=self.mcfName)
 
     def set_password(self, password):
         self.password = bcrypt.generate_password_hash(password).decode('utf-8')
@@ -122,10 +140,10 @@ class Member(UserMixin, db.Model):
         # for those confused
         # the basic shape
         # <statement-to-try> if <return-if-true> else <return-if-else>
-        return int(num) if num and num.isdigit() else 0
+        return int(num) if num and num.isdigit() else None
         
-    def getEvents(self):
-        return self.events or ""
+
+
 
     
     @classmethod
@@ -145,7 +163,7 @@ class Member(UserMixin, db.Model):
     def isDataInvalid(self, p_fideId, p_fideRating):
         errorsList = []
         if p_fideId.isnumeric() and p_fideRating.isnumeric():
-            return True
+            return []
         if not p_fideId.isnumeric():
             errorsList.append("FIDE ID should be a number")
         if not p_fideRating.isnumeric():
@@ -167,36 +185,236 @@ class Member(UserMixin, db.Model):
             mapFrom["state"] : self.state,
             mapFrom["nationalRating"] : self.nationalRating,
             mapFrom["fideId"] : self.fideId,
-            mapFrom["events"] : self.events
+            # mapFrom["events"] : self.events
             # "fideId" : self.fideId,
             # "fideName" : self.fideName,
             # "fideRating" : self.fideRating
         }
+
+
+
 
                 
-    def as_dict(self):
+    # def as_dict(self):
+    #     return {
+    #         "mcfId" : self.mcfId, 
+    #         "mcfName" : self.mcfName,
+    #         "gender" : self.gender,
+    #         "yearOfBirth" : self.yearOfBirth,
+    #         "state" : self.state,
+    #         "nationalRating" : self.nationalRating,
+    #         "events" : self.events
+    #         # "fideId" : self.fideId,
+    #         # "fideName" : self.fideName,
+    #         # "fideRating" : self.fideRating
+    #     }
+
+
+
+class EventMember(db.Model):
+    __tablename__ = "events_members"
+
+    id = db.Column(db.Integer, primary_key=True)
+    eventId = db.Column(db.Integer, nullable=False)
+    mcfId = db.Column(db.String(80), nullable=False)
+
+    
+    def __repr__(self):
+        return '<eventId: {eid}, mcfId: {mid}>'.format(eid=self.eventId, mid=self.mcfId)
+
+    
+
+class File(db.Model):
+    __tablename__ = "files"
+    id = db.Column(db.Integer, primary_key=True)
+    originalFilename = db.Column(db.String(200), nullable=False)
+    filename = db.Column(db.String(200), nullable=False)
+    filepath = db.Column(db.String(300), nullable=False)
+    mcfId = db.Column(db.String(80), nullable=False)
+    eventId = db.Column(db.Integer, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"File('{self.originalFilename}', '{self.filename}', '{self.filepath}')"
+
+    
+class Withdrawal(db.Model):
+    __tablename__ = "withdrawals"
+    id = db.Column(db.Integer, primary_key=True)
+    mcfId = db.Column(db.String(80))
+    mcfName = db.Column(db.String(128), index=True)
+    email = db.Column(db.String(128), unique=True, index=True)
+    eventId = db.Column(db.Integer, index=True)
+    tournamentName = db.Column(db.String(128), index=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+    def __repr__(self):
+        return f"Withdrawal('{self.mcfId}', '{self.mcfName}', '{self.tournamentName}', '{self.created_at}')"
+
+
+class FormQuestion(db.Model):
+    __tablename__ = "form_questions"
+    id = db.Column(db.Integer, primary_key=True)
+    eventId = db.Column(db.Integer, nullable=False) 
+    fieldName = db.Column(db.String(300), nullable=False) # change later to fieldName
+    questionstring = db.Column(db.String(1000), nullable=False)
+    # value = db.Column(db.DateTime, default=datetime.utcnow)
+    value = db.Column(db.String(100), nullable=False)
+    type = db.Column(db.String(30), nullable=False)
+    # ===== subGroupId - unique, nullable, mostly useless except for subgroups.
+    subgroupId = db.Column(db.String(36), unique=True, nullable=True)
+    subgroupName = db.Column(db.String(100), nullable=True)
+
+
+    def __repr__(self):
+        # return f"Form('{self.formname}', '{self.field}')"
+        return '<field: {f} questionstring {q}>'.format(f=self.field, q=self.questionstring[0:40])
+
+
+
+        
+    
+    def to_dict(self):
         return {
-            "mcfId" : self.mcfId, 
-            "mcfName" : self.mcfName,
-            "gender" : self.gender,
-            "yearOfBirth" : self.yearOfBirth,
-            "state" : self.state,
-            "nationalRating" : self.nationalRating,
-            "events" : self.events
-            # "fideId" : self.fideId,
-            # "fideName" : self.fideName,
-            # "fideRating" : self.fideRating
+            "id": self.id,
+            "eventId": self.eventId,
+            "fieldName": self.fieldName,
+            "value": self.value,
+            "questionstring": self.questionstring,
+            "type": self.type,
+            "subgroupId": self.subgroupId
         }
 
-    # @classmethod
-    # def doesFideExist(cls, id):
-    #     # isPasswordVerified = bcrypt.check_password_hash(self.password, password)
-    #     ret = cls.query.filter_by(fideId=id).first()
-    #     app.logger.info("++++++++++")
-    #     app.logger.info(ret)
-    #     if ret:
-    #         return True
-    #     return False
+
+class FormQuestionSubgroup(db.Model):
+    """
+    Question Subgroup
+     Similar to FormQuestion
+     Only difference is SubgroupId being 
+     compulsary
+    This table also avoids ordering problems in
+    event_answers_page, since we rely on DB entry order_by
+    there
+    
+    """
+
+    __tablename__ = "form_questions_subgroup"
+    id = db.Column(db.Integer, primary_key=True)
+    subgroupId = db.Column(db.String(36), nullable=False)
+    fieldName = db.Column(db.String(300), nullable=False) # fieldName?
+    eventId = db.Column(db.Integer, nullable=False) # we might try considering removing this later on, better remove now.. whatever..
+    questionString = db.Column(db.String(1000), nullable=False)
+    value = db.Column(db.String(100), nullable=False)
+    type = db.Column(db.String(30), nullable=False)
+
+    def __repr__(self):
+        # return f"Form('{self.formname}', '{self.field}')"
+        return '<fieldname: {f}, question: {q}>'.format(f=self.fieldName, q=self.questionString)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "subgroupId": self.subgroupId,
+            "fieldName": self.fieldName,
+            "eventId": self.eventId,
+            "questionString": self.questionString,
+            "value": self.value,
+            "type": self.type
+        }
+
+
+
+class FormQuestionAnswers(db.Model):
+    """
+    Answers for questions
+     Answers have no meaning to the code.
+     So, the only important fields for backend logic
+     is the user ID, fieldname & the eventId
+     Becoz our client only needs to glance through answers
+    
+    """
+    __tablename__ = "form_question_answers"
+    id = db.Column(db.Integer, primary_key=True)
+    mcfId = db.Column(db.String(80))
+    fieldName = db.Column(db.String(300), nullable=False) # fieldName?
+    # eventId = db.Column(db.String(200), nullable=False)
+    eventId = db.Column(db.Integer, nullable=False) 
+    answerString = db.Column(db.String(200), nullable=False)
+    subgroupId = db.Column(db.String(36), nullable=True)
+
+    def __repr__(self):
+        # return f"Form('{self.formname}', '{self.field}')"
+        return '<fieldname: {f} answers {a}>'.format(f=self.fieldName, a=self.answerString)
+
+    
+    # def to_dict(self):
+    #     return {"mcfId": self.mcfId, "fieldname": self.fieldname, "formname": self.formname, "fieldname": self.fieldname, "answers": self.answers}
+
+class FormQuestionAnswersDeleted(db.Model):
+    """
+    Answers for questions
+     Answers have no meaning to the code.
+     So, the only important fields for backend logic
+     is the user ID, fieldname & the eventId
+     Becoz our client only needs to glance through answers
+    
+    """
+    __tablename__ = "form_question_answers_deleted"
+    id = db.Column(db.Integer, primary_key=True)
+    mcfId = db.Column(db.String(80))
+    fieldName = db.Column(db.String(300), nullable=False) # fieldName?
+    # eventId = db.Column(db.String(200), nullable=False)
+    eventId = db.Column(db.Integer, nullable=False) 
+    answerString = db.Column(db.String(200), nullable=False)
+    subgroupId = db.Column(db.String(36), nullable=True)
+    deleted_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        # return f"Form('{self.formname}', '{self.field}')"
+        return '<fieldname: {f}, answers: {a}, deleted_at: {d}>'.format(f=self.fieldName, a=self.answerString, d=self.deleted_at)
+
+    
+class EventDeleted(db.Model):
+    __tablename__ = "events_deleted"
+
+                  
+
+    id = db.Column(db.Integer, primary_key=True)
+    tournamentName = db.Column(db.String(128), index=True, unique=True)
+    startDate = db.Column(db.String(64), index=True)
+    endDate = db.Column(db.String(64), index=True)
+    discipline = db.Column(db.String(64), index=True)
+    type = db.Column(db.String(64), index=True)
+    eligibility = db.Column(db.String(64), index=True)
+    limitation = db.Column(db.String(64), index=True)
+    rounds = db.Column(db.String(64), index=True)
+    timeControl = db.Column(db.String(64), index=True)
+    withdrawalClause = db.Column(db.String(300), index=True)
+    deleted_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def __repr__(self):
+        return '<DELETED tournameName: {tn}, , deleted_at: {d}>'.format(tn=self.tournamentName, d=self.deleted_at)
+
+
+    @classmethod
+    def delete_expired(cls):
+        expiration_hours = app.config['EXPIRY_PERIOD']
+        limit = datetime.now() - timedelta(hours=expiration_hours)
+        cls.query.filter(cls.deleted_at < limit).delete()
+        db.session.commit()
+
+
+
+        # @classmethod
+        # def doesFideExist(cls, id):
+        #     # isPasswordVerified = bcrypt.check_password_hash(self.password, password)
+        #     ret = cls.query.filter_by(fideId=id).first()
+        #     app.logger.info("++++++++++")
+        #     app.logger.info(ret)
+        #     if ret:
+        #         return True
+        #     return False
 
 
         

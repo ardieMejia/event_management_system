@@ -1,0 +1,94 @@
+{% extends "base_form_h.html" %} 
+
+
+
+
+{% block heading_1 %}
+    MCF Event Registration System
+{% endblock %}
+
+
+
+
+{% block form %}
+
+    <br><br>
+    <form enctype="multipart/form-data" id="formTemplate" action="{{ url_for('form_submission')  }}" method="post">
+	<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+	<caption class="caption-top text-orange-600 italic p-2">
+	    {{ whatHappened }}
+	</caption>
+	<table>
+	    <tbody>
+		{% for element in elements %}
+		    {% if element.subgroupId is defined %}
+			<tr>
+			    <td class="bg-yellow-200 w-300">
+				<div class="m-2 font-light">
+				    <label class="block text-gray-900 pt-6 pb-2">
+					{{ element.questionstring }}
+				    </label>
+				    <input type="radio" id='{{ "subgroupYes_" + element.subgroupId }}' value="Yes" name={{  element.fieldName }} data-action-subgroup-id='{{ element.subgroupId }}' class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+				    <label for='{{ "subgroupYes_" + element.subgroupId }}' class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300 mr-6">Yes</label>
+				    <input type="radio" id='{{ "subgroupNo_" + element.subgroupId }}' value="No" name={{  element.fieldName }} data-action-subgroup-id='{{ element.subgroupId }}' class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+				    <label for='{{ "subgroupNo_" + element.subgroupId }}' class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">No</label>
+				    <input name={{ element.fieldName}} value="-" hidden>
+				</div>
+			    </td>
+			</tr>
+			<tr id={{ element.subgroupId }} data-action-subgroup-id='{{ element.subgroupId }}' style="display:none">
+			    {% include 'form_elements/subgroup.html' %}
+
+
+			</tr>
+
+
+
+		    {% else %}
+
+		    	<!-- ============================== -->
+			
+			<tr>
+			    <!-- <tr id="12345" data-subgroup-id="12345" style="display:none"> -->
+			    <td  class="bg-yellow-200 w-300">
+				<div class="m-2 font-light">
+				    <label class="block text-gray-900 pt-6 pb-2">
+					{{ element.questionstring }}
+				    </label>
+				    {% if element.type == "dropdown" %}
+					{% include 'form_elements/dropdown.html' %}
+				    {% elif element.type == "checkbox" %}
+					{% include 'form_elements/checkbox.html' %}
+				    {% elif element.type == "radio" %}
+					{% include 'form_elements/radio.html' %}
+				    {% elif element.type == "file" %}
+					{% include 'form_elements/file.html' %}
+				    {% else %}
+					<input name={{ element.fieldName }} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-60 p-2" required/>
+				    {% endif %}
+				</div>
+			    </td>
+			</tr>
+
+		    <!-- ============================== -->
+		    {% endif %}
+		{% endfor %}
+		<input type="hidden" name="eventId" value={{ eventId }} />
+		<tr>
+		    <td class="bg-yellow-200 w-300">
+			<div class="m-2">
+			    
+			    <button type="submit" class="w-30 rounded-md bg-white py-2 px-4 border text-center text-sm text-black transition-all shadow-md hover:shadow-xl focus:bg-white-700 hover:bg-white-700 ">Submit</button>		    
+			</div>
+		    </td>
+		</tr>
+
+		
+
+	    </tbody>
+	</table>
+
+    </form>
+
+{% endblock %}
+
