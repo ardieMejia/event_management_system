@@ -64,6 +64,13 @@ login = LoginManager(app)
 mail = Mail(app)
 csrf = CSRFProtect(app)
 
+# @app.teardown_request
+# def teardown_request(response_or_exc):
+#     db.session.remove()
+
+# @app.teardown_appcontext
+# def teardown_appcontext(response_or_exc):
+#     db.session.remove()
 
 limiter = Limiter(
     get_remote_address,
@@ -958,6 +965,9 @@ def login():
             return redirect(url_for('member_front'))
     if request.method == 'POST':
 
+        csrf_token = request.form['csrf_token']
+        app.logger.info("CSRF Token (Backend):", csrf_token)
+    
         mcfId = request.form['mcfId']
         password = request.form['password']
 
