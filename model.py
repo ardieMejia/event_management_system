@@ -400,7 +400,7 @@ class EventDeleted(db.Model):
     @classmethod
     def delete_expired(cls):
         expiration_hours = app.config['EXPIRY_PERIOD']
-        limit = datetime.now() - timedelta(hours=expiration_hours)
+        limit = datetime.now() - timedelta(hours=int(expiration_hours))
         cls.query.filter(cls.deleted_at < limit).delete()
         db.session.commit()
 
