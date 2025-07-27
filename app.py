@@ -573,7 +573,7 @@ def kill_events():
     query = sa.select(Event)
     es = db.session.scalars(query).all()
 
-    db.session.close()
+    # db.session.close()
 
 
     return render_template("events.html", es=es, whatHappened=whatHappened)
@@ -645,7 +645,7 @@ def find_events():
     # app.logger.info(type(old_event.data.values.tolist()))
 
 
-    db.session.close()
+    # db.session.close()
 
 
 
@@ -681,7 +681,7 @@ def find_members():
     count = db.session.scalars(statement).first() # coz I dont know a better/faster way to count records
 
 
-    db.session.close()
+    # db.session.close()
     
     # return "wait"
     # ms_dict = [m.__dict__ for m in ms]
@@ -1890,7 +1890,7 @@ def member_front():
     
 
 
-            db.session.close()
+            # db.session.close()
 
             # endpost
             return redirect(url_for('member_front', whatHappened=whatHappened, updatedTournamentId=updatedTournamentId ))
