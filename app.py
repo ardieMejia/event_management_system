@@ -59,9 +59,7 @@ app = Flask(__name__)   # Flask constructor
 with app.app_context():
     app.logger.setLevel(logging.DEBUG) # Or DEBUG more verbose than INFO
     app.config.from_object(Config)
-    db = SQLAlchemy(app,  session_options{
-        'expire_on_commit': False
-    })
+    db = SQLAlchemy(app)
     migrate = Migrate(app, db)
     bcrypt = Bcrypt(app)
     login = LoginManager(app)

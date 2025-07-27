@@ -35,6 +35,7 @@
       <img width="100" src="https://static.cdnlogo.com/logos/y/92/youtube.svg" alt="YouTube">
   </a>
 </p> 
+
 ##### To contribute to my efforts:
   * Im not just a programmer, I do piano interpretations and Emacs exploration. If you believe in the importance of freelance work outside of just corporation constraint including art, writing and music. Please feel free to donate to my PayPal and be generous.## Heading
 ##### PayPal link:
