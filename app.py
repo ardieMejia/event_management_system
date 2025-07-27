@@ -55,29 +55,32 @@ dictConfig({
 })
 
 app = Flask(__name__)   # Flask constructor
-app.logger.setLevel(logging.DEBUG) # Or DEBUG more verbose than INFO
-app.config.from_object(Config)
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
-bcrypt = Bcrypt(app)
-login = LoginManager(app)
-mail = Mail(app)
-csrf = CSRFProtect(app)
+    
+with app.app_context():
+    app.logger.setLevel(logging.DEBUG) # Or DEBUG more verbose than INFO
+    app.config.from_object(Config)
+    db = SQLAlchemy(app)
+    migrate = Migrate(app, db)
+    bcrypt = Bcrypt(app)
+    login = LoginManager(app)
+    mail = Mail(app)
+    csrf = CSRFProtect(app)
+    
+    limiter = Limiter(
+        get_remote_address,
+        app=app,
+        default_limits=["200 per day", "50 per hour"],
+        storage_uri="memory://",
+    )
 
-@app.teardown_request
-def teardown_request(response_or_exc):
-    db.session.remove()
+# @app.teardown_request
+# def teardown_request(response_or_exc):
+#     db.session.remove()
 
-@app.teardown_appcontext
-def teardown_appcontext(response_or_exc):
-    db.session.remove()
+# @app.teardown_appcontext
+# def teardown_appcontext(response_or_exc):
+#     db.session.remove()
 
-limiter = Limiter(
-    get_remote_address,
-    app=app,
-    default_limits=["200 per day", "50 per hour"],
-    storage_uri="memory://",
-)
 
 # app.config['TEMPLATES_AUTO_RELOAD'] = True
 
