@@ -87,9 +87,9 @@ with app.app_context():
 
 from Models.declarative import EventListing # ===== remove this
 import sqlalchemy as sa
-app.app_context().push()
+# app.app_context().push()
 from model import Event, Member, File, FormQuestion, EventMember, FormQuestionAnswers, FormQuestionSubgroup, FormQuestionAnswersDeleted, EventDeleted, Withdrawal
-Session = sessionmaker(bind=db.engine)
+# Session = sessionmaker(bind=db.engine)
 
 
 from c_templater import C_templater
