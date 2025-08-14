@@ -2306,17 +2306,27 @@ def updateMcfList():
         m = Member.query.filter_by(mcfId=row[mapFrom['mcfId']]).first()
 
 
+
+            
         if m:
-            m.mcfName = row[mapFrom['mcfName']]
-            m.gender = row[mapFrom['gender']]
-            m.yearOfBirth = row[mapFrom['yearOfBirth']]
-            m.state = row[mapFrom['state']]
-            m.nationalRating = row[mapFrom['nationalRating']]
-            m.fideId = row[mapFrom['fideId']]
-            m.password = bcrypt.generate_password_hash(row[mapFrom['mcfId']].strip() \
-                                                       + row[mapFrom['yearOfBirth']].strip() \
-                                                       ).decode('utf-8')
-            updatesList.append(row[mapFrom['mcfId']])
+            dictMemberBeforeSaving = validate_before_saving(
+                mcfName = row[mapFrom['mcfName']],
+                yearOfBirth = row[mapFrom['yearOfBirth']],
+                state = row[mapFrom['state']])
+            if dictMemberBeforeSaving:            
+                m.mcfName = dictMemberBeforeSaving["mcfName"]
+                m.gender = row[mapFrom['gender']]
+                m.yearOfBirth = dictMemberBeforeSaving["yearOfBirth"]
+                m.state = row[mapFrom['state']]
+                m.nationalRating = row[mapFrom['nationalRating']]
+                m.fideId = row[mapFrom['fideId']]
+                m.password = bcrypt.generate_password_hash(row[mapFrom['mcfId']].strip() \
+                                                           + dictMemberBeforeSaving["mcfName"].strip() \
+                                                           ).decode('utf-8')
+            
+                updatesList.append(row[mapFrom['mcfId']])
+            else:
+                skippedList.append(row[mapFrom['mcfId']])
 
 
         else:
