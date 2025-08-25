@@ -2321,7 +2321,7 @@ def updateMcfList():
                 m.nationalRating = row[mapFrom['nationalRating']]
                 m.fideId = row[mapFrom['fideId']]
                 m.password = bcrypt.generate_password_hash(row[mapFrom['mcfId']].strip() \
-                                                           + dictMemberBeforeSaving["mcfName"].strip() \
+                                                           + dictMemberBeforeSaving["yearOfBirth"].strip() \
                                                            ).decode('utf-8')
             
                 updatesList.append(row[mapFrom['mcfId']])
