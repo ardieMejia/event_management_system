@@ -1,18 +1,27 @@
 # Event-Registration-Management-Python-CRUD-Application
-1. 2 models: Member and Event
-2. Still a work in progress
+1. Models:
+   - Event
+   - Member
+   - EventMember
+   - File
+   - Withdrawal
+   - FormQuestion
+   - FormQuestionSubgroup
+   - FormQuestionAnswers
+   - FormQuestionAnswersDeleted
+   - EventDeleted
 3. Flask + Tailwind CSS + PostgreSQL
 4. A CRUD (Create, Read, Update, Delete) or FUCK (Find, Update, Create, Kill) based project application, working prototype for Malaysian Chess Federation
-5. Code is documentation as usual. However:
+5. Code is documentation as usual.
 
 ---
+### The most important feature:
+  * Its got a form creator. And the forms can branch into subforms, depending on the answers in a "special radio input". 
+  * This feature is quite special and the table structure storing is relatively simple. No ID for each question, but rather each question is generated at the user end by order (if the admin creates "name" followed by "age", in the question, it renders same order at the user end)
+
 ### Personal Notes:
-  1. [My Python Diary](https://github.com/ardieMejia/my-org-files/blob/main/misc/2021/PythonDiary.org): gradual writing since day 1.
-  2. [Python notes on Frameworks in org mode](https://github.com/ardieMejia/my-org-files/blob/main/misc/2025/frameworks.org): Links and writings on frameworks in general
-  3. [General Python notes in org mode](https://github.com/ardieMejia/my-org-files/blob/main/misc/2021/Python.org): Notes on Python in general. The many peculiar tricks one can do in Python (List comprehension, etc..)
-### Branch details:
-  * Pushed into production is tailwind_1_safe.
-### To run details:
+  1. [My Python Diary](https://github.com/ardieMejia/my-org-files/blob/main/misc/2021/PythonDiary.org): personal notes since day 1.
+### To run locally:
   * flask --app main.py run --debug --extra-files "templates/form.html:crud.py:main.py"
   #### I use this trick with --extra-files
   * flask run --debug --extra-files $(extra_f)
@@ -37,7 +46,7 @@
 </p> 
 
 ##### To contribute to my efforts:
-  * Im not just a programmer, I do piano interpretations and Emacs exploration. If you believe in the importance of freelance work outside of just corporation constraint including art, writing and music. Please feel free to donate to my PayPal and be generous.## Heading
+  * Im not just a programmer, I do piano interpretations and Emacs exploration. If you believe in the importance of programmer freedom, writing and music, please feel free to donate to my PayPal and be generous.## Heading
 ##### PayPal link:
 <p>
   <a href="https://paypal.me/ardiemejia83">

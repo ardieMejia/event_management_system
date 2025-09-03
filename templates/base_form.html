@@ -157,9 +157,45 @@ Continue?`;
 }
 
 
-function confirmWithAJAX(message, callback){
 
-    var dialog = $('<div>').dialog({
+
+function MCFeventKillEvent_s(){
+    
+    const text = `
+THIS WILL KILL ALL EVENTS
+and ALL derived entities of events
+(forms, forms answers, etc)
+
+Continue?`;
+    
+    if (confirm(text) == true){
+	return true;
+    }else{
+	return false;
+    }
+}
+
+
+function killAllMembers(){
+    
+    const text = `
+THIS WILL KILL ALL MEMBERS
+
+Continue?`;
+    
+    if (confirm(text) == true){
+	return true;
+    }else{
+	return false;
+    }
+}
+
+
+
+
+	 function confirmWithAJAX(message, callback){
+
+	     var dialog = $('<div>').dialog({
         modal: true,
         title: 'Confirmation',
         buttons: {

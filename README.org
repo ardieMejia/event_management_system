@@ -188,3 +188,6 @@ Your entry status, I am an Open Entry
 
 #+end_quote
 ** and it will only be limited to a single radio button (and values: selected or on-selectd)
+* Cpanel:
+** cPanel is just a GUI tools for non-technical person to manage the server. They don't know command line. So, what you could do from terminal, you could do it in cPanel. Google has some tutorial for how to deploy the Flask in cPanel, or you can ask the owner's hosting support team to guide you that's the resources you can utilise.
+** You can publish your python app with cpanel,just need to make sure the hosting provider is using cloudlinux on their hosting, typically the "84x faster WordPress Hosting" will have it. How do I set up a Python web application? – cPanel https://share.google/GodRzV3LNS1fgoUOh

@@ -500,7 +500,8 @@ def expire_event(id):
 
 
 
-@app.route('/kill-events')
+# @app.route('/kill-events')
+@app.route('/kill-events', methods=['POST'])
 @admin_required
 def kill_events():
 
@@ -569,14 +570,21 @@ def kill_events():
         db.session.rollback()
         whatHappened = f"IntegrityError: {i}"
 
-    
-    query = sa.select(Event)
-    es = db.session.scalars(query).all()
+        
+    stmt = sa.delete(EventDeleted)
+    db.session.execute(stmt)
 
-    # db.session.close()
+    try:
+        db.session.commit()
+        whatHappened = "all member-events rel, formquestion, formquestionsubgroup, answers & overwritten answers deleted"
+    except IntegrityError as i: # ========== exceptions are cool, learn to love exceptions.
+        db.session.rollback()
+        whatHappened = f"IntegrityError: {i}"
 
 
-    return render_template("events.html", es=es, whatHappened=whatHappened)
+
+    return redirect(url_for('find_events', whatHappened="All events successfully killed"))
+
 
 
 @app.route('/kill-member/<mcfId>')
@@ -599,7 +607,8 @@ def kill_member(mcfId):
     # return render_template("members.html", ms=ms, whatHappened="Member successfully killed")
     return redirect(url_for("find_members", ms=ms, whatHappened="Member successfully killed"))
 
-@app.route('/kill-members')
+# @app.route('/kill-members')
+@app.route('/kill-members', methods=['POST'])
 @admin_required
 def kill_members():
     
@@ -2209,7 +2218,7 @@ def processMcfList():
     if not skippedList:            
         whatHappened = "No records skipped"
     else:
-        whatHappened = "Some skipped records"
+        whatHappened = "Some skipped records, see below"
 
     fullfilename = os.path.join(app.config['UPLOAD_FOLDER'], "mcf.csv")
     tryRemoveMcfFile(fullfilename)                
@@ -2494,7 +2503,7 @@ def bulk_upload_all_files_mcf():
         file1.save(os.path.join(app.config['UPLOAD_FOLDER'], 'mcf.csv'))
         return render_template("main-page.html", whatHappened="MCF file successfully uploaded")
     else:
-        whatHappened = "CSV filename must contain mcf.   Eg: mcf-Q1.csv"
+        whatHappened = "Oops, CSV filename must contain mcf.   Eg: mcf-Q1.csv"
         return redirect(url_for('main_page', whatHappened=whatHappened))
 
 
@@ -2518,7 +2527,7 @@ def bulk_upload_all_files_frl():
         # return 'File successfully uploaded'
         return render_template("main-page.html", whatHappened="FRL file successfully uploaded")
     else:
-        whatHappened = "CSV filename must contain frl.   Eg: my-frl-Q4.csv"
+        whatHappened = "Oops, CSV filename must contain frl.   Eg: my-frl-Q4.csv"
         return redirect(url_for('main_page', whatHappened=whatHappened))
 
 
